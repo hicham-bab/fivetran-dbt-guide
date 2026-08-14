@@ -1,0 +1,3080 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fivetran + dbt: the interactive guide</title>
+<meta name="description" content="An interactive guide to the Fivetran + dbt value proposition: move data reliably, own it in open formats, govern the meaning as code, and let any engine or agent read it.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' rx='3' fill='%23071726'/%3E%3Crect x='3' y='3' width='4.4' height='10' rx='1' fill='%234D83F7'/%3E%3Crect x='8.6' y='3' width='4.4' height='10' rx='1' fill='%23E8552E'/%3E%3C/svg%3E">
+<style>
+/* ============================== TOKENS ============================== */
+:root{
+  --ft:#4D83F7; --ft-soft:rgba(77,131,247,.14); --ft-line:rgba(77,131,247,.36);
+  --db:#E8552E; --db-soft:rgba(232,85,46,.14); --db-line:rgba(232,85,46,.36);
+  --trust:#4D83F7; --scale:#21C7A8; --cost:#F5B23D;
+  --ok:#21C7A8; --warn:#F5B23D; --bad:#FF6058;
+  --r:14px; --rs:10px;
+  --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,"Liberation Mono",monospace;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 12px 34px -18px rgba(0,0,0,.7);
+  --rail:266px;
+}
+html[data-theme=dark]{
+  --bg:#060e18; --bg2:#040a12; --panel:#0c1826; --panel2:#111f31; --panel3:#16273c;
+  --line:rgba(255,255,255,.10); --line2:rgba(255,255,255,.17);
+  --tx:#e9eff8; --tx2:#a7bad2; --tx3:#7389a5;
+  --code:#08111c; --hi:rgba(255,255,255,.04);
+}
+html[data-theme=light]{
+  --bg:#f6f8fb; --bg2:#eef2f7; --panel:#ffffff; --panel2:#f4f7fb; --panel3:#e9eff7;
+  --line:rgba(9,25,44,.12); --line2:rgba(9,25,44,.20);
+  --tx:#0b1c2e; --tx2:#46617f; --tx3:#6b839e;
+  --code:#0c1826; --hi:rgba(9,25,44,.03);
+  --shadow:0 1px 2px rgba(9,25,44,.06),0 12px 30px -20px rgba(9,25,44,.32);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--tx);font-family:var(--sans);
+  font-size:15.5px;line-height:1.62;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+h1,h2,h3,h4{margin:0;line-height:1.18;letter-spacing:-.021em;font-weight:700}
+p{margin:0 0 .8em}
+p:last-child{margin-bottom:0}
+a{color:var(--ft);text-decoration:none}
+a:hover{text-decoration:underline}
+code,kbd{font-family:var(--mono);font-size:.86em}
+button{font-family:inherit;font-size:inherit;color:inherit;cursor:pointer;border:0;background:none}
+ul{margin:0;padding-left:1.15em}
+li{margin:.3em 0}
+::selection{background:rgba(77,131,247,.32)}
+:focus-visible{outline:2px solid var(--ft);outline-offset:2px;border-radius:6px}
+
+/* ============================== LAYOUT ============================== */
+.shell{display:flex;min-height:100vh}
+.rail{width:var(--rail);flex:0 0 var(--rail);position:sticky;top:0;height:100vh;
+  border-right:1px solid var(--line);background:var(--bg2);display:flex;flex-direction:column;z-index:60}
+.rail-top{padding:16px 16px 12px;border-bottom:1px solid var(--line)}
+.brandmark{display:flex;align-items:center;gap:9px;margin-bottom:12px}
+.bm-sq{width:26px;height:26px;border-radius:7px;background:#071726;position:relative;flex:0 0 26px;
+  box-shadow:inset 0 0 0 1px var(--line2)}
+.bm-sq i{position:absolute;top:5px;height:16px;width:7px;border-radius:2px}
+.bm-sq i:nth-child(1){left:5px;background:var(--ft)}
+.bm-sq i:nth-child(2){left:14px;background:var(--db)}
+.bm-t{font-size:12.5px;font-weight:750;letter-spacing:.01em}
+.bm-s{font-size:10.5px;color:var(--tx3);letter-spacing:.06em;text-transform:uppercase;font-weight:650}
+.railnav{flex:1;overflow-y:auto;padding:10px 10px 22px;scrollbar-width:thin}
+.railnav::-webkit-scrollbar{width:7px}
+.railnav::-webkit-scrollbar-thumb{background:var(--line2);border-radius:4px}
+.nav-group{font-size:10px;text-transform:uppercase;letter-spacing:.13em;color:var(--tx3);
+  font-weight:750;padding:14px 8px 6px}
+.nav-a{display:flex;gap:9px;align-items:center;padding:7px 9px;border-radius:9px;color:var(--tx2);
+  font-size:13.2px;font-weight:550;position:relative;transition:background .14s,color .14s}
+.nav-a:hover{background:var(--hi);color:var(--tx);text-decoration:none}
+.nav-a.on{background:var(--panel2);color:var(--tx);font-weight:680}
+.nav-a.on::before{content:"";position:absolute;left:-10px;top:9px;bottom:9px;width:3px;border-radius:0 3px 3px 0;background:var(--ft)}
+.nav-n{font-family:var(--mono);font-size:10.5px;color:var(--tx3);width:16px;flex:0 0 16px;text-align:center}
+.nav-a.on .nav-n{color:var(--ft)}
+.rail-bot{border-top:1px solid var(--line);padding:10px 12px;display:flex;gap:8px;align-items:center;justify-content:space-between}
+.main{flex:1;min-width:0}
+.wrap{max-width:1120px;margin:0 auto;padding:0 30px}
+
+/* ============================== TOPBAR ============================== */
+.topbar{position:sticky;top:0;z-index:55;background:color-mix(in srgb,var(--bg) 86%,transparent);
+  backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+.topbar-in{max-width:1120px;margin:0 auto;padding:9px 30px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.crumb{font-size:12px;color:var(--tx3);font-weight:600;letter-spacing:.02em;min-width:0;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.crumb b{color:var(--tx2);font-weight:700}
+.spacer{flex:1}
+.prog{position:absolute;left:0;bottom:-1px;height:2px;background:linear-gradient(90deg,var(--ft),var(--db));width:0;transition:width .1s linear}
+.mobnav{display:none}
+
+/* ============================== CONTROLS ============================== */
+.seg{display:inline-flex;background:var(--panel2);border:1px solid var(--line);border-radius:11px;
+  padding:3px;gap:2px;max-width:100%;overflow-x:auto;scrollbar-width:none}
+.seg::-webkit-scrollbar{display:none}
+.seg button{padding:5px 11px;border-radius:8px;font-size:12.3px;font-weight:650;color:var(--tx3);
+  transition:background .14s,color .14s;white-space:nowrap}
+.seg button:hover{color:var(--tx)}
+.seg button.on{background:var(--panel);color:var(--tx);box-shadow:0 1px 3px rgba(0,0,0,.25)}
+.seg.sm button{padding:4px 9px;font-size:11.4px}
+.iconbtn{width:30px;height:30px;border-radius:9px;border:1px solid var(--line);background:var(--panel2);
+  display:grid;place-items:center;color:var(--tx2);font-size:13px;transition:.14s}
+.iconbtn:hover{color:var(--tx);border-color:var(--line2)}
+.btn{display:inline-flex;align-items:center;gap:7px;padding:8px 15px;border-radius:10px;
+  font-size:13px;font-weight:680;border:1px solid var(--line2);background:var(--panel2);color:var(--tx);transition:.15s}
+.btn:hover{border-color:var(--ft);background:var(--ft-soft)}
+.btn-p{background:linear-gradient(135deg,var(--ft),#3d6fdd);border-color:transparent;color:#fff}
+.btn-p:hover{filter:brightness(1.1);background:linear-gradient(135deg,var(--ft),#3d6fdd)}
+.btn-d{background:linear-gradient(135deg,var(--db),#cf4423);border-color:transparent;color:#fff}
+.btn-d:hover{filter:brightness(1.1);background:linear-gradient(135deg,var(--db),#cf4423)}
+.btn[disabled]{opacity:.45;pointer-events:none}
+.btn.sm{padding:6px 11px;font-size:12px}
+
+/* ============================== PRIMITIVES ============================== */
+.sec{padding:62px 0 10px;scroll-margin-top:64px}
+.eyebrow{display:flex;align-items:center;gap:9px;font-size:10.6px;font-weight:750;letter-spacing:.15em;
+  text-transform:uppercase;color:var(--tx3);margin-bottom:13px}
+.eyebrow::after{content:"";flex:1;height:1px;background:var(--line)}
+h2.st{font-size:clamp(24px,3.1vw,33px);margin-bottom:11px}
+.lede{color:var(--tx2);font-size:16.4px;max-width:74ch;margin-bottom:26px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:20px;box-shadow:var(--shadow)}
+.card.tight{padding:15px}
+.grid{display:grid;gap:14px}
+.g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.g4{grid-template-columns:repeat(4,minmax(0,1fr))}
+.chip{display:inline-flex;align-items:center;gap:5px;font-size:10.4px;font-weight:750;letter-spacing:.09em;
+  text-transform:uppercase;padding:3px 8px;border-radius:999px;border:1px solid var(--line2);color:var(--tx3)}
+.chip.ft{color:var(--ft);border-color:var(--ft-line);background:var(--ft-soft)}
+.chip.db{color:var(--db);border-color:var(--db-line);background:var(--db-soft)}
+.chip.trust{color:var(--trust);border-color:var(--ft-line);background:var(--ft-soft)}
+.chip.scale{color:var(--scale);border-color:rgba(33,199,168,.36);background:rgba(33,199,168,.12)}
+.chip.cost{color:var(--cost);border-color:rgba(245,178,61,.36);background:rgba(245,178,61,.12)}
+.chip.off{opacity:.32}
+.dim{color:var(--tx3)}
+.muted{color:var(--tx2)}
+.mono{font-family:var(--mono)}
+.tiny{font-size:12.2px}
+.xs{font-size:11.2px}
+.kbd{font-family:var(--mono);font-size:10.5px;border:1px solid var(--line2);border-bottom-width:2px;
+  border-radius:5px;padding:1px 5px;color:var(--tx3);background:var(--panel2)}
+hr.rule{border:0;border-top:1px solid var(--line);margin:26px 0}
+.stat{background:var(--panel2);border:1px solid var(--line);border-radius:var(--rs);padding:12px 13px}
+.stat b{display:block;font-size:22px;font-weight:750;letter-spacing:-.03em;line-height:1.1}
+.stat span{display:block;font-size:11.8px;color:var(--tx3);margin-top:3px;line-height:1.4}
+.note{border-left:2px solid var(--line2);padding:2px 0 2px 13px;color:var(--tx2);font-size:13.6px}
+.callout{border-radius:var(--rs);padding:12px 14px;font-size:13.4px;border:1px solid;display:flex;gap:10px;align-items:flex-start}
+.callout .ci{font-size:13px;line-height:1.5;flex:0 0 auto;margin-top:1px}
+.c-warn{background:rgba(245,178,61,.09);border-color:rgba(245,178,61,.3);color:var(--tx2)}
+.c-ok{background:rgba(33,199,168,.09);border-color:rgba(33,199,168,.3);color:var(--tx2)}
+.c-bad{background:rgba(255,96,88,.08);border-color:rgba(255,96,88,.3);color:var(--tx2)}
+.c-ft{background:var(--ft-soft);border-color:var(--ft-line);color:var(--tx2)}
+.callout b{color:var(--tx)}
+pre.code{margin:0;background:var(--code);border:1px solid var(--line);border-radius:var(--rs);
+  padding:12px 14px;overflow-x:auto;font-family:var(--mono);font-size:12.1px;line-height:1.62;color:#c9d7ea}
+pre.code .k{color:#7fa9ff}.code .s{color:#9fe0b8}.code .c{color:#5d7592;font-style:italic}
+.code .f{color:#f0a583}.code .n{color:#e2c08d}
+.log{background:var(--code);border:1px solid var(--line);border-radius:var(--rs);padding:12px 14px;
+  font-family:var(--mono);font-size:11.9px;line-height:1.75;color:#b9c9dd;max-height:280px;overflow:auto}
+.log .l{display:flex;gap:8px;animation:fin .22s ease;min-width:max-content}
+.log .t{color:#5d7592;flex:0 0 auto}
+.log .ok{color:var(--ok)}.log .er{color:var(--bad)}.log .wn{color:var(--warn)}.log .em{color:#fff;font-weight:600}
+@keyframes fin{from{opacity:0;transform:translateY(-3px)}to{opacity:1;transform:none}}
+.ph{color:var(--tx3);font-size:12.3px;font-style:italic}
+
+/* lens visibility */
+[data-lens]{display:none}
+html[data-view=bus] [data-lens~=bus],html[data-view=tech] [data-lens~=tech],html[data-view=partner] [data-lens~=partner]{display:block}
+.lens-inline[data-lens]{display:none}
+html[data-view=bus] .lens-inline[data-lens~=bus],html[data-view=tech] .lens-inline[data-lens~=tech],html[data-view=partner] .lens-inline[data-lens~=partner]{display:inline}
+
+/* ============================== HERO ============================== */
+.hero{position:relative;overflow:hidden;border-bottom:1px solid var(--line);
+  background:radial-gradient(120% 120% at 12% -10%,rgba(77,131,247,.20),transparent 55%),
+             radial-gradient(110% 110% at 92% 0%,rgba(232,85,46,.16),transparent 52%),var(--bg2)}
+.hero-in{max-width:1120px;margin:0 auto;padding:52px 30px 40px;position:relative}
+.hero h1{font-size:clamp(31px,4.6vw,50px);letter-spacing:-.033em;margin-bottom:16px;max-width:22ch}
+.hero h1 em{font-style:normal;background:linear-gradient(100deg,var(--ft),var(--db));
+  -webkit-background-clip:text;background-clip:text;color:transparent}
+.hero .sub{font-size:17.6px;color:var(--tx2);max-width:66ch;margin-bottom:24px}
+.hero-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:11px;margin-top:26px}
+.hs{background:color-mix(in srgb,var(--panel) 72%,transparent);border:1px solid var(--line);
+  border-radius:var(--rs);padding:13px 14px;backdrop-filter:blur(6px)}
+.hs b{display:block;font-size:25px;font-weight:780;letter-spacing:-.035em;line-height:1;
+  background:linear-gradient(120deg,var(--ft),var(--db));-webkit-background-clip:text;background-clip:text;color:transparent}
+.hs span{display:block;font-size:11.7px;color:var(--tx3);margin-top:5px;line-height:1.42}
+.lenspick{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:26px}
+.lenspick .lbl{font-size:11px;text-transform:uppercase;letter-spacing:.13em;font-weight:750;color:var(--tx3)}
+.lens-desc{font-size:12.8px;color:var(--tx3);margin-top:8px}
+
+/* ============================== ARCH MAP ============================== */
+.archwrap{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);
+  padding:18px;box-shadow:var(--shadow);overflow-x:auto}
+.lane{display:flex;gap:8px;align-items:stretch}
+.lane-lbl{flex:0 0 84px;font-size:10px;font-weight:750;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--tx3);display:flex;align-items:center}
+.lane-body{flex:1;display:flex;gap:8px;min-width:0}
+.pill{flex:1;min-width:0;background:var(--panel2);border:1px solid var(--line);border-radius:9px;
+  padding:8px 10px;font-size:11.4px;color:var(--tx2);text-align:center;font-weight:600;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.arch-row{display:flex;gap:7px;align-items:stretch;margin:12px 0}
+.stagebtn{flex:1;min-width:0;position:relative;background:var(--panel2);border:1px solid var(--line);
+  border-radius:11px;padding:12px 9px 11px;text-align:left;transition:.16s;overflow:hidden}
+.stagebtn:hover{border-color:var(--line2);transform:translateY(-2px)}
+.stagebtn::after{content:"";position:absolute;inset:0 0 auto 0;height:3px}
+.stagebtn[data-own=ft]::after{background:var(--ft)}
+.stagebtn[data-own=db]::after{background:var(--db)}
+.stagebtn[data-own=both]::after{background:linear-gradient(90deg,var(--ft),var(--db))}
+.stagebtn.on{border-color:var(--line2);background:var(--panel3);box-shadow:0 0 0 1px var(--line2),var(--shadow)}
+.sb-n{font-family:var(--mono);font-size:10px;color:var(--tx3);letter-spacing:.08em}
+.sb-t{font-size:14px;font-weight:730;margin:2px 0 4px;letter-spacing:-.015em}
+.sb-o{font-size:10.2px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--tx3)}
+.sb-g{font-size:11px;color:var(--tx3);margin-top:6px;line-height:1.4;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.chev{flex:0 0 12px;display:grid;place-items:center;color:var(--tx3);font-size:11px}
+.legend{display:flex;gap:16px;flex-wrap:wrap;font-size:11.4px;color:var(--tx3);margin-top:14px;
+  padding-top:13px;border-top:1px solid var(--line);align-items:center}
+.legend i{display:inline-block;width:9px;height:9px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+
+/* ============================== BREAKS ============================== */
+.breakcard{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;
+  box-shadow:var(--shadow);display:flex;flex-direction:column}
+.bc-top{padding:17px 18px 14px;border-bottom:1px solid var(--line);position:relative}
+.bc-top::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--bad)}
+.bc-n{font-family:var(--mono);font-size:10.5px;color:var(--bad);letter-spacing:.1em;font-weight:700}
+.bc-h{font-size:18px;font-weight:740;margin:3px 0 9px}
+.bc-l{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:5px}
+.bc-l li{font-size:12.9px;color:var(--tx2);display:flex;gap:7px;align-items:flex-start;margin:0}
+.bc-l li::before{content:"×";color:var(--bad);font-weight:700;flex:0 0 auto;font-size:13px;line-height:1.5}
+.bc-q{padding:14px 18px;background:var(--panel2);flex:1}
+.bc-q .qh{font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:var(--tx3);font-weight:750;margin-bottom:8px}
+.bc-q q{display:block;font-size:13.2px;color:var(--tx2);font-style:italic;margin-bottom:7px;line-height:1.5}
+.bc-f{padding:11px 18px;border-top:1px solid var(--line);font-size:11.4px;color:var(--tx3);
+  display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.tagmini{font-family:var(--mono);font-size:10.4px;padding:2px 6px;border-radius:5px;
+  border:1px solid var(--line2);color:var(--tx3);cursor:pointer;transition:.14s}
+.tagmini:hover{color:var(--tx);border-color:var(--ft);background:var(--ft-soft)}
+
+/* ============================== PILLARS ============================== */
+.filterbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:16px}
+.pillar{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);
+  box-shadow:var(--shadow);overflow:hidden;transition:.2s}
+.pillar.dimmed{opacity:.32;filter:saturate(.35)}
+.p-head{display:flex;gap:14px;align-items:flex-start;padding:16px 18px;width:100%;text-align:left}
+.p-num{flex:0 0 34px;height:34px;border-radius:10px;background:var(--panel3);display:grid;place-items:center;
+  font-family:var(--mono);font-size:12.5px;font-weight:700;color:var(--tx2)}
+.p-mid{flex:1;min-width:0}
+.p-t{font-size:16.4px;font-weight:730;letter-spacing:-.015em}
+.p-s{font-size:12.7px;color:var(--tx3);margin-top:1px}
+.p-chips{display:flex;gap:5px;margin-top:8px;flex-wrap:wrap}
+.p-caret{flex:0 0 auto;color:var(--tx3);transition:transform .2s;font-size:12px;margin-top:8px}
+.pillar.open .p-caret{transform:rotate(180deg)}
+.p-body{display:none;padding:0 18px 18px;border-top:1px solid var(--line);padding-top:16px}
+.pillar.open .p-body{display:block}
+.p-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.subh{font-size:10.4px;text-transform:uppercase;letter-spacing:.12em;font-weight:750;color:var(--tx3);margin-bottom:7px}
+.proof{background:var(--panel2);border:1px solid var(--line);border-radius:var(--rs);padding:13px 14px}
+.proof .subh{color:var(--ok)}
+
+/* ============================== WALKTHROUGH ============================== */
+.stagenav{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;margin-bottom:16px;scrollbar-width:none}
+.stagenav::-webkit-scrollbar{display:none}
+.snb{flex:0 0 auto;padding:8px 13px;border-radius:10px;border:1px solid var(--line);background:var(--panel2);
+  font-size:12.8px;font-weight:660;color:var(--tx3);display:flex;gap:7px;align-items:center;transition:.15s}
+.snb:hover{color:var(--tx);border-color:var(--line2)}
+.snb.on{color:var(--tx);background:var(--panel3);border-color:var(--line2);font-weight:730}
+.snb i{width:6px;height:6px;border-radius:2px;display:inline-block}
+.snb[data-own=ft] i{background:var(--ft)}.snb[data-own=db] i{background:var(--db)}
+.snb[data-own=both] i{background:linear-gradient(120deg,var(--ft),var(--db))}
+.stagepane{display:none}
+.stagepane.on{display:block;animation:fin .26s ease}
+.stagehead{display:flex;gap:16px;align-items:flex-start;margin-bottom:16px}
+.stagehead .bignum{flex:0 0 auto;font-family:var(--mono);font-size:38px;font-weight:750;line-height:.9;
+  letter-spacing:-.05em;color:var(--tx3);opacity:.5}
+.stagehead h3{font-size:26px;letter-spacing:-.025em}
+.stagehead .oneline{color:var(--tx2);font-size:15.2px;margin-top:6px;max-width:72ch}
+.gatebar{background:linear-gradient(100deg,var(--ft-soft),transparent 70%);border:1px solid var(--ft-line);
+  border-left-width:3px;border-radius:var(--rs);padding:13px 15px;margin-bottom:18px}
+.gatebar .gl{font-size:10.2px;text-transform:uppercase;letter-spacing:.13em;font-weight:750;color:var(--ft);margin-bottom:5px}
+.gatebar .gt{font-size:14.6px;font-weight:640;color:var(--tx);line-height:1.5}
+.deps{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:18px}
+.dep{background:var(--panel2);border:1px solid var(--line);border-radius:var(--rs);padding:12px 14px;font-size:13.2px;color:var(--tx2)}
+.dep .subh{margin-bottom:5px}
+.acc{border:1px solid var(--line);border-radius:var(--rs);background:var(--panel);overflow:hidden;margin-bottom:9px}
+.acc-h{display:flex;align-items:center;gap:10px;padding:12px 15px;width:100%;text-align:left;font-size:14px;font-weight:660}
+.acc-h:hover{background:var(--hi)}
+.acc-h .ac{margin-left:auto;color:var(--tx3);font-size:11px;transition:transform .2s}
+.acc.open .acc-h .ac{transform:rotate(180deg)}
+.acc-b{display:none;padding:0 15px 15px;font-size:13.6px;color:var(--tx2)}
+.acc.open .acc-b{display:block}
+.acc-b>*+*{margin-top:11px}
+.acc-h .badge{font-size:10px;font-weight:750;letter-spacing:.08em;text-transform:uppercase;
+  padding:2px 7px;border-radius:999px;background:var(--panel3);color:var(--tx3)}
+.reasons{list-style:none;padding:0;margin:0}
+.reasons li{margin:0 0 11px;padding-left:20px;position:relative;font-size:13.6px;color:var(--tx2)}
+.reasons li::before{content:"";position:absolute;left:4px;top:.62em;width:6px;height:6px;border-radius:2px;background:var(--ft);opacity:.75}
+.reasons li b{color:var(--tx)}
+.sellbox{background:linear-gradient(100deg,var(--db-soft),transparent 65%);border:1px solid var(--db-line);
+  border-left-width:3px;border-radius:var(--rs);padding:13px 15px;font-size:13.5px;color:var(--tx2)}
+.sellbox .subh{color:var(--db)}
+.oneliner{background:var(--panel3);border:1px solid var(--line2);border-radius:var(--rs);padding:14px 16px;
+  font-size:15.4px;font-weight:600;color:var(--tx);line-height:1.5}
+.oneliner .subh{font-weight:750}
+.stagefoot{display:flex;gap:10px;justify-content:space-between;align-items:center;margin-top:20px;
+  padding-top:16px;border-top:1px solid var(--line);flex-wrap:wrap}
+
+/* ============================== SIM ============================== */
+.sim{border:1px solid var(--line2);border-radius:var(--r);background:var(--panel);overflow:hidden;box-shadow:var(--shadow)}
+.sim-h{display:flex;gap:12px;align-items:center;padding:13px 16px;border-bottom:1px solid var(--line);
+  background:linear-gradient(100deg,var(--panel2),var(--panel))}
+.sim-h .lab{font-size:9.8px;text-transform:uppercase;letter-spacing:.15em;font-weight:780;color:var(--db)}
+.sim-h h4{font-size:15px;font-weight:720;margin-top:2px}
+.sim-b{padding:16px}
+.sim-f{padding:11px 16px;border-top:1px solid var(--line);background:var(--panel2);font-size:12.6px;color:var(--tx2)}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:13px}
+.vs-col{border:1px solid var(--line);border-radius:var(--rs);overflow:hidden;background:var(--panel2)}
+.vs-col .vh{padding:9px 13px;font-size:11.6px;font-weight:730;letter-spacing:.02em;
+  border-bottom:1px solid var(--line);display:flex;gap:7px;align-items:center}
+.vs-col.bad .vh{background:rgba(255,96,88,.1);color:#ff8f89}
+.vs-col.good .vh{background:rgba(33,199,168,.1);color:#4fd9c0}
+.vs-col .vb{padding:12px 13px}
+.rowlist{border:1px solid var(--line);border-radius:8px;overflow:hidden;font-size:12.3px}
+.rl{display:flex;gap:8px;align-items:center;padding:6px 10px;border-bottom:1px solid var(--line);background:var(--panel)}
+.rl:last-child{border-bottom:0}
+.rl .rn{font-family:var(--mono);font-size:10.6px;color:var(--tx3);flex:0 0 16px}
+.rl .nm{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rl .vv{font-family:var(--mono);font-size:11.4px;color:var(--tx2);flex:0 0 auto}
+.rl.hit{background:rgba(33,199,168,.11)}
+.rl.miss{background:rgba(255,96,88,.09)}
+.rl .tag{font-size:9.4px;font-weight:750;letter-spacing:.06em;text-transform:uppercase;padding:1px 5px;border-radius:4px}
+.rl.hit .tag{background:rgba(33,199,168,.2);color:#4fd9c0}
+.rl.miss .tag{background:rgba(255,96,88,.18);color:#ff8f89}
+.enggrid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}
+.eng{border:1px solid var(--line);border-radius:9px;padding:10px 8px;background:var(--panel2);text-align:center;transition:.18s;position:relative}
+.eng:hover{border-color:var(--line2);transform:translateY(-2px)}
+.eng.on{border-color:var(--ok);background:rgba(33,199,168,.08)}
+.eng .en{font-size:12.2px;font-weight:700;letter-spacing:-.01em}
+.eng .ef{font-family:var(--mono);font-size:9.6px;color:var(--tx3);margin-top:2px}
+.eng .et{font-family:var(--mono);font-size:10px;margin-top:5px;color:var(--tx3)}
+.eng.on .et{color:var(--ok)}
+.eng .ck{position:absolute;top:5px;right:6px;font-size:10px;color:var(--ok);opacity:0;transition:.2s}
+.eng.on .ck{opacity:1}
+.dag{display:flex;gap:9px;align-items:center;justify-content:center;flex-wrap:wrap}
+.dagcol{display:flex;flex-direction:column;gap:7px}
+.node{border:1px solid var(--line);border-radius:8px;padding:7px 10px;background:var(--panel2);
+  font-family:var(--mono);font-size:11px;min-width:132px;transition:.25s;position:relative}
+.node .nl{display:block;font-size:8.6px;color:var(--tx3);letter-spacing:.09em;text-transform:uppercase;margin-bottom:2px}
+.node.rebuild{border-color:var(--db);background:var(--db-soft);color:var(--tx)}
+.node.skip{opacity:.42;border-style:dashed}
+.node.src{border-style:dashed;color:var(--tx3)}
+.node.changed{border-color:var(--warn);background:rgba(245,178,61,.13)}
+.node .pulse{position:absolute;inset:-3px;border-radius:10px;border:1px solid var(--db);opacity:0}
+.node.rebuild .pulse{animation:pl 1.1s ease-out}
+@keyframes pl{0%{opacity:.9;transform:scale(.97)}100%{opacity:0;transform:scale(1.06)}}
+.meterrow{display:flex;gap:12px;align-items:center;margin-top:12px;flex-wrap:wrap}
+.meter{flex:1;min-width:180px}
+.meter .mh{display:flex;justify-content:space-between;font-size:11.4px;color:var(--tx3);margin-bottom:4px}
+.mbar{height:7px;border-radius:99px;background:var(--panel3);overflow:hidden}
+.mbar i{display:block;height:100%;border-radius:99px;transition:width .7s cubic-bezier(.2,.8,.2,1)}
+.mbar i.a{background:linear-gradient(90deg,var(--bad),#ff9a94)}
+.mbar i.b{background:linear-gradient(90deg,var(--ok),#7ce6d3)}
+table.t{width:100%;border-collapse:collapse;font-size:12.7px}
+table.t th{text-align:left;font-size:10.2px;text-transform:uppercase;letter-spacing:.1em;color:var(--tx3);
+  font-weight:750;padding:7px 9px;border-bottom:1px solid var(--line2)}
+table.t td{padding:8px 9px;border-bottom:1px solid var(--line);color:var(--tx2);vertical-align:top}
+table.t tr:last-child td{border-bottom:0}
+table.t td b{color:var(--tx)}
+.scrollx{overflow-x:auto}
+
+/* ============================== INDUSTRY / MATURITY ============================== */
+.indwrap{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.metricbox{background:var(--code);border:1px solid var(--line);border-radius:var(--rs);padding:13px 15px}
+.metricbox .mn{font-family:var(--mono);font-size:14px;color:#7fd8ff;font-weight:600}
+.metricbox .md{font-size:12.4px;color:var(--tx3);margin-top:5px}
+.stageladder{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}
+.sl{border:1px solid var(--line);border-radius:11px;padding:12px 11px;background:var(--panel2);
+  text-align:left;transition:.18s;position:relative;overflow:hidden}
+.sl:hover{transform:translateY(-2px);border-color:var(--line2)}
+.sl.on{border-color:var(--ft);background:var(--ft-soft);box-shadow:0 0 0 1px var(--ft-line)}
+.sl .sn{font-family:var(--mono);font-size:10px;color:var(--tx3);letter-spacing:.08em}
+.sl .snm{font-size:13px;font-weight:730;margin-top:3px;letter-spacing:-.015em}
+.sl .sbar{height:4px;border-radius:99px;background:var(--panel3);margin-top:9px;overflow:hidden}
+.sl .sbar i{display:block;height:100%;background:linear-gradient(90deg,var(--ft),var(--db))}
+.bandpick{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px}
+.opt{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--line);border-radius:var(--rs);
+  padding:11px 13px;background:var(--panel2);cursor:pointer;transition:.15s;font-size:13.2px}
+.opt:hover{border-color:var(--line2)}
+.opt.on{border-color:var(--ft);background:var(--ft-soft)}
+.opt .bx{flex:0 0 16px;height:16px;border-radius:5px;border:1.5px solid var(--line2);margin-top:2px;
+  display:grid;place-items:center;font-size:10px;color:transparent;transition:.15s}
+.opt.on .bx{background:var(--ft);border-color:var(--ft);color:#fff}
+.verdict{border:1px solid var(--line2);border-radius:var(--r);padding:17px 18px;background:var(--panel2)}
+.verdict .vt{font-size:11px;text-transform:uppercase;letter-spacing:.13em;font-weight:750;color:var(--tx3)}
+.verdict .vv2{font-size:27px;font-weight:770;letter-spacing:-.03em;margin:4px 0 8px}
+.bandlow{color:var(--ok)}.bandmed{color:var(--warn)}.bandhigh{color:var(--bad)}
+
+/* ============================== SCORECARD ============================== */
+.gates{display:flex;flex-direction:column;gap:9px}
+.gaterow{display:flex;gap:12px;align-items:flex-start;border:1px solid var(--line);border-radius:var(--rs);
+  padding:13px 15px;background:var(--panel);cursor:pointer;transition:.15s}
+.gaterow:hover{border-color:var(--line2)}
+.gaterow.on{border-color:var(--ok);background:rgba(33,199,168,.06)}
+.gaterow .bx{flex:0 0 19px;height:19px;border-radius:6px;border:1.5px solid var(--line2);
+  display:grid;place-items:center;font-size:11px;color:transparent;margin-top:2px;transition:.15s}
+.gaterow.on .bx{background:var(--ok);border-color:var(--ok);color:#04231d}
+.gaterow .gname{font-size:11px;text-transform:uppercase;letter-spacing:.1em;font-weight:750;color:var(--tx3)}
+.gaterow .gtxt{font-size:13.6px;color:var(--tx2);margin-top:3px}
+.ring{width:112px;height:112px;flex:0 0 112px;position:relative}
+.ring svg{transform:rotate(-90deg)}
+.ring .rv{position:absolute;inset:0;display:grid;place-items:center;font-size:27px;font-weight:770;letter-spacing:-.03em}
+.scorehead{display:flex;gap:20px;align-items:center;flex-wrap:wrap}
+
+/* ============================== REFERENCE ============================== */
+.searchbox{display:flex;gap:8px;align-items:center;border:1px solid var(--line2);border-radius:11px;
+  padding:8px 13px;background:var(--panel);max-width:min(400px,100%)}
+.searchbox input{flex:1;border:0;background:none;color:var(--tx);font-size:13.6px;outline:none;min-width:0}
+.searchbox input::placeholder{color:var(--tx3)}
+.prod{background:var(--panel);border:1px solid var(--line);border-radius:var(--rs);padding:14px 15px;
+  transition:.16s;position:relative;overflow:hidden}
+.prod::before{content:"";position:absolute;left:0;top:0;bottom:0;width:2px}
+.prod[data-vendor=ft]::before{background:var(--ft)}
+.prod[data-vendor=db]::before{background:var(--db)}
+.prod[data-vendor=open]::before{background:var(--ok)}
+.prod:hover{border-color:var(--line2);transform:translateY(-2px)}
+.prod .pn{font-size:14.2px;font-weight:720;letter-spacing:-.015em;margin-bottom:2px}
+.prod .pd{font-size:12.8px;color:var(--tx2);margin-top:6px}
+.prod.hide{display:none}
+
+/* ============================== FOOT ============================== */
+.foot{margin-top:60px;border-top:1px solid var(--line);background:var(--bg2);padding:34px 0 46px}
+.foot .wrap{display:flex;gap:24px;justify-content:space-between;flex-wrap:wrap;align-items:flex-start}
+.foot .fl{font-size:12.8px;color:var(--tx3);max-width:52ch}
+
+/* ============================== RESPONSIVE ============================== */
+@media (max-width:1080px){
+  .rail{display:none}
+  .mobnav{display:block}
+  .wrap,.topbar-in,.hero-in{padding-left:20px;padding-right:20px}
+  .g4{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .hero-stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .enggrid{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .stageladder{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media (max-width:760px){
+  body{font-size:15px}
+  .g2,.g3,.g4,.p-grid,.vs,.deps,.indwrap{grid-template-columns:1fr}
+  .arch-row{flex-direction:column}
+  .chev{transform:rotate(90deg);height:12px}
+  .lane{flex-direction:column;gap:6px}
+  .lane-lbl{flex:none}
+  .enggrid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .stagehead .bignum{font-size:28px}
+  .sec{padding-top:44px}
+  .hero-in{padding-top:34px}
+}
+@media print{
+  .rail,.topbar,.sim,.iconbtn,.seg{display:none!important}
+  body{background:#fff;color:#000}
+  .stagepane{display:block!important}
+  .acc-b,.p-body{display:block!important}
+}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+</style>
+</head>
+<body>
+<div class="shell">
+
+<!-- ======================= LEFT RAIL ======================= -->
+<aside class="rail">
+  <div class="rail-top">
+    <div class="brandmark">
+      <span class="bm-sq"><i></i><i></i></span>
+      <span>
+        <span class="bm-t" style="display:block">Fivetran + dbt</span>
+        <span class="bm-s">interactive guide</span>
+      </span>
+    </div>
+    <div class="seg sm" id="lensRail" style="width:100%">
+      <button data-setlens="bus" title="Business and commercial framing">Business</button>
+      <button data-setlens="tech" title="Architecture and how it is built">Technical</button>
+      <button data-setlens="partner" title="What it means for a services practice">Partner</button>
+    </div>
+  </div>
+  <nav class="railnav" id="railnav">
+    <div class="nav-group">Overview</div>
+    <a class="nav-a" href="#start"><span class="nav-n">01</span>Start here</a>
+    <a class="nav-a" href="#architecture"><span class="nav-n">02</span>The architecture</a>
+    <a class="nav-a" href="#breaks"><span class="nav-n">03</span>What breaks without it</a>
+    <a class="nav-a" href="#delivers"><span class="nav-n">04</span>What it delivers</a>
+    <a class="nav-a" href="#pillars"><span class="nav-n">05</span>The six pillars</a>
+    <div class="nav-group">The walkthrough</div>
+    <a class="nav-a" href="#walkthrough"><span class="nav-n">06</span>Six stages, six gates</a>
+    <a class="nav-a" href="#ownership"><span class="nav-n">07</span>What ownership buys</a>
+    <div class="nav-group">In practice</div>
+    <a class="nav-a" href="#industries"><span class="nav-n">08</span>Industry examples</a>
+    <a class="nav-a" href="#maturity"><span class="nav-n">09</span>Where a client is today</a>
+    <a class="nav-a" href="#scorecard"><span class="nav-n">10</span>Gate scorecard</a>
+    <a class="nav-a" href="#objections"><span class="nav-n">11</span>Objection handling</a>
+    <a class="nav-a" href="#reference"><span class="nav-n">12</span>Product reference</a>
+  </nav>
+  <div class="rail-bot">
+    <span class="xs dim">Fivetran + dbt Labs</span>
+    <button class="iconbtn" id="themeBtn" title="Toggle light and dark">◐</button>
+  </div>
+</aside>
+
+<!-- ======================= MAIN ======================= -->
+<main class="main">
+
+<div class="topbar">
+  <div class="topbar-in">
+    <span class="crumb" id="crumb"><b>Start here</b></span>
+    <span class="spacer"></span>
+    <div class="seg sm mobnav" id="lensTop">
+      <button data-setlens="bus">Business</button>
+      <button data-setlens="tech">Technical</button>
+      <button data-setlens="partner">Partner</button>
+    </div>
+    <span class="xs dim" style="white-space:nowrap"><span class="kbd">J</span> <span class="kbd">K</span> to move</span>
+    <button class="iconbtn mobnav" id="themeBtn2" title="Toggle light and dark">◐</button>
+  </div>
+  <div class="prog" id="prog"></div>
+</div>
+
+<!-- ======================= HERO ======================= -->
+<section class="hero" id="start">
+  <div class="hero-in">
+    <div class="eyebrow" style="max-width:420px">Well-architected open data infrastructure</div>
+    <h1>The stack was built for humans. <em>Agents are the new primary consumers.</em></h1>
+    <p class="sub">Move data reliably from any source. Land it once in open formats the client owns.
+      Build the logic as tested, version-controlled code instead of SQL trapped inside one platform.
+      Define what it means a single time, then any engine, any agent and any application can read it, and act on it.</p>
+
+    <div class="lenspick">
+      <span class="lbl">Read this as</span>
+      <div class="seg" id="lensHero">
+        <button data-setlens="bus">Business and commercial</button>
+        <button data-setlens="tech">Architecture and build</button>
+        <button data-setlens="partner">Services practice</button>
+      </div>
+    </div>
+    <div class="lens-desc" data-lens="bus">Growth, margin, trust, and what a client is actually buying.</div>
+    <div class="lens-desc" data-lens="tech">How it is built, what each stage depends on, and what breaks without it.</div>
+    <div class="lens-desc" data-lens="partner">What you standardize once, what you sell, and where the next engagement comes from.</div>
+
+    <div class="hero-stats">
+      <div class="hs"><b>6</b><span>stages, each closed by evidence a client can check rather than an assertion</span></div>
+      <div class="hs"><b>1</b><span>write per source; three open formats over one set of files, zero copies</span></div>
+      <div class="hs"><b>750+</b><span>pre-built connectors, plus a Connector SDK for everything else</span></div>
+      <div class="hs"><b>10</b><span>engines validated against the same files, returning the same rows</span></div>
+    </div>
+
+    <div style="margin-top:24px;display:flex;gap:10px;flex-wrap:wrap">
+      <a class="btn btn-p" href="#walkthrough">Start the walkthrough</a>
+      <a class="btn" href="#architecture">See the architecture</a>
+      <a class="btn" href="#scorecard">Score a client</a>
+    </div>
+  </div>
+</section>
+
+<div class="wrap">
+
+<!-- ======================= 02 ARCHITECTURE ======================= -->
+<section class="sec" id="architecture">
+  <div class="eyebrow">02 · The target state</div>
+  <h2 class="st">One architecture, six stages, and who owns each one</h2>
+  <p class="lede">Every stage below is a claim with a gate attached. A gate is evidence: something you can
+    produce and put in front of a client. One per stage, and a stage is not done until its gate passes.
+    Select a stage to jump straight to it.</p>
+
+  <div class="archwrap">
+    <div class="lane">
+      <span class="lane-lbl">Sources</span>
+      <div class="lane-body">
+        <span class="pill">SAP</span><span class="pill">Oracle</span><span class="pill">Salesforce</span>
+        <span class="pill">ServiceNow</span><span class="pill">Postgres</span>
+        <span class="pill" style="border-style:dashed">long tail, via SDK</span>
+      </div>
+    </div>
+
+    <div class="arch-row" id="archRow">
+      <button class="stagebtn" data-own="ft" data-go="move">
+        <div class="sb-n">01 · START HERE</div><div class="sb-t">Move</div>
+        <div class="sb-o" style="color:var(--ft)">Fivetran</div>
+        <div class="sb-g">Row parity, and the schema-drift record</div>
+      </button>
+      <span class="chev">▶</span>
+      <button class="stagebtn" data-own="both" data-go="manage">
+        <div class="sb-n">02</div><div class="sb-t">Manage</div>
+        <div class="sb-o">Fivetran + dbt</div>
+        <div class="sb-g">Same rows through every metadata layer</div>
+      </button>
+      <span class="chev">▶</span>
+      <button class="stagebtn" data-own="db" data-go="transform">
+        <div class="sb-n">03</div><div class="sb-t">Transform</div>
+        <div class="sb-o" style="color:var(--db)">dbt</div>
+        <div class="sb-g">Tested code, and blast radius before a run</div>
+      </button>
+      <span class="chev">▶</span>
+      <button class="stagebtn" data-own="db" data-go="context">
+        <div class="sb-n">04</div><div class="sb-t">Context</div>
+        <div class="sb-o" style="color:var(--db)">dbt</div>
+        <div class="sb-g">Definition, test and lineage per metric</div>
+      </button>
+      <span class="chev">▶</span>
+      <button class="stagebtn" data-own="db" data-go="agent">
+        <div class="sb-n">05</div><div class="sb-t">Agent</div>
+        <div class="sb-o" style="color:var(--db)">dbt</div>
+        <div class="sb-g">Cross-engine parity, identical rows</div>
+      </button>
+      <span class="chev">▶</span>
+      <button class="stagebtn" data-own="ft" data-go="activate">
+        <div class="sb-n">06</div><div class="sb-t">Activate</div>
+        <div class="sb-o" style="color:var(--ft)">Fivetran</div>
+        <div class="sb-g">Write-back lands, and can be undone</div>
+      </button>
+    </div>
+
+    <div class="lane">
+      <span class="lane-lbl">Consumers</span>
+      <div class="lane-body">
+        <span class="pill">Snowflake</span><span class="pill">Databricks</span><span class="pill">BigQuery</span>
+        <span class="pill">Fabric</span><span class="pill">Trino / DuckDB</span><span class="pill">agents, any platform</span>
+      </div>
+    </div>
+
+    <div class="legend">
+      <span><i style="background:var(--ft)"></i>Fivetran</span>
+      <span><i style="background:var(--db)"></i>dbt</span>
+      <span><i style="background:linear-gradient(90deg,var(--ft),var(--db))"></i>both</span>
+      <span class="spacer"></span>
+      <span class="dim">Storage, catalog and credentials stay in the client's own cloud account.</span>
+    </div>
+  </div>
+
+  <div class="grid g3" style="margin-top:16px">
+    <div class="card tight">
+      <div class="subh">Product-neutral by design</div>
+      <p class="tiny muted">The framework is six claims, what each depends on, and the gate that closes it.
+        Fivetran and dbt are one way to satisfy those gates, shown because it is the way we can
+        demonstrate end to end. Any tooling that produces the same evidence satisfies the same gate.</p>
+    </div>
+    <div class="card tight">
+      <div class="subh">Where a client starts</div>
+      <p class="tiny muted">Move, almost always. Its only prerequisite is a named consumer waiting on a
+        source, and its gate reconciles or it does not. Activate is the stage added last, and most often is.</p>
+    </div>
+    <div class="card tight">
+      <div class="subh">What the client keeps</div>
+      <p class="tiny muted">Open formats in their own storage, logic in version control, and definitions
+        in one place. None of it is rented from the compute that happens to read it today.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= 03 WHAT BREAKS ======================= -->
+<section class="sec" id="breaks">
+  <div class="eyebrow">03 · The problem</div>
+  <h2 class="st">Three things break without this architecture</h2>
+  <p class="lede">Each one shows up in the room as a sentence somebody says out loud. The tags at the
+    bottom of each card point at the stages that fix it.</p>
+
+  <div class="grid g3">
+    <div class="breakcard">
+      <div class="bc-top">
+        <div class="bc-n">01</div><div class="bc-h">Trust breaks</div>
+        <ul class="bc-l"><li>Incomplete data</li><li>Inconsistent metrics</li><li>No lineage</li></ul>
+      </div>
+      <div class="bc-q">
+        <div class="qh">What you will hear</div>
+        <q>Our AI answers do not match our reports.</q>
+        <q>How do we stop an agent making things up about our data?</q>
+      </div>
+      <div class="bc-f">Fixed at
+        <button class="tagmini" data-go="transform">03 Transform</button>
+        <button class="tagmini" data-go="context">04 Context</button>
+      </div>
+    </div>
+
+    <div class="breakcard">
+      <div class="bc-top">
+        <div class="bc-n">02</div><div class="bc-h">Scale stalls</div>
+        <ul class="bc-l"><li>Ungoverned data</li><li>Fragmented context</li><li>Locked-in formats</li></ul>
+      </div>
+      <div class="bc-q">
+        <div class="qh">What you will hear</div>
+        <q>Snowflake and Databricks are both in the building. Which do we pick?</q>
+        <q>An acquisition brought a second platform.</q>
+        <q>Every new source turns into its own project.</q>
+      </div>
+      <div class="bc-f">Fixed at
+        <button class="tagmini" data-go="move">01 Move</button>
+        <button class="tagmini" data-go="manage">02 Manage</button>
+        <button class="tagmini" data-go="agent">05 Agent</button>
+      </div>
+    </div>
+
+    <div class="breakcard">
+      <div class="bc-top">
+        <div class="bc-n">03</div><div class="bc-h">Costs explode</div>
+        <ul class="bc-l"><li>Repeated retrievals</li><li>Unoptimized modeling</li><li>Storage locked to compute</li></ul>
+      </div>
+      <div class="bc-q">
+        <div class="qh">What you will hear</div>
+        <q>Our warehouse bill doubled and nobody can tell me why.</q>
+        <q>Every new use case adds cost.</q>
+        <q>The renewal is coming and we have no leverage.</q>
+      </div>
+      <div class="bc-f">Fixed at
+        <button class="tagmini" data-go="transform">03 Transform</button>
+        <button class="tagmini" data-go="ownership">Ownership</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="callout c-bad" style="margin-top:16px">
+    <span class="ci">!</span>
+    <div>The compound result is unreliable agents, limited return on the AI investment, and a data team
+      that never gets past maintenance to the part that was worth funding.</div>
+  </div>
+</section>
+
+<!-- ======================= 04 WHAT IT DELIVERS ======================= -->
+<section class="sec" id="delivers">
+  <div class="eyebrow">04 · The payoff</div>
+  <h2 class="st">Agents your client can actually defend</h2>
+  <p class="lede">Governed data that holds up when someone senior asks why the number was trusted.
+    That is what a client is buying; everything else here is downstream of delivering it.</p>
+
+  <div class="card">
+    <div class="subh">What agents demand from a data layer</div>
+    <p class="tiny muted" style="margin-bottom:14px">A human analyst brings their own context and catches a
+      bad number. Agents do not. They inherit whatever context you hand them and act on it at machine speed.</p>
+    <div class="grid g4">
+      <div class="stat"><b style="color:var(--ft)">Flexible</b><span>storage and compute, never locked to one engine or one model</span></div>
+      <div class="stat"><b style="color:var(--db)">Reliable</b><span>data movement across all your data, not a sample</span></div>
+      <div class="stat"><b style="color:var(--scale)">Rich</b><span>metadata and context, so an agent knows what it is looking at</span></div>
+      <div class="stat"><b style="color:var(--cost)">Scalable</b><span>a hundred agents hit your data a thousand times harder than a hundred people</span></div>
+    </div>
+  </div>
+
+  <div style="margin-top:16px" data-lens="bus partner">
+    <div class="grid g4">
+      <div class="card tight"><div class="subh" style="color:var(--ft)">Efficient growth</div>
+        <p class="tiny muted">Managed pipelines and optimized transformation deliver more outcomes with less
+          overhead: predictable growth instead of firefighting.</p></div>
+      <div class="card tight"><div class="subh" style="color:var(--db)">Use-case expansion</div>
+        <p class="tiny muted">Governed, agent-ready data opens new trusted-AI use cases, and more consumption
+          on whichever platform the client already runs.</p></div>
+      <div class="card tight"><div class="subh" style="color:var(--scale)">Growth built on trust</div>
+        <p class="tiny muted">Explainable, governed AI (lineage, docs, tests) earns confidence, which compounds
+          into adoption, expansion and renewals.</p></div>
+      <div class="card tight"><div class="subh" style="color:var(--cost)">Future-proof market</div>
+        <p class="tiny muted">An open foundation turns every migration and every new platform into net-new work
+          rather than a rebuild.</p></div>
+    </div>
+  </div>
+
+  <div style="margin-top:16px" data-lens="tech">
+    <div class="grid g2">
+      <div class="card tight"><div class="subh">Why the order matters</div>
+        <ul class="tiny muted" style="padding-left:1.1em">
+          <li>Nothing downstream reads what has not landed, so Move gates everything.</li>
+          <li>Cross-engine parity at Agent depends on the single write at Manage.</li>
+          <li>An agent cannot resolve a definition that Transform has not written and tested.</li>
+          <li>Activate needs something worth writing back, which is why it comes last.</li>
+        </ul></div>
+      <div class="card tight"><div class="subh">The two catalogs, and the difference</div>
+        <p class="tiny muted">The lake catalog (Polaris, Glue, Unity Catalog, BigLake, OneLake) makes tables
+          reachable: where is this table, and may I read it. dbt Catalog makes them interpretable: what a column
+          means, where it came from, what tests it passed. Both are needed. An estate with only the first has
+          data every engine can find and nobody can explain.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= 05 PILLARS ======================= -->
+<section class="sec" id="pillars">
+  <div class="eyebrow">05 · The six pillars</div>
+  <h2 class="st">What a well-architected data foundation looks like</h2>
+  <p class="lede">Six properties a client's foundation has to show. Each is marked with where it does the most
+    work, and each has a moment in the walkthrough you can put in front of them. Filter by the outcome the
+    client cares about.</p>
+
+  <div class="filterbar">
+    <span class="xs dim" style="font-weight:750;letter-spacing:.12em;text-transform:uppercase">Filter by outcome</span>
+    <div class="seg sm" id="pillarFilter">
+      <button data-f="all" class="on">All six</button>
+      <button data-f="trust">Trust</button>
+      <button data-f="scale">Scale</button>
+      <button data-f="cost">Cost</button>
+    </div>
+    <span class="spacer"></span>
+    <button class="btn sm" id="pillarAll">Expand all</button>
+  </div>
+
+  <div class="grid" id="pillarList" style="gap:11px"></div>
+</section>
+
+<!-- ======================= 06 WALKTHROUGH ======================= -->
+<section class="sec" id="walkthrough">
+  <div class="eyebrow">06 · The walkthrough</div>
+  <h2 class="st">Six stages, six gates</h2>
+  <p class="lede">Each stage states one claim, names what it depends on, and closes with evidence. Every stage
+    carries a live simulator you can run in front of a client. Use <span class="kbd">←</span>
+    <span class="kbd">→</span> to move between stages.</p>
+
+  <div class="stagenav" id="stagenav">
+    <button class="snb on" data-stage="move" data-own="ft"><i></i>01 Move</button>
+    <button class="snb" data-stage="manage" data-own="both"><i></i>02 Manage</button>
+    <button class="snb" data-stage="transform" data-own="db"><i></i>03 Transform</button>
+    <button class="snb" data-stage="context" data-own="db"><i></i>04 Context</button>
+    <button class="snb" data-stage="agent" data-own="db"><i></i>05 Agent</button>
+    <button class="snb" data-stage="activate" data-own="ft"><i></i>06 Activate</button>
+  </div>
+
+  <!-- ---------------- 01 MOVE ---------------- -->
+  <div class="stagepane on" data-pane="move">
+    <div class="stagehead">
+      <span class="bignum">01</span>
+      <div>
+        <h3>Move</h3>
+        <p class="oneline">Each source lands once, in one place the client owns, and every engine, agent and
+          use case downstream reads that single write instead of getting a pipeline of its own.</p>
+      </div>
+    </div>
+
+    <div class="gatebar">
+      <div class="gl">The gate that closes this stage</div>
+      <div class="gt">Row parity from source to destination, and the schema-drift record that proves nothing
+        was silently dropped between them.</div>
+    </div>
+
+    <div class="deps">
+      <div class="dep"><div class="subh">Needs</div>A named consumer waiting on the source: a team, an
+        application, a dashboard or an agent that will actually read it. That is the only prerequisite,
+        which is why this is where a client starts.</div>
+      <div class="dep"><div class="subh">What depends on this</div>Every stage after it. Nothing downstream
+        reads what has not landed.</div>
+    </div>
+
+    <div class="grid g4" style="margin-bottom:18px">
+      <div class="stat"><b>750+</b><span>pre-built connectors, maintained for you</span></div>
+      <div class="stat"><b style="font-size:16px">Connector SDK</b><span>for every source the library does not cover</span></div>
+      <div class="stat"><b>1</b><span>managed sync per source, not a pipeline per consumer</span></div>
+      <div class="stat"><b>0</b><span>schema-drift jobs for the client's team to maintain</span></div>
+    </div>
+
+    <!-- SIM: schema drift -->
+    <div class="sim" style="margin-bottom:18px">
+      <div class="sim-h">
+        <div><div class="lab">Live simulator</div><h4>Fire a source change at both pipelines</h4></div>
+        <span class="spacer"></span>
+        <button class="btn sm" data-drift="col">Add a column</button>
+        <button class="btn sm" data-drift="type">Widen a type</button>
+        <button class="btn sm" data-drift="fail">Kill the sync</button>
+        <button class="btn sm" data-drift="reset">Reset</button>
+      </div>
+      <div class="sim-b">
+        <div class="vs">
+          <div class="vs-col bad">
+            <div class="vh"><span>✕</span>Hand-built pipeline</div>
+            <div class="vb"><div class="log" id="driftBad"><span class="ph">Fire an event above.</span></div></div>
+          </div>
+          <div class="vs-col good">
+            <div class="vh"><span>✓</span>Fivetran managed connection</div>
+            <div class="vb"><div class="log" id="driftGood"><span class="ph">Fire an event above.</span></div></div>
+          </div>
+        </div>
+        <div class="meterrow">
+          <div class="meter"><div class="mh"><span>Hand-built: engineer hours this quarter</span><b id="driftH">0</b></div>
+            <div class="mbar"><i class="a" id="driftHB" style="width:0"></i></div></div>
+          <div class="meter"><div class="mh"><span>Managed: engineer hours this quarter</span><b id="driftM">0</b></div>
+            <div class="mbar"><i class="b" id="driftMB" style="width:0"></i></div></div>
+        </div>
+      </div>
+      <div class="sim-f">Schema drift, type promotion, auth, pagination, checkpointing, retries and health belong
+        to the platform. Not to a team, and not to a scheduled job somebody inherited.</div>
+    </div>
+
+    <div data-lens="tech">
+      <div class="subh">Why these choices</div>
+      <ul class="reasons">
+        <li><b>One managed sync, not a pipeline per consumer.</b> Adding a consumer adds no standing compute
+          and no new movement to maintain.</li>
+        <li><b>The library covers the core estate; the SDK covers the long tail.</b> SAP, Oracle, Salesforce and
+          ServiceNow are in the library. The long tail is the proprietary systems, the in-house application, the
+          shop-floor system, the regional vendor. A large enterprise has hundreds of them, and each one is a
+          connector the SDK can build. They land the same way, on the same managed platform, as everything else.</li>
+        <li><b>Loading is idempotent.</b> A re-run is always safe; a failed sync retries itself and resumes from
+          its last checkpoint.</li>
+        <li><b>What lands is a correct, queryable schema.</b> Fivetran's standard shape for application sources,
+          the source's own structure for databases. Whether naming follows Fivetran's convention or the
+          source's is a choice you make per source.</li>
+      </ul>
+    </div>
+
+    <div data-lens="bus">
+      <div class="subh">Why it matters commercially</div>
+      <ul class="reasons">
+        <li><b>One ingestion motion across every source.</b> What used to be a build decision per system is the
+          same move every time.</li>
+        <li><b>The long tail is where scope gets cut.</b> The core systems are already covered. What shrinks a
+          project is the hundreds of custom sources specific to that business, and that is the part the
+          Connector SDK removes.</li>
+        <li><b>Nothing here is bespoke, so nothing here is a rewrite next year.</b> Hand-built movement is where
+          the undocumented business rules accumulate.</li>
+      </ul>
+    </div>
+
+    <div data-lens="partner">
+      <div class="subh">For your practice</div>
+      <ul class="reasons">
+        <li><b>The awkward sources stop being the reason a project gets smaller.</b> Your team builds them with
+          the Connector SDK and AI tooling, and they run managed alongside everything else: same syncs, same
+          monitoring, same schema treatment.</li>
+        <li><b>One predictable ingestion motion.</b> The way a source is landed, monitored and handed over is the
+          same every time, so your team gets faster across every client rather than deep on one.</li>
+      </ul>
+    </div>
+
+    <div class="acc" style="margin-top:18px">
+      <button class="acc-h">Doing it: what a custom connector actually takes <span class="badge">3 modes</span><span class="ac">▼</span></button>
+      <div class="acc-b">
+        <p>AI tooling changed the shape of this work, and the honest answer is a range rather than a number.
+          Three modes, and the difference is not the API; it is what the connector has to survive.</p>
+        <div class="scrollx"><table class="t">
+          <tr><th>Mode</th><th>Time</th><th>What is included</th></tr>
+          <tr><td><b>Proving it works</b></td><td>15 to 20 min</td>
+            <td>A source whose pagination and auth are already understood, built and deployed live. A measured
+              time, and the one that surprises people. Useful in discovery: stop debating whether the awkward
+              system can be connected and just connect it.</td></tr>
+          <tr><td><b>Production, typical API</b></td><td>hours, not weeks</td>
+            <td>The same build plus the interview that profiles the API's hazards, a test harness, and a README
+              the client's own team can maintain after you leave.</td></tr>
+          <tr><td><b>Production, difficult source</b></td><td>longer; the API decides</td>
+            <td>Async polling, a query language, streaming, or several calls per record change the shape of the
+              connector rather than adding steps to it.</td></tr>
+        </table></div>
+        <div class="callout c-warn"><span class="ci">!</span><div><b>Where the time actually goes.</b>
+          Not the request loop. It goes into the handful of API behaviours that decide the cursor design, and
+          getting one wrong is a long debugging tail rather than a bug.
+          <ul style="margin-top:7px">
+            <li><b>Inclusive range filters.</b> If both bounds are inclusive, a single-key cursor re-fetches the
+              boundary record on every sync. It needs a compound cursor.</li>
+            <li><b>Per-sync caps with offset pagination.</b> Advance the offset by what was actually consumed,
+              not by page size, or the off-by-N is structural.</li>
+            <li><b>Async polling, pagination tokens, query DSLs, streaming, multi-call-per-record.</b> Each changes
+              the shape of the connector rather than adding a step to it.</li>
+          </ul>
+          Profile the API before generating any code. These are interview questions, not discoveries.</div></div>
+      </div>
+    </div>
+
+    <div class="acc">
+      <button class="acc-h">The gate in detail <span class="badge">evidence</span><span class="ac">▼</span></button>
+      <div class="acc-b">
+        <p>Counts and values reconcile against the source, and every schema change that arrived is on the record.
+          Nobody has to take that on trust; it reconciles or it does not, which is why this is the easiest
+          place to start.</p>
+        <div class="callout c-ok"><span class="ci">✓</span><div><b>Satisfied by evidence, not by tooling.</b>
+          Any pipeline that reconciles counts and values against the source and keeps the schema-change record
+          satisfies this gate.</div></div>
+        <p class="tiny"><b>What the client has when it closes:</b> one governed write per source, with row parity
+          proven against the source and every schema change that arrived on the record.</p>
+      </div>
+    </div>
+
+    <div class="acc">
+      <button class="acc-h">When this is the wrong call <span class="badge" style="color:var(--warn)">caution</span><span class="ac">▼</span></button>
+      <div class="acc-b">
+        <p>Do not connect a source nobody has named a consumer for. Landing data because it is easy to land is
+          storage, governance surface and one more thing to explain in an audit, with nothing asking for it.
+          Connect what someone is waiting on, then the next one.</p>
+        <p class="tiny dim">You will also hear: <q>Our regulator says this data cannot leave our network.</q>
+          That is a routing question, answered under Manage.</p>
+      </div>
+    </div>
+
+    <div class="grid g2" style="margin-top:18px">
+      <div class="oneliner"><div class="subh">If you say one thing about this stage</div>
+        Each source lands once, and every consumer downstream reads that write. You are not building a pipeline
+        per engine, per agent, or per team, however many sources there are.</div>
+      <div class="sellbox" data-lens="partner bus"><div class="subh">What this gate lets you sell</div>
+        A landing scoped to named sources and closed by parity. A finance reader can check the evidence
+        themselves, which is why you sell it without a debate about effort.</div>
+      <div class="sellbox" data-lens="tech"><div class="subh">What to build first</div>
+        The connection, the parity query, and the schema-change record. Everything else in this framework
+        assumes those three exist and can be produced on demand.</div>
+    </div>
+
+    <div class="stagefoot">
+      <span class="xs dim">Stage 1 of 6</span>
+      <span><button class="btn sm" data-go="manage">Next: Manage →</button></span>
+    </div>
+  </div>
+
+  <!-- ---------------- 02 MANAGE ---------------- -->
+  <div class="stagepane" data-pane="manage">
+    <div class="stagehead">
+      <span class="bignum">02</span>
+      <div>
+        <h3>Manage</h3>
+        <p class="oneline">Schema drift, soft deletes, retention, multi-format writes and catalog registration
+          handled continuously, and the jobs that shape what lands run in dependency order rather than on a
+          schedule somebody maintains.</p>
+      </div>
+    </div>
+
+    <div class="gatebar">
+      <div class="gl">The gate that closes this stage</div>
+      <div class="gt">The same rows returned through every metadata layer the lake maintains, from one write,
+        and the models that shape what lands ran in dependency order with run results you can read.</div>
+    </div>
+
+    <div class="deps">
+      <div class="dep"><div class="subh">Needs</div>Move. There has to be a write before there is anything to manage.</div>
+      <div class="dep"><div class="subh">What depends on this</div>Any engine that reads the lake, and the
+        cross-engine parity the Agent stage depends on.</div>
+    </div>
+
+    <div class="grid g4" style="margin-bottom:18px">
+      <div class="stat"><b>3</b><span>open formats written from one sync: Delta, Iceberg, Parquet</span></div>
+      <div class="stat"><b>0</b><span>copies; three metadata layers over one set of files</span></div>
+      <div class="stat"><b style="font-size:17px">In order</b><span>models run on their dependencies, with readable run results</span></div>
+      <div class="stat"><b style="font-size:17px">Client's cloud</b><span>the storage account, the catalog, the credentials</span></div>
+    </div>
+
+    <!-- SIM: one write, three layers -->
+    <div class="sim" style="margin-bottom:18px">
+      <div class="sim-h">
+        <div><div class="lab">Live simulator</div><h4>One write, every metadata layer, identical rows</h4></div>
+        <span class="spacer"></span>
+        <button class="btn sm btn-p" id="mgRun">Run the parity query</button>
+        <button class="btn sm" id="mgReset">Reset</button>
+      </div>
+      <div class="sim-b">
+        <div class="grid g3" style="margin-bottom:13px">
+          <div class="card tight" style="background:var(--panel2)">
+            <div class="subh">One physical write</div>
+            <pre class="code" style="font-size:11px"><span class="c">-- the client's own bucket</span>
+s3://acme-lake/fivetran/
+  <span class="f">orders/</span>
+    part-0000.<span class="n">parquet</span>
+    part-0001.<span class="n">parquet</span>
+    <span class="s">_delta_log/</span>
+    <span class="s">metadata/</span> <span class="c">(iceberg)</span></pre>
+          </div>
+          <div class="card tight" style="background:var(--panel2)">
+            <div class="subh">Three ways in</div>
+            <div class="grid" style="gap:6px">
+              <div class="rl" style="border:1px solid var(--line);border-radius:7px"><span class="nm">Iceberg metadata</span><span class="vv">always</span></div>
+              <div class="rl" style="border:1px solid var(--line);border-radius:7px"><span class="nm">Delta Lake log</span><span class="vv">optional</span></div>
+              <div class="rl" style="border:1px solid var(--line);border-radius:7px"><span class="nm">Parquet direct</span><span class="vv">always</span></div>
+            </div>
+          </div>
+          <div class="card tight" style="background:var(--panel2)">
+            <div class="subh">The catalog in between</div>
+            <p class="xs muted">Polaris, Glue, Unity Catalog, BigLake, OneLake. It answers two questions:
+              where is this table, and may I read it. That layer is what lets an engine plug in without a new pipeline.</p>
+          </div>
+        </div>
+        <div class="scrollx"><table class="t" id="mgTable">
+          <tr><th>Engine</th><th>Reads</th><th>Catalog</th><th>Row count</th><th>Sum(order_total)</th><th>Max(order_date)</th><th>Result</th></tr>
+        </table></div>
+        <div class="log" id="mgLog" style="margin-top:12px;max-height:150px"><span class="ph">Run the parity query to read the same files through every layer.</span></div>
+      </div>
+      <div class="sim-f">Each engine reads the layer it understands, and none of them know about each other.
+        That half of the gate proves the openness claim rather than asserting it.</div>
+    </div>
+
+    <div data-lens="tech">
+      <div class="subh">Why these choices</div>
+      <ul class="reasons">
+        <li><b>One write, one physical set of files, three ways in.</b> The data is written once as Parquet.
+          Iceberg metadata is always created over it, and Delta Lake metadata as well when you enable it. Two
+          metadata layers over the Parquet, plus the Parquet itself, which anything can read directly.</li>
+        <li><b>Table maintenance runs on its own schedule, and it is the part nobody wants to own.</b> Snapshots
+          older than the retention period are expired daily, with at least the last two always kept. Delta delete
+          markers are held for up to seven days, or the retention period if that is shorter. Three previous
+          versions of the metadata files are retained. Orphaned files are staged on alternate Saturdays and
+          removed on the following pass. These are documented behaviours of the managed service, not something a
+          client tunes and not something a delivery team writes a job for.</li>
+        <li><b>What the docs do not claim, this page does not either.</b> There is no user-facing report
+          confirming a maintenance pass ran, which is why maintenance is described here and deliberately absent
+          from the gate.</li>
+        <li><b>Engine to layer.</b> Databricks reads the Delta log. Snowflake, Athena, BigQuery and DuckDB read
+          the Iceberg metadata. Fabric reads the Parquet directly.</li>
+        <li><b>Orchestration is dbt's job here.</b> Models run in the order their dependencies require, with run
+          results you can read afterwards, not a cron entry and a hope. That is what makes the arrival of new
+          data and the shaping of it one system rather than two.</li>
+      </ul>
+    </div>
+
+    <div data-lens="bus">
+      <div class="subh">Why it matters commercially</div>
+      <ul class="reasons">
+        <li><b>This is work a client stops paying anyone to build and keep running.</b> Schema evolution,
+          retention and catalog registration are maintenance: necessary, invisible when it works, and the
+          reason data teams never get to the part that was worth funding.</li>
+        <li><b>It moves the work up-stack.</b> Away from pipeline babysitting, toward the governance and agent
+          layers, which is where the outcome a client is actually paying for gets built.</li>
+        <li><b>Query-ready on sync completion is the claim clients actually test.</b> It is also what makes the
+          next use case cheap rather than another project.</li>
+        <li><b>No bespoke scheduler to inherit.</b> Orchestration comes with the platform, so nobody is
+          maintaining a homegrown one and nobody is explaining it to the next team.</li>
+      </ul>
+    </div>
+
+    <div data-lens="partner">
+      <div class="subh">For your practice</div>
+      <p class="muted" style="font-size:13.6px">Fivetran keeps the data current and dbt keeps the jobs in order.
+        Neither is something your team rebuilds at the next client. You arrive with the foundation already
+        running and spend the engagement on the layers above it, which is where the work is worth doing anyway.</p>
+    </div>
+
+    <div class="acc" style="margin-top:18px">
+      <button class="acc-h">Know who pays for what <span class="badge">operating model</span><span class="ac">▼</span></button>
+      <div class="acc-b">
+        <p>The operating model is clean, and a client will ask. Fivetran manages the ingestion and the table
+          layer: reading the source, writing the tables, the merges that apply changes, metadata handling, table
+          maintenance and the managed catalog. The compute to do all of that is Fivetran's, not the client's. In
+          most architectures the merge cost lands on the warehouse bill. The client pays for their own cloud
+          storage, because the data lives in their account, and for whatever compute they point at it to read.</p>
+        <p class="tiny dim">That is the operating model, and it is as far as this page goes. Rates, tiers and
+          actual numbers are a conversation with Fivetran rather than something to quote from an architecture
+          document.</p>
+      </div>
+    </div>
+
+    <div class="acc">
+      <button class="acc-h">Watch out for <span class="badge" style="color:var(--warn)">2 traps</span><span class="ac">▼</span></button>
+      <div class="acc-b">
+        <div class="callout c-warn"><span class="ci">!</span><div><b>"Any cloud, any engine" is architecturally
+          true and has a geography bill.</b> If the lake sits in one region and the engine reads it from another,
+          or from another cloud entirely, that traffic is charged, and it is charged to the client. The
+          architecture permits it; the invoice notices. Establish where the lake lives before anyone attaches an
+          engine somewhere convenient.</div></div>
+        <div class="callout c-warn"><span class="ci">!</span><div><b>A catalog the client runs themselves is
+          their cost too.</b> Registering the same tables in Glue, Unity Catalog, BigLake or OneLake is a
+          reasonable thing to do, and often the right thing for survivability. Just book it as a client platform
+          cost rather than assuming it comes with the managed service.</div></div>
+      </div>
+    </div>
+
+    <div class="acc">
+      <button class="acc-h">Ask this early: where data is allowed to be processed <span class="badge" style="color:var(--bad)">hard constraint</span><span class="ac">▼</span></button>
+      <div class="acc-b">
+        <p><b>The policy attaches to a source, not to the client.</b> It says that particular data may not be
+          processed through a SaaS service. Most of a client's estate carries no such policy; one or two systems
+          will.</p>
+        <p>Two models answer it. SaaS processes in Fivetran's cloud. Hybrid Deployment processes inside the
+          client's own network and uses Fivetran's cloud only to orchestrate. Both are secure and governed, and
+          in neither one does Fivetran store or maintain the data. What persists is a cursor marking the last
+          checkpoint, so the next incremental sync knows where to resume.</p>
+        <p><b>The question that clarifies it.</b> When a source carries a no-SaaS-processing policy, ask where
+          the data is going to land. It is usually a cloud data platform, which is itself a SaaS service. That is
+          not a gotcha; it is the question that separates a policy about the processing path from a policy about
+          the data leaving the environment at all. Those need different architectures, and clients frequently
+          have not distinguished them.</p>
+        <div class="callout c-bad"><span class="ci">✕</span><div><b>The managed lake does not support Hybrid
+          Deployment today.</b> Follow the chain and it is absolute: a source whose policy forbids processing
+          through a SaaS service requires Hybrid Deployment, and Hybrid Deployment cannot write to the managed
+          lake. That source cannot land in the lake, and there is no configuration that gets around it.
+          <br><br>What it does not do is break the architecture. That source lands in a warehouse destination over
+          Hybrid Deployment; everything else lands in the lake as designed. The client ends up with two
+          destinations, deliberately, which is a normal outcome and not a compromise. Establish which sources
+          carry the policy before the design is drawn and it is a routing decision. Find out afterwards and it
+          is a redesign.</div></div>
+      </div>
+    </div>
+
+    <div class="acc">
+      <button class="acc-h">The gate in detail <span class="badge">evidence</span><span class="ac">▼</span></button>
+      <div class="acc-b">
+        <p>One query, every metadata layer, identical results. That half proves the openness claim rather than
+          asserting it. The second half is what separates orchestration from a schedule: the run results name
+          what ran, in what order, and what it depended on.</p>
+        <p>Table maintenance (snapshot expiry, delete markers, metadata versions, orphan files) runs
+          automatically and is deliberately not in this gate. There is no documented report, alert or run history
+          confirming a pass completed. Some effects are visible in the client's own storage, and the docs name
+          the orphans folders and say not to touch them, but a folder you can see is not a pass you can verify,
+          and a gate needs the second one.</p>
+        <div class="callout c-ok"><span class="ci">✓</span><div><b>Satisfied by evidence, not by tooling.</b>
+          Any lake that writes once and serves more than one metadata layer over the same files, with an
+          orchestrator that reports what ran and why, satisfies this gate. The formats are open standards and the
+          gate is the identical result, not who wrote it.</div></div>
+      </div>
+    </div>
+
+    <div class="acc">
+      <button class="acc-h">When this is the wrong call <span class="badge" style="color:var(--warn)">caution</span><span class="ac">▼</span></button>
+      <div class="acc-b"><p>If a client runs exactly one engine and has no second one planned, multi-format is
+        optionality they are not using yet. Say that plainly. It costs nothing to keep and it is not, on its own,
+        a reason to change anything today.</p></div>
+    </div>
+
+    <div class="grid g2" style="margin-top:18px">
+      <div class="oneliner"><div class="subh">If you say one thing about this stage</div>
+        One write, one set of Parquet files in your own data lake, with Iceberg metadata over it, Delta metadata
+        when you want it, and the Parquet readable directly.</div>
+      <div class="sellbox" data-lens="partner bus"><div class="subh">What this gate lets you sell</div>
+        One query, every metadata layer, identical results: a demonstration rather than a position. You sell
+        the same proof at every client, whatever engine they already run.</div>
+      <div class="sellbox" data-lens="tech"><div class="subh">What to verify</div>
+        Read real rows through each layer and compare values. A row count can be answered from table metadata
+        without touching a data file, so it passes while the reads underneath are broken.</div>
+    </div>
+
+    <div class="stagefoot">
+      <span><button class="btn sm" data-go="move">← Move</button></span>
+      <span class="xs dim">Stage 2 of 6</span>
+      <span><button class="btn sm" data-go="transform">Next: Transform →</button></span>
+    </div>
+  </div>
+
+  <!-- ---------------- 03 TRANSFORM ---------------- -->
+  <div class="stagepane" data-pane="transform">
+    <div class="stagehead">
+      <span class="bignum">03</span>
+      <div>
+        <h3>Transform</h3>
+        <p class="oneline">Business logic becomes tested, version-controlled code instead of SQL living inside
+          one platform, which is what makes it reviewable, portable, and safe to let tooling change.</p>
+      </div>
+    </div>
+
+    <div class="gatebar">
+      <div class="gl">The gate that closes this stage</div>
+      <div class="gt">The logic is in version control with tests, and the project can name what a change breaks
+        before anything runs.</div>
+    </div>
+
+    <div class="deps">
+      <div class="dep"><div class="subh">Needs</div>Move, for raw to model against. Manage as well if the modeled
+        layer is to land in open formats rather than inside one platform.</div>
+      <div class="dep"><div class="subh">What depends on this</div>Context. Governed definitions have to exist
+        before an agent can resolve them.</div>
+    </div>
+
+    <div class="grid g4" style="margin-bottom:18px">
+      <div class="stat"><b style="font-size:17px">Multi-engine</b><span>one dbt project, more than one warehouse adapter</span></div>
+      <div class="stat"><b style="font-size:17px">Before the run</b><span>dialect errors caught while the model is written</span></div>
+      <div class="stat"><b style="font-size:17px">Per model</b><span>warehouse spend attributed to what caused it</span></div>
+      <div class="stat"><b style="font-size:17px">Changed only</b><span>what a run rebuilds, not the whole project</span></div>
+    </div>
+
+    <!-- SIM: blast radius + dbt State -->
+    <div class="sim" style="margin-bottom:18px">
+      <div class="sim-h">
+        <div><div class="lab">Live simulator</div><h4>Blast radius, then rebuild only what changed</h4></div>
+        <span class="spacer"></span>
+        <div class="seg sm" id="stMode">
+          <button data-m="format" class="on">Reformat SQL</button>
+          <button data-m="logic">Change the logic</button>
+          <button data-m="stale">Upstream did not move</button>
+        </div>
+        <button class="btn sm btn-d" id="stRun">Run</button>
+      </div>
+      <div class="sim-b">
+        <div class="dag" style="margin-bottom:14px" id="stDag"></div>
+        <div class="vs">
+          <div class="vs-col bad">
+            <div class="vh"><span>✕</span>Rebuild everything on a schedule</div>
+            <div class="vb"><div class="log" id="stBad" style="max-height:170px"><span class="ph">Pick a change and run.</span></div></div>
+          </div>
+          <div class="vs-col good">
+            <div class="vh"><span>✓</span>dbt State</div>
+            <div class="vb"><div class="log" id="stGood" style="max-height:170px"><span class="ph">Pick a change and run.</span></div></div>
+          </div>
+        </div>
+        <div class="meterrow">
+          <div class="meter"><div class="mh"><span>Models rebuilt, full run</span><b id="stBadN">0 / 8</b></div>
+            <div class="mbar"><i class="a" id="stBadB" style="width:0"></i></div></div>
+          <div class="meter"><div class="mh"><span>Models rebuilt, dbt State</span><b id="stGoodN">0 / 8</b></div>
+            <div class="mbar"><i class="b" id="stGoodB" style="width:0"></i></div></div>
+          <div class="stat" style="flex:0 0 auto;min-width:150px"><b id="stSave" style="font-size:20px">0%</b><span>warehouse work avoided</span></div>
+        </div>
+      </div>
+      <div class="sim-f">dbt State parses the SQL rather than diffing the file, so a reformat or a renamed alias
+        is not a change. It also asks whether the upstream data moved, not only whether the code did, which is
+        the part a manifest comparison cannot do at all.</div>
+    </div>
+
+    <div data-lens="tech">
+      <div class="subh">Why these choices</div>
+      <ul class="reasons">
+        <li><b>Staging, marts, then semantic, with source schemas parameterized.</b> One set of SQL runs against
+          more than one warehouse without a fork.</li>
+        <li><b>The compiled manifest is the artifact, not a diagram someone drew.</b> It carries every model,
+          column, description and dependency, and it is what downstream governance reads.</li>
+        <li><b>Blast radius before rebuild.</b> You are told exactly what breaks downstream before anything runs.
+          Governance before execution is how teams at scale manage change.</li>
+        <li><b>How fresh a model has to be becomes a declaration, not a schedule.</b> A per-model freshness
+          tolerance states how stale that table is allowed to get, in the project, where it can be reviewed. Most
+          estates carry the same requirement scattered across cron jobs whose reasons nobody remembers.</li>
+        <li><b>Materialization is a per-platform trade-off, not a rule.</b> Views are cheaper to maintain on one
+          engine, tables faster on another. The model SQL is identical either way.</li>
+        <li><b>Search the compiled project, not the files.</b> dbt Wizard answers questions across the compiled
+          manifest (SQL, column descriptions, documentation) in one call, so "where does the word risk appear in
+          this project" has an answer with a source.</li>
+        <li><b>The engine underneath is changing.</b> Fusion is the new execution engine. Worth knowing it
+          exists, and worth not designing a client's timeline around it yet.</li>
+        <li><b>The dbt platform runs it.</b> Scheduling, environments and run history come with the platform
+          rather than being assembled per client.</li>
+      </ul>
+    </div>
+
+    <div data-lens="bus">
+      <div class="subh">Why it matters commercially</div>
+      <ul class="reasons">
+        <li><b>This is where the refactor cost lives at a platform change.</b> Logic in the platform refactors
+          entirely. Logic in version control refactors partially.</li>
+        <li><b>Undocumented business rules accumulate here,</b> which is exactly why hand-built transformation is
+          the most expensive thing to inherit.</li>
+        <li><b>Governed transformation is the trust foundation for everything above it,</b> agents included. An
+          agent cannot be more reliable than the layer it reads.</li>
+        <li><b>Mistakes are caught before the warehouse bills for them.</b> Fusion understands SQL across engine
+          dialects, so a broken reference or a bad column surfaces while the model is being written rather than
+          after a run somebody already paid for.</li>
+        <li><b>You can see which models cost what.</b> Warehouse spend attributed per model turns "the bill went
+          up" into the specific change that caused it, which is the difference between a cost conversation and a
+          cost argument.</li>
+        <li><b>Staleness a person absorbs, an agent acts on.</b> Someone reading a dashboard notices that
+          yesterday's number looks off. An agent does not pause to ask whether the data is current. It acts, at
+          machine speed, and a tolerance that was survivable for the dashboard is not survivable for the agent.</li>
+        <li><b>Increasingly this work is done by tooling rather than by people.</b> An agent changing a model
+          reads the same compiled project a senior engineer would (lineage, state, tests) and its work is checked
+          the same way. That is what makes handing the volume to AI defensible rather than reckless.</li>
+      </ul>
+    </div>
+
+    <div data-lens="partner">
+      <div class="subh">For your practice</div>
+      <p class="muted" style="font-size:13.6px">Governed transformation is the layer you build once and run
+        everywhere. The project is the client's; the skills that generate, test and migrate it are yours. One
+        senior practitioner with that tooling delivers what used to take a team and a quarter.</p>
+    </div>
+
+    <div class="acc" style="margin-top:18px">
+      <button class="acc-h">The gate in detail <span class="badge">evidence</span><span class="ac">▼</span></button>
+      <div class="acc-b">
+        <p>Coverage is countable from the compiled project: either every model carries a test, or you can name
+          the ones that do not. Lineage and blast radius are generated from that same compiled project rather
+          than drawn by hand, so the answer to "what does this affect" is produced rather than remembered.</p>
+        <div class="callout c-warn"><span class="ci">!</span><div><b>Break one model on purpose and confirm the
+          tests catch it.</b> A check you have never seen fail is an assumption.</div></div>
+        <p>A client who is changing engines has a second and stricter gate to pass: value parity, compared as
+          values rather than as a row count. That is a migration question rather than a transformation one, and
+          it is answered under <button class="tagmini" data-goto="#ownership">what ownership buys</button>.</p>
+        <div class="callout c-ok"><span class="ci">✓</span><div><b>Satisfied by evidence, not by tooling.</b>
+          Any transformation layer that keeps logic in version control, generates lineage from the project
+          itself, and has a test suite somebody has watched fail satisfies this gate.</div></div>
+      </div>
+    </div>
+
+    <div class="acc">
+      <button class="acc-h">When this is the wrong call <span class="badge" style="color:var(--warn)">caution</span><span class="ac">▼</span></button>
+      <div class="acc-b"><p>Do not pay for portability a client will never spend. Where a workload genuinely
+        needs an engine's native capability (a function, a procedure, a performance behaviour) use it. Avoiding
+        it costs real expressiveness and buys nothing if that client is never moving. What matters is that the
+        choice is deliberate and documented.</p></div>
+    </div>
+
+    <div class="grid g2" style="margin-top:18px">
+      <div class="oneliner"><div class="subh">If you say one thing about this stage</div>
+        You know what breaks before you change anything, and because the logic is code rather than one
+        platform's dialect, moving it to a different engine is a re-point rather than a rewrite.</div>
+      <div class="sellbox" data-lens="partner bus"><div class="subh">What this gate lets you sell</div>
+        A project the client's own team can change safely after you leave: tests somebody has watched fail, and
+        a blast radius the project generates itself. A handover document asserts that. This demonstrates it.</div>
+      <div class="sellbox" data-lens="tech"><div class="subh">What to verify</div>
+        Test coverage counted from the manifest, a deliberate induced failure, and a state-based run that
+        rebuilds strictly less than the full project.</div>
+    </div>
+
+    <div class="stagefoot">
+      <span><button class="btn sm" data-go="manage">← Manage</button></span>
+      <span class="xs dim">Stage 3 of 6</span>
+      <span><button class="btn sm" data-go="context">Next: Context →</button></span>
+    </div>
+  </div>
+
+  <!-- ---------------- 04 CONTEXT ---------------- -->
+  <div class="stagepane" data-pane="context">
+    <div class="stagehead">
+      <span class="bignum">04</span>
+      <div>
+        <h3>Context</h3>
+        <p class="oneline">Governed definitions an agent reads before it answers, not after somebody checks
+          its work.</p>
+      </div>
+    </div>
+
+    <div class="gatebar">
+      <div class="gl">The gate that closes this stage</div>
+      <div class="gt">Every governed metric has a definition, a test, and lineage back to its source, and an
+        agent resolves the definition before it queries.</div>
+    </div>
+
+    <div class="deps">
+      <div class="dep"><div class="subh">Needs</div>Transform. An agent cannot resolve a definition that has not
+        been written, tested and given lineage.</div>
+      <div class="dep"><div class="subh">What depends on this</div>Agent.</div>
+    </div>
+
+    <div class="grid g4" style="margin-bottom:18px">
+      <div class="stat"><b>1</b><span>place a definition changes, for every consumer</span></div>
+      <div class="stat"><b>3</b><span>supported ways an agent reads governed definitions</span></div>
+      <div class="stat"><b>0</b><span>prompt edits when a definition changes</span></div>
+      <div class="stat"><b style="font-size:17px">Countable</b><span>coverage, read from the compiled project</span></div>
+    </div>
+
+    <!-- SIM: governed vs ungoverned -->
+    <div class="sim" style="margin-bottom:18px">
+      <div class="sim-h">
+        <div><div class="lab">Live simulator</div><h4>The same question, governed and ungoverned</h4></div>
+        <span class="spacer"></span>
+        <button class="btn sm btn-d" id="agRun">Ask both agents</button>
+        <button class="btn sm" id="agReset">Reset</button>
+      </div>
+      <div class="sim-b">
+        <div class="metricbox" style="margin-bottom:13px">
+          <div class="mn">customer_value_score</div>
+          <div class="md">40% lifetime value + 30% order frequency + 30% satisfaction, defined once in the dbt
+            project, tested, and resolved through the Semantic Layer before the agent writes a query.</div>
+        </div>
+        <p class="tiny muted" style="margin-bottom:12px"><b>Question asked of both:</b>
+          <q>Who are our most valuable customers?</q> Same data (40 accounts), same question, no error on either side.</p>
+        <div class="vs">
+          <div class="vs-col bad">
+            <div class="vh"><span>✕</span>Ungoverned: sorts by lifetime value</div>
+            <div class="vb"><div class="rowlist" id="agBad"><div class="rl"><span class="nm ph">Not run yet.</span></div></div></div>
+          </div>
+          <div class="vs-col good">
+            <div class="vh"><span>✓</span>Governed: resolves the definition first</div>
+            <div class="vb"><div class="rowlist" id="agGood"><div class="rl"><span class="nm ph">Not run yet.</span></div></div></div>
+          </div>
+        </div>
+        <div class="meterrow">
+          <div class="stat" style="flex:1"><b id="agOv" style="font-size:20px">–</b><span>of the ungoverned top ten survive the governed ranking</span></div>
+          <div class="stat" style="flex:1"><b id="agTop" style="font-size:20px">–</b><span>governed score of the top customer by lifetime value</span></div>
+          <div class="stat" style="flex:1"><b id="agBest" style="font-size:20px">–</b><span>governed score of the actual top customer</span></div>
+        </div>
+        <div class="log" id="agLog" style="margin-top:12px;max-height:160px"><span class="ph">Run to see how each agent resolves the question.</span></div>
+      </div>
+      <div class="sim-f">The ungoverned answer is never an error. It returns rows, it looks reasonable, and
+        nobody checks it, which is precisely why the governed definition has to live where the agent reads
+        rather than in somebody's head. The ratio belongs to these weightings; the failure mode does not.</div>
+    </div>
+
+    <div data-lens="tech">
+      <div class="subh">Why these choices</div>
+      <ul class="reasons">
+        <li><b>Document every column, and test what matters.</b> Documentation coverage is what makes a
+          natural-language answer possible; the tests are what make it trustworthy.</li>
+        <li><b>dbt Catalog and lineage are what make it findable.</b> Documentation nobody can search is
+          documentation nobody uses, and the same is true for an agent. The catalog turns a compiled project
+          into something a person or an agent can navigate.</li>
+        <li><b>The Semantic Layer is where a metric is defined once.</b> A governed metric queried through it
+          returns the same answer to a person, a dashboard and an agent, because there is only one definition
+          to return.</li>
+        <li><b>Resolve before acting.</b> The agent reads the governed definition, then writes the query.</li>
+        <li><b>The loop closes in the project.</b> Change the definition in dbt, re-ingest, and the next answer
+          uses it. No prompt edit, and the lineage moves with it.</li>
+      </ul>
+    </div>
+
+    <div data-lens="bus">
+      <div class="subh">Why it matters commercially</div>
+      <ul class="reasons">
+        <li><b>A wrong answer delivered fluently costs more than no answer.</b> It is acted on before anyone
+          checks it.</li>
+        <li><b>This is the layer clients cannot buy off the shelf.</b> The definitions are the client's; the
+          tooling that keeps them correct is what you bring.</li>
+        <li><b>Agreeing definitions once makes the second use case cheap.</b> Every agent after the first
+          inherits them instead of relitigating what a number means.</li>
+        <li><b>Explainability survives procurement.</b> Lineage, tests and documentation are what a client shows
+          when someone asks why they trusted the number, and they are the same artifacts that make the AI work
+          defensible.</li>
+      </ul>
+    </div>
+
+    <div data-lens="partner">
+      <div class="subh">For your practice</div>
+      <p class="muted" style="font-size:13.6px">The definitions belong to each client. The skill that resolves,
+        tests and republishes them is yours, and it runs the same everywhere, so you sell a working agent rather
+        than the weeks it used to take to agree what a customer is.</p>
+    </div>
+
+    <div class="acc" style="margin-top:18px">
+      <button class="acc-h">Decide: how the agent actually reads it <span class="badge">4 routes</span><span class="ac">▼</span></button>
+      <div class="acc-b">
+        <p>An Agents Schema built out of dbt's compiled artifacts resolves definitions directly. That is the
+          emerging shape and it is on the roadmap, not something to build a client on today. The supported path
+          is the dbt MCP server, and which tool family you reach for depends on the question being asked.</p>
+        <div class="scrollx"><table class="t">
+          <tr><th>The question</th><th>What to use</th><th>What it gives the agent</th></tr>
+          <tr><td>A business question: what does this metric mean, what is revenue</td>
+            <td><b>Semantic Layer tools, over MCP</b></td>
+            <td>Governed metrics, dimensions, entities and saved queries, and the ability to query a metric
+              rather than guess at a column.</td></tr>
+          <tr><td>A model or lineage question: where does this come from, what breaks</td>
+            <td><b>Discovery tools, over MCP</b></td>
+            <td>Models, columns, descriptions, lineage, sources, tests and project health.</td></tr>
+          <tr><td>A code-aware question, inside a project, in an editor</td>
+            <td><b>Fusion and language-server tools, over MCP</b></td>
+            <td>Definition lookup, compiled SQL context, column-level lineage.</td></tr>
+          <tr><td>No MCP in play, or you need lower-level access</td>
+            <td><b>The build artifacts directly</b></td>
+            <td>The manifest, catalog, semantic manifest and run results. Valid and powerful, and a raw
+              integration surface rather than an agent interface.</td></tr>
+        </table></div>
+        <div class="callout c-warn"><span class="ci">!</span><div><b>Do not default a client onto the
+          artifact-indexed route.</b> Normalising artifacts into a queryable metadata layer is directionally
+          right and it is where this is going. It is also not the safe default unless the client already has it
+          in place. Start at the supported path and step down only when there is a reason.</div></div>
+      </div>
+    </div>
+
+    <div class="acc">
+      <button class="acc-h">Watch out for <span class="badge" style="color:var(--warn)">2 traps</span><span class="ac">▼</span></button>
+      <div class="acc-b">
+        <div class="callout c-warn"><span class="ci">!</span><div><b>A definition that changes without a
+          re-ingest.</b> The governed layer is a copy of what the project compiled. Change the definition and
+          skip the re-ingest, and the agent keeps answering from the old one: confidently, with no error and no
+          signal. Wire the ingest to the same trigger that builds the project, or it will drift the first week
+          somebody is busy.</div></div>
+        <div class="callout c-warn"><span class="ci">!</span><div><b>Definitions without owners.</b> The governed
+          layer carries what a metric means, its type and its lineage. It does not carry who owns it unless
+          somebody adds an owner to the project's metadata. So it can answer "what is this" and not "who decides
+          this", and the second question is the one that comes up when two teams disagree.</div></div>
+      </div>
+    </div>
+
+    <div class="acc">
+      <button class="acc-h">The gate in detail, and when this is the wrong call <span class="badge">evidence</span><span class="ac">▼</span></button>
+      <div class="acc-b">
+        <p>Coverage is countable from the compiled project. Either every metric an agent can reach is defined
+          and tested, or you can name the ones that are not.</p>
+        <div class="callout c-ok"><span class="ci">✓</span><div><b>Satisfied by evidence, not by tooling.</b>
+          Any semantic layer an agent resolves before it queries satisfies this gate, provided the coverage is
+          countable rather than asserted.</div></div>
+        <p><b>When this is the wrong call.</b> Where a metric genuinely has no agreed definition yet, do not
+          publish one as governed. Documenting a contested definition makes one team's version authoritative by
+          accident, and that is harder to undo than leaving it open. Agree it first, then govern it.</p>
+      </div>
+    </div>
+
+    <div class="grid g2" style="margin-top:18px">
+      <div class="oneliner"><div class="subh">If you say one thing about this stage</div>
+        Fivetran moves the data, dbt governs the meaning, and the agent resolves those definitions before it
+        answers rather than guessing at them.</div>
+      <div class="sellbox" data-lens="partner bus"><div class="subh">What this gate lets you sell</div>
+        Coverage is countable from the compiled project, so "is it governed" stops being an opinion. What you
+        sell is a working agent and the evidence that it is right.</div>
+      <div class="sellbox" data-lens="tech"><div class="subh">What to verify</div>
+        A metric defined once in dbt, resolved by the agent before it writes a query, and a coverage count you
+        can read out of the compiled project.</div>
+    </div>
+
+    <div class="stagefoot">
+      <span><button class="btn sm" data-go="transform">← Transform</button></span>
+      <span class="xs dim">Stage 4 of 6</span>
+      <span><button class="btn sm" data-go="agent">Next: Agent →</button></span>
+    </div>
+  </div>
+
+  <!-- ---------------- 05 AGENT ---------------- -->
+  <div class="stagepane" data-pane="agent">
+    <div class="stagehead">
+      <span class="bignum">05</span>
+      <div>
+        <h3>Agent</h3>
+        <p class="oneline">Pick the agent backend per workload rather than per dataset. The data underneath
+          does not change.</p>
+      </div>
+    </div>
+
+    <div class="gatebar">
+      <div class="gl">The gate that closes this stage</div>
+      <div class="gt">Cross-engine parity: the same question, every attached engine, identical rows.</div>
+    </div>
+
+    <div class="deps">
+      <div class="dep"><div class="subh">Needs</div>Context, for definitions to resolve, and Manage, for engines
+        reading the same files. An agent that acts on its own rather than on request also needs change data
+        capture at Move and a path through Activate.</div>
+      <div class="dep"><div class="subh">What depends on this</div>Activate. An agent's observation has to reach
+        an operational system to change anything.</div>
+    </div>
+
+    <div class="grid g3" style="margin-bottom:18px">
+      <div class="stat"><b style="font-size:17px">Any engine</b><span>that reads Iceberg, Delta or Parquet, not a list we maintain</span></div>
+      <div class="stat"><b style="font-size:17px">Any agent</b><span>on any AI platform, against the same governed tables</span></div>
+      <div class="stat"><b style="font-size:17px">Minutes</b><span>to attach one; ten validated so far, 8 to 35 measured</span></div>
+    </div>
+
+    <!-- SIM: attach engines -->
+    <div class="sim" style="margin-bottom:18px">
+      <div class="sim-h">
+        <div><div class="lab">Live simulator</div><h4>Attach an engine, then check parity</h4></div>
+        <span class="spacer"></span>
+        <button class="btn sm" id="engAll">Attach all</button>
+        <button class="btn sm btn-p" id="engParity">Run the parity checks</button>
+        <button class="btn sm" id="engReset">Reset</button>
+      </div>
+      <div class="sim-b">
+        <p class="tiny muted" style="margin-bottom:11px">Click an engine to attach it to the same lake. Storage
+          does not move and nothing is re-synced. Times shown are measured setup, not engine speed.</p>
+        <div class="enggrid" id="engGrid"></div>
+        <div class="meterrow">
+          <div class="stat" style="flex:1"><b id="engN" style="font-size:20px">0</b><span>engines attached</span></div>
+          <div class="stat" style="flex:1"><b id="engT" style="font-size:20px">0 min</b><span>total setup time, cumulative</span></div>
+          <div class="stat" style="flex:1"><b id="engC" style="font-size:20px">0</b><span>copies of the data made</span></div>
+        </div>
+        <div style="margin-top:13px" class="scrollx"><table class="t" id="engParityT">
+          <tr><th>Parity check</th><th>What it proves</th><th>Result</th></tr>
+        </table></div>
+        <div class="log" id="engLog" style="margin-top:12px;max-height:170px"><span class="ph">Attach at least two engines, then run the parity checks.</span></div>
+      </div>
+      <div class="sim-f">Never a count on its own. A count is answerable from table metadata and will pass while
+        the reads underneath are broken.</div>
+    </div>
+
+    <div data-lens="tech">
+      <div class="subh">Why these choices</div>
+      <ul class="reasons">
+        <li><b>Three agent backends answered the same question and the top answers matched.</b> Not because they
+          agree, but because all three read the same underlying files.</li>
+        <li><b>Ten engines, five catalogs, three open formats, one write, zero copies.</b> Raw SQL, no agent and
+          no semantic layer in the path, and every number identical.</li>
+        <li><b>A laptop counts.</b> An in-process engine reads the same tables through the same catalog as the
+          warehouse did. No cluster, no warehouse, no standing cost.</li>
+        <li><b>Adding an engine is a configuration change measured in minutes.</b> The slowest we timed was 35,
+          and that included first-run account setup.</li>
+      </ul>
+      <div class="acc" style="margin-top:14px">
+        <button class="acc-h">What attaching an engine actually takes <span class="badge">4 timed</span><span class="ac">▼</span></button>
+        <div class="acc-b">
+          <p>Four of the ten were attached to a live lake and timed. All four used the same catalog and the same
+            vended credentials, and none needed custom code. They differed only in connection syntax.</p>
+          <div class="scrollx"><table class="t">
+            <tr><th>Engine</th><th>Shape</th><th>Time</th><th>What the time was</th></tr>
+            <tr><td><b>PyIceberg</b></td><td>Local script or agent</td><td>~3 min</td>
+              <td>Virtual environment, install, point it at the catalog.</td></tr>
+            <tr><td><b>Trino</b></td><td>Self-hosted, local container</td><td>~8 min</td>
+              <td>Mostly a one-time image pull. Warm, about two minutes. No gotchas.</td></tr>
+            <tr><td><b>ClickHouse</b></td><td>Managed cloud warehouse</td><td>~12 min</td>
+              <td>Same region as the lake, vended credentials, no gotchas.</td></tr>
+            <tr><td><b>Dremio</b></td><td>Managed cloud engine</td><td>~35 min</td>
+              <td>First-run account setup plus a region mismatch. A repeat is minutes.</td></tr>
+          </table></div>
+        </div>
+      </div>
+    </div>
+
+    <div data-lens="bus">
+      <div class="subh">Why it matters commercially</div>
+      <ul class="reasons">
+        <li><b>Three engines agreeing on one set of files ends the lock-in objection in the room.</b> It is
+          interoperability a client can see rather than a claim on a slide.</li>
+        <li><b>The client is never forced to standardize on one AI stack,</b> which matters because the AI layer
+          is the part of the stack that turns over fastest.</li>
+        <li><b>Once it has been demonstrated on their own data, the lock-in question stops being theoretical.</b></li>
+      </ul>
+    </div>
+
+    <div data-lens="partner">
+      <div class="subh">For your practice</div>
+      <p class="muted" style="font-size:13.6px">Optionality you can bank on: meet the client on their stack, and
+        your delivery IP carries to the next engagement. Governed, agent-ready data opens new trusted-AI use
+        cases, which is more work on the platform they already run.</p>
+    </div>
+
+    <div class="acc" style="margin-top:18px">
+      <button class="acc-h">Watch out for <span class="badge" style="color:var(--warn)">2 traps</span><span class="ac">▼</span></button>
+      <div class="acc-b">
+        <div class="callout c-warn"><span class="ci">!</span><div><b>Region mismatch is the one that costs an
+          afternoon.</b> An engine in a different region from the lake fails in ways that do not obviously point
+          at geography, and it is billable traffic even once it works. Confirm the lake's region before attaching
+          anything.</div></div>
+        <div class="callout c-warn"><span class="ci">!</span><div><b>Validate with a real data read, never a row
+          count.</b> A count can be answered from table metadata without touching a data file, so it will pass
+          while the actual reads are broken. Select real rows and compare values against an engine you already
+          trust.</div></div>
+      </div>
+    </div>
+
+    <div class="acc">
+      <button class="acc-h">The gate in detail, and when this is the wrong call <span class="badge">evidence</span><span class="ac">▼</span></button>
+      <div class="acc-b">
+        <p>Row count, distinct key, aggregate, min and max, a ranked result with a deterministic tiebreak, and
+          zero null keys.</p>
+        <div class="callout c-ok"><span class="ci">✓</span><div><b>Satisfied by evidence, not by tooling.</b>
+          Any set of engines reading the same files satisfies this gate. Parity is a property of the storage,
+          not of any one engine.</div></div>
+        <p><b>When this is the wrong call.</b> Do not turn the cost comparison into an engine ranking. Agent-side
+          cost is uniformly small, and the differences between engines on the same query are mostly an artifact
+          of how each tool returns rows. Claiming one engine is inherently leaner is the fastest way to lose an
+          architect who has measured it.</p>
+      </div>
+    </div>
+
+    <div class="grid g2" style="margin-top:18px">
+      <div class="oneliner"><div class="subh">If you say one thing about this stage</div>
+        Same question, every engine you have attached, and the answers match, because they are all reading the
+        same files rather than each holding a copy.</div>
+      <div class="sellbox" data-lens="partner bus"><div class="subh">What this gate lets you sell</div>
+        The parity run itself, and it is the same run at the next client.</div>
+      <div class="sellbox" data-lens="tech"><div class="subh">What to verify</div>
+        Six checks, every attached engine, deterministic tiebreak on the ranked result. Compare values, not counts.</div>
+    </div>
+
+    <div class="stagefoot">
+      <span><button class="btn sm" data-go="context">← Context</button></span>
+      <span class="xs dim">Stage 5 of 6</span>
+      <span><button class="btn sm" data-go="activate">Next: Activate →</button></span>
+    </div>
+  </div>
+
+  <!-- ---------------- 06 ACTIVATE ---------------- -->
+  <div class="stagepane" data-pane="activate">
+    <div class="stagehead">
+      <span class="bignum">06</span>
+      <div>
+        <h3>Activate</h3>
+        <p class="oneline">The insight does not stop at a query. It reaches the system the business actually
+          works in.</p>
+      </div>
+    </div>
+
+    <div class="gatebar">
+      <div class="gl">The gate that closes this stage</div>
+      <div class="gt">The write-back lands what was intended, and can be undone.</div>
+    </div>
+
+    <div class="deps">
+      <div class="dep"><div class="subh">Needs</div>Something worth writing back, from Transform or Agent. This is
+        the stage that can be added last, and most often is.</div>
+      <div class="dep"><div class="subh">What depends on this</div>Nothing further, and that is the point: it
+        closes the loop. Without it the open lake is a parking lot, and an empty one.</div>
+    </div>
+
+    <div class="grid g3" style="margin-bottom:18px">
+      <div class="stat"><b>200+</b><span>destinations for governed data and decisions</span></div>
+      <div class="stat"><b>1</b><span>governed source behind both the person and the agent</span></div>
+      <div class="stat"><b style="font-size:17px">Reversible</b><span>the half of the gate that gets skipped</span></div>
+    </div>
+
+    <!-- SIM: write-back with undo -->
+    <div class="sim" style="margin-bottom:18px">
+      <div class="sim-h">
+        <div><div class="lab">Live simulator</div><h4>Send a decision, then undo it</h4></div>
+        <span class="spacer"></span>
+        <button class="btn sm btn-p" id="acSend">Send to Salesforce</button>
+        <button class="btn sm" id="acUndo" disabled>Exercise the undo</button>
+        <button class="btn sm" id="acReset">Reset</button>
+      </div>
+      <div class="sim-b">
+        <div class="grid g3" style="margin-bottom:13px">
+          <div class="stat"><b id="acSel" style="font-size:20px">10</b><span>records selected, deliberately, not mirrored</span></div>
+          <div class="stat"><b id="acLand" style="font-size:20px">0</b><span>records landed in the target system</span></div>
+          <div class="stat"><b id="acState" style="font-size:15px">Not sent</b><span>gate status</span></div>
+        </div>
+        <div class="log" id="acLog" style="max-height:210px"><span class="ph">Send the governed selection, then exercise the reversal.</span></div>
+      </div>
+      <div class="sim-f">Nothing that writes into a live system should pass on the first half alone. What reached
+        the target matches what was sent, and the reversal path has been exercised rather than designed.</div>
+    </div>
+
+    <div data-lens="tech">
+      <div class="subh">Why these choices</div>
+      <ul class="reasons">
+        <li><b>Write-back goes through the same controls as the rest of the movement.</b> Reading data wrong
+          produces a bad answer. Writing data wrong changes what a business does.</li>
+        <li><b>Send what you actually want acted on, when you want it acted on.</b> Activation is a deliberate
+          selection rather than a mirror of everything that moved. Destination systems charge per record and the
+          load lands on the system the business runs on, so what you send is a decision rather than a side
+          effect.</li>
+        <li><b>The consumer at the end can be a person or an agent.</b> Same governed data, same controls. One
+          triages and drafts the work, the other reads it.</li>
+      </ul>
+    </div>
+
+    <div data-lens="bus">
+      <div class="subh">Why it matters commercially</div>
+      <ul class="reasons">
+        <li><b>Most data projects end with good infrastructure and no changed behaviour.</b> Dashboards inform
+          people who then act manually. That is not data-driven, it is data-adjacent.</li>
+        <li><b>Activation is the outcome a client actually buys.</b> Not analytics: decisions and action in the
+          system where the work happens.</li>
+        <li><b>This is where an engagement becomes an annuity.</b> Activation and agent enablement are the
+          stickiest layer you can deliver on the foundation.</li>
+      </ul>
+    </div>
+
+    <div data-lens="partner">
+      <div class="subh">For your practice</div>
+      <p class="muted" style="font-size:13.6px">Activation and agent enablement are the highest-value, stickiest
+        layer you deliver on top of the foundation, and the point where a build engagement turns into managed
+        services.</p>
+    </div>
+
+    <div class="acc" style="margin-top:18px">
+      <button class="acc-h">The gate in detail, and when this is the wrong call <span class="badge">evidence</span><span class="ac">▼</span></button>
+      <div class="acc-b">
+        <div class="callout c-ok"><span class="ci">✓</span><div><b>Satisfied by evidence, not by tooling.</b>
+          Any write-back path whose reversal has been exercised satisfies this gate. The exercised undo is the
+          requirement; the integration that performs it is not.</div></div>
+        <p><b>When this is the wrong call.</b> Do not start here. Writing into a live business system changes what
+          the business does, so reversibility and approval have to be designed before the first write, not
+          retrofitted after the first incident.</p>
+        <p class="tiny dim">You will hear: <q>We built the dashboards and nothing changed.</q> That is the
+          sentence this stage answers.</p>
+      </div>
+    </div>
+
+    <div class="grid g2" style="margin-top:18px">
+      <div class="oneliner"><div class="subh">If you say one thing about this stage</div>
+        The insight does not stop at the query. It reaches the system the business already works in, from
+        whichever engine produced it.</div>
+      <div class="sellbox" data-lens="partner bus"><div class="subh">What this gate lets you sell</div>
+        A write-back the client has watched being undone, which is a different conversation from one they are
+        asked to trust.</div>
+      <div class="sellbox" data-lens="tech"><div class="subh">What to verify</div>
+        Reconcile what landed against what was sent, then run the reversal and reconcile again.</div>
+    </div>
+
+    <div class="stagefoot">
+      <span><button class="btn sm" data-go="agent">← Agent</button></span>
+      <span class="xs dim">Stage 6 of 6</span>
+      <span><button class="btn sm" data-goto="#ownership">Next: what ownership buys →</button></span>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= 07 OWNERSHIP ======================= -->
+<section class="sec" id="ownership">
+  <div class="eyebrow">07 · What ownership actually buys</div>
+  <h2 class="st">The data is your client's, and that pays continuously</h2>
+  <p class="lede">In a proprietary store, data is readable only by the compute that owns it. Every question has
+    to be asked through one vendor's engine, on that vendor's meter, at whatever the contract says next year.
+    Open formats in the client's own storage end that.</p>
+
+  <div class="grid g2" style="margin-bottom:18px">
+    <div class="card">
+      <div class="subh">What that is worth on an ordinary Tuesday</div>
+      <p class="tiny muted">The payoff most people miss is not the big migration; it is the small choices, every
+        week. An analytics engineer wants to check whether a model change does what they think. Today that means
+        running it on the warehouse and burning credits to find out. With the data in open formats, they point an
+        in-process engine at the same tables on a laptop and find out for free. Same data, same governed tables,
+        no cluster, no consumption.</p>
+      <p class="tiny muted">The same logic scales up. A workload that suits a different engine gets that engine.
+        A team that needs an ad-hoc query surface gets one without a licence conversation. None of that is a
+        migration; it is what having options looks like day to day.</p>
+    </div>
+    <div class="card">
+      <div class="subh">And when a bigger change does come up</div>
+      <p class="tiny muted">A contract comes up for renewal. An acquisition brings a second stack through the
+        door. A team needs an engine the current platform cannot give them. The question is always the same:
+        what would it actually cost to change? Most architectures cannot answer it. This one can, and the answer
+        has two halves.</p>
+      <div class="grid g2" style="margin-top:11px">
+        <div class="callout c-ok" style="display:block"><b>What is gone</b><br>
+          <span class="tiny">The data does not move. The raw layer already sits in open formats in the client's
+          own storage, so this is not a data platform migration. Nothing is exported, re-loaded or reconciled.</span></div>
+        <div class="callout c-warn" style="display:block"><b>What is left</b><br>
+          <span class="tiny">Re-pointing the transformation project and its SQL at a different engine. How much
+          that costs depends on how platform-specific the project was allowed to become.</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SIM: band calculator -->
+  <div class="sim" style="margin-bottom:18px">
+    <div class="sim-h">
+      <div><div class="lab">Live calculator</div><h4>Place a client in a band in about ten minutes</h4></div>
+      <span class="spacer"></span>
+      <button class="btn sm" id="bandReset">Clear</button>
+    </div>
+    <div class="sim-b">
+      <p class="tiny muted" style="margin-bottom:11px">Tick what is true of the project. A <b>decision</b> is a
+        distinct pattern somebody has to work out once; applying it across forty models is volume, and volume is
+        the part that automates.</p>
+      <div class="bandpick" id="bandPick"></div>
+      <div style="margin-top:14px" class="grid g2">
+        <div class="verdict">
+          <div class="vt">Band</div>
+          <div class="vv2" id="bandName">Low to medium</div>
+          <div class="tiny muted" id="bandDesc">Mostly ref() and source() driven, standard SQL transforms,
+            packages, tests, snapshots and exposures. Little platform-specific syntax.</div>
+          <hr class="rule" style="margin:13px 0">
+          <div class="grid g2" style="gap:9px">
+            <div class="stat"><b id="bandDec" style="font-size:19px">0</b><span>distinct decisions to work out</span></div>
+            <div class="stat"><b id="bandRun" style="font-size:19px">flag</b><span>what the migration took</span></div>
+          </div>
+        </div>
+        <div class="card" style="background:var(--panel2)">
+          <div class="subh">What was measured at this band</div>
+          <p class="tiny muted" id="bandMeas">One project with two targets, so the migration was a command-line
+            flag. Four of four models moved with no edits, 22.5 seconds for a full build, identical values on
+            both engines.</p>
+          <div class="callout c-ft" style="margin-top:11px"><span class="ci">i</span><div class="tiny"
+            id="bandAdvice">A project kept portable stays in this band. The band is decided years before anybody
+            opens a renewal.</div></div>
+        </div>
+      </div>
+      <div class="callout c-bad" style="margin-top:13px" id="bandNoDbt"><span class="ci">!</span><div>
+        <b>No dbt project means the bands do not apply.</b> Stored procedures, a third-party transformation tool,
+        notebooks, or SQL on a scheduler leave nothing portable to re-point and no test suite to verify a rewrite
+        against. That client is not choosing between bands; they are choosing whether to be in the band system at
+        all. Getting there is its own engagement with its own return, whether or not a platform change ever
+        happens.</div></div>
+    </div>
+    <div class="sim-f">Five migrations, 57 decisions, 19 models. Sixteen rewritten with no human edits, six
+      first-attempt failures, and values identical on eighteen of nineteen, measured 30 July 2026.</div>
+  </div>
+
+  <div class="grid g2">
+    <div class="card">
+      <div class="subh">What was measured</div>
+      <p class="tiny muted">Five dbt projects across pharma and retail, migrated Snowflake to Databricks and
+        Databricks to Snowflake: both directions at every band, nineteen models in total. One Fivetran-managed
+        lake held the raw layer throughout and was never rewritten; only the transformation project moved. Fusion
+        drove every run, with the Databricks side on a SQL warehouse rather than an all-purpose cluster. Source
+        tables of 750 rows and one derived fact of 6,000: enough to prove pattern coverage and merge behaviour,
+        and nothing at all about tuning at production scale.</p>
+    </div>
+    <div class="card">
+      <div class="subh">Where the measurement disagreed with the read</div>
+      <div class="callout c-bad" style="margin-bottom:10px"><span class="ci">!</span><div class="tiny">
+        <b>The tests are not what tells you a rewrite is correct.</b> A model was broken on purpose (one
+        aggregate rounded to a different place) and the run succeeded, its whole test suite passed, and the row
+        count matched. Only a value-level comparison against the engine being left caught it. A green run, a
+        green test suite and a matching row count are three layers of agreement that can all be wrong at once.</div></div>
+      <p class="tiny muted"><b>Two corrections.</b> Reading a project tells you what to decide; it does not tell
+        you what the target engine will refuse. Several of the top band's patterns only appeared once the migrated
+        code ran, so budget that band for a run and not only a read. And verification does not always end in
+        agreement: one model of nineteen cannot match, for reasons in the arithmetic rather than in the code. A
+        quantified, documented difference is a result, not a failure, and it is worth knowing before promising
+        bit-exact parity.</p>
+    </div>
+  </div>
+
+  <div class="acc" style="margin-top:16px">
+    <button class="acc-h">Check this first, and what always changes <span class="badge">checklist</span><span class="ac">▼</span></button>
+    <div class="acc-b">
+      <div class="callout c-warn"><span class="ci">!</span><div><b>Incremental behaviour can change with the
+        runtime, not just the engine.</b> The same project can run incrementally on one runtime and silently fall
+        back to full table materialisation on another. If the modelled layers are incremental-heavy, that is the
+        first thing to establish. It moves a client between bands on its own, and it is invisible until the bill
+        arrives.</div></div>
+      <div class="subh">What always changes</div>
+      <ul class="tiny muted" style="padding-left:1.1em">
+        <li>Re-point the project at the new adapter and target.</li>
+        <li>Give the engine access to the lake tables and catalog.</li>
+        <li>Update source, database and schema naming for the target catalog.</li>
+        <li>Refactor platform-specific SQL and macros. This is the band-defining work.</li>
+        <li>Revisit incremental models and materialisations.</li>
+        <li>Re-test row counts, tests, performance and downstream reporting before anyone trusts a number again.</li>
+      </ul>
+      <div class="callout c-ft"><span class="ci">i</span><div><b>The band no longer sets the timeline the way it
+        used to.</b> A dialect rewrite is high-volume, low-judgement work, the kind AI tooling does well, and dbt
+        is what makes letting it run safe: the compiled graph and a value-level comparison against the engine you
+        are leaving say whether each rewritten model is right. You can automate the rewrite because you can
+        verify it, and that is the general rule rather than a fact about migrations. How much of any delivery can
+        run unattended is set by how much of it you can gate.</div></div>
+    </div>
+  </div>
+
+  <div class="grid g2" style="margin-top:16px">
+    <div class="sellbox" data-lens="partner"><div class="subh">For your practice</div>
+      Two engagements live here, and the small one comes first. Helping a client actually use their optionality
+      (the right engine per workload, a free one for development) is delivery work you can start immediately. The
+      larger one arrives at renewal: vendor management, procurement and supply chain are measured on leverage,
+      and they are almost never consulted on the architecture decision that creates it. Walk in with a priced
+      answer to "what would it cost to move" and the client has a negotiating position they did not have before,
+      on a stack you also deliver. "Storage separated from compute" is already their language. The point is not
+      to move the client; it is that a client with options negotiates differently from one without them.</div>
+    <div class="oneliner" data-lens="bus tech"><div class="subh">When this is the wrong call</div>
+      Portability is insurance, and insurance is not the argument. A client running one engine, with no second
+      platform in view and no renewal in front of them, gets far more from what this changes in an ordinary week
+      than from a move they may never make. Lead with the Tuesday, not the migration.</div>
+    <div class="oneliner" data-lens="partner"><div class="subh">Lead with the Tuesday</div>
+      A client running one engine, with no renewal in front of them, gets far more from the right engine per job
+      and a free one to develop against than from a move they may never make.</div>
+  </div>
+</section>
+
+<!-- ======================= 08 INDUSTRIES ======================= -->
+<section class="sec" id="industries">
+  <div class="eyebrow">08 · Industry examples</div>
+  <h2 class="st">The same pattern, five different questions</h2>
+  <p class="lede">Each of these is one governed metric, the ungoverned answer an agent reaches for instead, and
+    what the gap costs. The pattern is identical; only the domain changes. Pick the one in the room.</p>
+
+  <div class="seg" id="indNav" style="margin-bottom:16px;flex-wrap:wrap"></div>
+  <div id="indBody"></div>
+
+  <div class="callout c-warn" style="margin-top:16px"><span class="ci">!</span><div>
+    The weightings and figures are worked examples on sample data, chosen to show the mechanism rather than to
+    benchmark it. A client's definition is theirs to set, and the size of the gap is whatever their own data
+    says. What holds regardless of the numbers is the mechanism: the agent resolves the definition before it
+    queries, or it sorts by whatever column sounds right.</div></div>
+</section>
+
+<!-- ======================= 09 MATURITY ======================= -->
+<section class="sec" id="maturity">
+  <div class="eyebrow">09 · Where a client is today</div>
+  <h2 class="st">Five stages, and the next one to sell</h2>
+  <p class="lede">A map to read, not a form to fill in. The framework carries no assessment and scores nothing.
+    You do not need every client at stage 4; you need to know which stage they are in and sell the next one.</p>
+
+  <div class="stageladder" id="matLadder" style="margin-bottom:16px"></div>
+  <div id="matBody"></div>
+
+  <div class="callout c-ft" style="margin-top:16px"><span class="ci">i</span><div>
+    <b>The band shifts between stage 2 and stage 3,</b> from trusted data to trusted AI and agents. That is the
+    jump most organizations are standing in front of right now, and it is the one the open, portable foundation
+    exists to make.</div></div>
+
+  <div class="grid g3" style="margin-top:16px" data-lens="partner">
+    <div class="card tight"><div class="subh">Reframe, do not rebuild</div>
+      <p class="tiny muted">Teams already delivering Fivetran, dbt and a warehouse are already delivering most of
+        this. What changes is the narrative and the order, not the skill set.</p></div>
+    <div class="card tight"><div class="subh">Point the gates at finished work</div>
+      <p class="tiny muted">Every client you have built for is running something that is drifting right now:
+        sources change, schemas evolve, platforms release, and the person who understood the original design has
+        moved on. Re-running a gate against a finished engagement finds that drift, and the finding is the
+        conversation. No new entrant can do this; it needs the delivery history.</p></div>
+    <div class="card tight"><div class="subh">Three ways this goes wrong</div>
+      <p class="tiny muted">Positioning the open lake as replacing the client's platform (it damages the
+        relationship with the platform vendor, so present both paths). Pushing open formats at a client who is
+        not ready (qualify first). And treating it as a two-party conversation when the platform vendor should be
+        at the table: the message is about expanding the data footprint, not competing for it.</p></div>
+  </div>
+</section>
+
+<!-- ======================= 10 SCORECARD ======================= -->
+<section class="sec" id="scorecard">
+  <div class="eyebrow">10 · Gate scorecard</div>
+  <h2 class="st">Six gates, checked against a real client</h2>
+  <p class="lede">Tick a gate only when you could produce the evidence today. Your answers are kept in this
+    browser so you can come back to them. A gate is not a feeling; it reconciles or it does not.</p>
+
+  <div class="card" style="margin-bottom:16px">
+    <div class="scorehead">
+      <div class="ring">
+        <svg width="112" height="112" viewBox="0 0 112 112">
+          <circle cx="56" cy="56" r="48" fill="none" stroke="var(--panel3)" stroke-width="10"></circle>
+          <circle id="ringArc" cx="56" cy="56" r="48" fill="none" stroke="url(#rg)" stroke-width="10"
+            stroke-linecap="round" stroke-dasharray="301.6" stroke-dashoffset="301.6"></circle>
+          <defs><linearGradient id="rg" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#4D83F7"></stop><stop offset="1" stop-color="#E8552E"></stop>
+          </linearGradient></defs>
+        </svg>
+        <div class="rv" id="ringVal">0</div>
+      </div>
+      <div style="flex:1;min-width:220px">
+        <div class="subh">Reading</div>
+        <div id="scoreRead" style="font-size:16.4px;font-weight:660;line-height:1.45">Nothing closed yet. Start at
+          Move: its gate reconciles against the source, so it is the easiest one to prove.</div>
+        <div class="tiny dim" style="margin-top:8px" id="scoreNext"></div>
+      </div>
+      <button class="btn sm" id="scoreReset">Clear</button>
+    </div>
+  </div>
+
+  <div class="gates" id="gateList"></div>
+</section>
+
+<!-- ======================= 11 OBJECTIONS ======================= -->
+<section class="sec" id="objections">
+  <div class="eyebrow">11 · When they push back</div>
+  <h2 class="st">The objections you will actually get</h2>
+  <p class="lede">Ten sentences you will hear in the room, and the answer that holds. None of them are won by
+    asserting harder.</p>
+  <div id="objList"></div>
+</section>
+
+<!-- ======================= 12 REFERENCE ======================= -->
+<section class="sec" id="reference">
+  <div class="eyebrow">12 · Product reference</div>
+  <h2 class="st">What these products are</h2>
+  <p class="lede">The pieces named across this guide, in one place, with what each actually does.</p>
+
+  <div class="filterbar">
+    <div class="searchbox">
+      <span class="dim">⌕</span>
+      <input id="prodSearch" placeholder="Search products and formats" autocomplete="off">
+    </div>
+    <div class="seg sm" id="prodFilter">
+      <button data-v="all" class="on">All</button>
+      <button data-v="ft">Fivetran</button>
+      <button data-v="db">dbt Labs</button>
+      <button data-v="open">Open standards</button>
+    </div>
+  </div>
+  <div class="grid g3" id="prodList" style="gap:11px"></div>
+
+  <div class="card" style="margin-top:20px">
+    <div class="subh">Also here</div>
+    <p class="tiny muted">The architecture diagram at the top of this page doubles as navigation, and it prints
+      on its own page. Use <span class="kbd">J</span> and <span class="kbd">K</span> to move between sections,
+      <span class="kbd">←</span> and <span class="kbd">→</span> to move between walkthrough stages, and
+      <span class="kbd">T</span> to switch theme.</p>
+  </div>
+</section>
+
+</div><!-- /wrap -->
+
+<footer class="foot">
+  <div class="wrap">
+    <div>
+      <div class="brandmark" style="margin-bottom:10px">
+        <span class="bm-sq"><i></i><i></i></span>
+        <span><span class="bm-t" style="display:block">Fivetran + dbt Labs</span>
+        <span class="bm-s">open data infrastructure</span></span>
+      </div>
+      <p class="fl">Growth built on trust: the foundation clients keep investing in. Gates are satisfied by
+        evidence, not by tooling. Any stack that produces the same evidence satisfies the same gate.</p>
+    </div>
+    <div class="fl">
+      <div class="subh">Currency</div>
+      <p>Migration figures measured 30 July 2026 across five dbt projects. Engine attach times measured on four
+        of ten validated engines. Worked examples use sample data chosen to show the mechanism, not to
+        benchmark it. Rates and tiers are a conversation with Fivetran, not something to quote from an
+        architecture page.</p>
+    </div>
+  </div>
+</footer>
+
+</main>
+</div><!-- /shell -->
+<script>
+/* ================================================================
+   Fivetran + dbt interactive guide
+   No dependencies. All state in localStorage + the DOM.
+   ================================================================ */
+const $  = (s,r=document)=>r.querySelector(s);
+const $$ = (s,r=document)=>[...r.querySelectorAll(s)];
+const el = (t,c,h)=>{const n=document.createElement(t); if(c)n.className=c; if(h!=null)n.innerHTML=h; return n;};
+const store = {
+  get(k,d){ try{const v=localStorage.getItem('ftdbt:'+k); return v===null?d:JSON.parse(v);}catch(e){return d;} },
+  set(k,v){ try{localStorage.setItem('ftdbt:'+k,JSON.stringify(v));}catch(e){} }
+};
+const sleep = ms => new Promise(r=>setTimeout(r,ms));
+let RUN = 0; // cancels in-flight simulations when a new one starts
+
+/* ---------------------------------------------------------------- lens */
+function setLens(v){
+  document.documentElement.dataset.view = v;
+  $$('[data-setlens]').forEach(b=>b.classList.toggle('on', b.dataset.setlens===v));
+  store.set('lens', v);
+}
+$$('[data-setlens]').forEach(b=>b.addEventListener('click',()=>setLens(b.dataset.setlens)));
+setLens(store.get('lens','bus'));
+
+/* ---------------------------------------------------------------- theme */
+function setTheme(t){ document.documentElement.dataset.theme=t; store.set('theme',t); }
+function flipTheme(){ setTheme(document.documentElement.dataset.theme==='dark'?'light':'dark'); }
+$('#themeBtn').addEventListener('click',flipTheme);
+$('#themeBtn2').addEventListener('click',flipTheme);
+setTheme(store.get('theme','dark'));
+
+/* ---------------------------------------------------------------- nav + progress */
+const SECTIONS = [
+  ['start','Start here'],['architecture','The architecture'],['breaks','What breaks without it'],
+  ['delivers','What it delivers'],['pillars','The six pillars'],['walkthrough','The walkthrough'],
+  ['ownership','What ownership buys'],['industries','Industry examples'],['maturity','Where a client is today'],
+  ['scorecard','Gate scorecard'],['objections','Objection handling'],['reference','Product reference']
+];
+const crumb = $('#crumb'), prog = $('#prog');
+function onScroll(){
+  const y = window.scrollY + 120;
+  let cur = SECTIONS[0];
+  for(const s of SECTIONS){ const n=document.getElementById(s[0]); if(n && n.offsetTop<=y) cur=s; }
+  crumb.innerHTML = '<b>'+cur[1]+'</b>';
+  $$('#railnav .nav-a').forEach(a=>a.classList.toggle('on', a.getAttribute('href')==='#'+cur[0]));
+  const h = document.body.scrollHeight - innerHeight;
+  prog.style.width = (h>0 ? Math.min(100, (scrollY/h)*100) : 0) + '%';
+}
+addEventListener('scroll', onScroll, {passive:true});
+addEventListener('resize', onScroll);
+
+/* ---------------------------------------------------------------- accordions (event-delegated) */
+document.addEventListener('click', e=>{
+  const h = e.target.closest('.acc-h');
+  if(h) h.parentElement.classList.toggle('open');
+  const g = e.target.closest('[data-goto]');
+  if(g){ const t=document.querySelector(g.dataset.goto); if(t) t.scrollIntoView({behavior:'smooth'}); }
+});
+
+/* ================================================================
+   05 · PILLARS
+   ================================================================ */
+const PILLARS = [
+  { t:'Flexible storage and compute', s:'any cloud, any compute, any model', tags:['trust','scale','cost'],
+    why:'The client is not committing to one vendor’s roadmap. Whatever engine or AI platform they run today, and whatever replaces it, reads the same data, so a decision made this year does not decide the next one.',
+    how:'The Managed Data Lake Service writes once to open formats in the client’s own data lake, so a new engine, or an agent on a different AI platform, reads the same governed data with no copy and no rebuild.',
+    proof:'Ten engines across five catalogs and three open formats have been run against the same files, returning the same rows every time. Ten is what has been validated, not what is permitted: the format is the interface, so the list is open-ended.',
+    practice:'Optionality you can bank on. Meet the client on the stack they already run, and on whichever AI platform they pick next. You never rebuild your tooling per platform: their AI stack will turn over, the foundation under it does not have to.',
+    stage:'manage' },
+  { t:'Reliable data movement', s:'every source, including the difficult ones', tags:['trust','scale'],
+    why:'Sooner or later a client names a source that is not in the connector library: an in-house application, a shop-floor system, a regional vendor. That is usually where a programme stalls or turns into a custom build, and it does not have to be either.',
+    how:'Every system that matters lands completely and stays current, from the connector library, or built with the Connector SDK when the library does not cover it.',
+    proof:'Fivetran designs, builds, operates and maintains the extract and load. Sources change constantly and the schema keeps up on its own: a new column or table appears downstream, and a column whose type widens is promoted to one that accepts both the old and new values. Loading is idempotent, so a re-run is always safe. Nobody on the client’s team maintains any of it.',
+    practice:'One predictable ingestion motion across the connector library and the custom sources you build. The way a source is landed, monitored and handed over is the same every time, so your team gets faster across every client rather than deep on one.',
+    stage:'move' },
+  { t:'Rich metadata and context', s:'traceable, trusted information for agents', tags:['trust'],
+    why:'A number a client cannot explain is a number they cannot act on. Definitions, lineage and tests are what let someone senior ask why an agent said that, and get an answer that holds.',
+    how:'Business logic, tests, documentation and lineage live in the dbt project, versioned like code and compiled rather than drawn. dbt Catalog and the Semantic Layer are what make them findable and queryable by every consumer, including an agent.',
+    proof:'A metric defined once in dbt, resolved by the agent before it writes a query. Governed against ungoverned: two of ten survive.',
+    practice:'Governed definitions are what make an agent’s answers defensible, and they are what your AI tooling delivers rather than what a team documents. The definitions belong to each client; the skill that resolves, tests and republishes them is yours.',
+    stage:'context' },
+  { t:'Scalable infrastructure', s:'for the scale of agents', tags:['scale','cost'],
+    why:'The second use case should not cost what the first did. Cost tracks what actually changes rather than how many consumers are attached, so adding the next one is a decision about value and not about budget.',
+    how:'Work stays proportional to change: Fivetran moves only what changed, dbt rebuilds only what changed, and the lake runs no compute of its own. Each consumer brings and pays for its own.',
+    proof:'The same question answered by six engines side by side, with agent tokens and engine compute costed together, so a workload moves to whichever engine fits it without moving the data.',
+    practice:'The lake carries no standing cost per consumer, so each new use case is a self-contained piece of work on a foundation that is already paid for: something you can scope, gate and prove on its own rather than another infrastructure project.',
+    stage:'transform' },
+  { t:'Customer-owned data', s:'no vendor lock-in', tags:['trust','cost'],
+    why:'The data is an asset the client holds rather than one they rent. Storage, catalog and credentials sit where they chose to put them, which means the terms of any future conversation are theirs to set.',
+    how:'The data lake is the client’s own cloud storage, in open formats. Custody of storage, catalog and credentials is a decision they made on purpose, and one they can price.',
+    proof:'The table files sit in the client’s own cloud storage and stay there. Fivetran writes and registers them; it does not hold them.',
+    practice:'No lock-in is what the client keeps; one delivery pattern is what you keep. You standardize once and it holds on whatever they run, and when their stack changes you extend the architecture instead of rebuilding it.',
+    stage:'manage' },
+  { t:'Future-proofed infrastructure', s:'new capability without a re-platform', tags:['scale'],
+    why:'New capability arrives constantly and only some of it will matter. The ones worth keeping should plug in and deliver, not trigger another foundation project before anyone sees a result.',
+    how:'When an outcome needs a different engine, model or tool, it plugs into the same data, so the work starts on the business problem instead of on infrastructure.',
+    proof:'Attach an engine nobody planned for, live, and it agrees to the row: minutes, and no data moved.',
+    practice:'Speed to impact, because there is no re-platform in front of it. When a client wants something new you plug it in and deliver: the architecture absorbs it instead of needing to be redone first.',
+    stage:'agent' }
+];
+const TAGNAME = {trust:'Trust',scale:'Scale',cost:'Cost'};
+function renderPillars(){
+  const list = $('#pillarList'); list.innerHTML='';
+  PILLARS.forEach((p,i)=>{
+    const node = el('div','pillar');
+    node.dataset.tags = p.tags.join(' ');
+    const chips = ['trust','scale','cost'].map(t=>
+      `<span class="chip ${t} ${p.tags.includes(t)?'':'off'}">${TAGNAME[t]}</span>`).join('');
+    node.innerHTML = `
+      <button class="p-head">
+        <span class="p-num">0${i+1}</span>
+        <span class="p-mid">
+          <span class="p-t">${p.t}</span>
+          <span class="p-s">${p.s}</span>
+          <span class="p-chips">${chips}</span>
+        </span>
+        <span class="p-caret">▼</span>
+      </button>
+      <div class="p-body">
+        <div class="p-grid">
+          <div><div class="subh">Why a client should care</div><p class="muted tiny">${p.why}</p></div>
+          <div><div class="subh">How it is delivered</div><p class="muted tiny">${p.how}</p></div>
+        </div>
+        <div class="proof" style="margin-top:13px">
+          <div class="subh">Proof point</div><p class="muted tiny">${p.proof}</p>
+        </div>
+        <div class="sellbox" style="margin-top:11px" data-lens="partner bus">
+          <div class="subh">For your practice</div><span class="tiny">${p.practice}</span>
+        </div>
+        <div style="margin-top:12px"><button class="btn sm" data-go="${p.stage}">See the moment in the walkthrough →</button></div>
+      </div>`;
+    node.querySelector('.p-head').addEventListener('click',()=>node.classList.toggle('open'));
+    list.appendChild(node);
+  });
+}
+renderPillars();
+$$('#pillarFilter button').forEach(b=>b.addEventListener('click',()=>{
+  $$('#pillarFilter button').forEach(x=>x.classList.toggle('on',x===b));
+  const f=b.dataset.f;
+  $$('#pillarList .pillar').forEach(p=>
+    p.classList.toggle('dimmed', f!=='all' && !p.dataset.tags.split(' ').includes(f)));
+}));
+$('#pillarAll').addEventListener('click',e=>{
+  const open = $$('#pillarList .pillar').some(p=>!p.classList.contains('open'));
+  $$('#pillarList .pillar').forEach(p=>p.classList.toggle('open',open));
+  e.target.textContent = open?'Collapse all':'Expand all';
+});
+
+/* ================================================================
+   06 · WALKTHROUGH stage switching
+   ================================================================ */
+const STAGES = ['move','manage','transform','context','agent','activate'];
+function goStage(id,scroll=true){
+  if(!STAGES.includes(id)) return;
+  RUN++;                                        // cancel any running simulation
+  $$('.snb').forEach(b=>b.classList.toggle('on', b.dataset.stage===id));
+  $$('.stagepane').forEach(p=>p.classList.toggle('on', p.dataset.pane===id));
+  $$('#archRow .stagebtn').forEach(b=>b.classList.toggle('on', b.dataset.go===id));
+  if(scroll) $('#walkthrough').scrollIntoView({behavior:'smooth'});
+  store.set('stage', id);
+}
+$$('.snb').forEach(b=>b.addEventListener('click',()=>goStage(b.dataset.stage)));
+document.addEventListener('click',e=>{
+  const t = e.target.closest('[data-go]');
+  if(!t) return;
+  if(t.dataset.go==='ownership'){ $('#ownership').scrollIntoView({behavior:'smooth'}); return; }
+  goStage(t.dataset.go);
+});
+
+/* ================================================================
+   SIM 01 · Move, schema drift
+   ================================================================ */
+const driftBad=$('#driftBad'), driftGood=$('#driftGood');
+let driftHours={bad:0,good:0};
+function logLine(box,txt,cls='',t){
+  if(box.querySelector('.ph')) box.innerHTML='';
+  const l = el('div','l');
+  l.innerHTML = `<span class="t">${t||new Date().toLocaleTimeString('en-GB',{hour12:false})}</span><span class="${cls}">${txt}</span>`;
+  box.appendChild(l); box.scrollTop = box.scrollHeight;
+}
+function driftMeters(){
+  $('#driftH').textContent = driftHours.bad + ' h';
+  $('#driftM').textContent = driftHours.good + ' h';
+  $('#driftHB').style.width = Math.min(100, driftHours.bad*2.2)+'%';
+  $('#driftMB').style.width = Math.min(100, driftHours.good*2.2)+'%';
+}
+const DRIFT = {
+  col:{ bad:[['raw.orders: unexpected column loyalty_tier','wn'],
+             ['INSERT failed: column count mismatch (14 vs 13)','er'],
+             ['downstream models skipped: 6','er'],
+             ['ticket opened, an engineer edits the load script','wn']],
+        good:[['raw.orders: new column loyalty_tier detected','wn'],
+              ['column added to destination, backfilled','ok'],
+              ['sync completed, 0 rows lost','ok'],
+              ['schema-change record updated for the gate','ok']], h:[6,0] },
+  type:{ bad:[['raw.orders.order_total widened: INT → DECIMAL(15,2)','wn'],
+              ['silent truncation: 1,208 values rounded','er'],
+              ['nobody notices until finance reconciles','er'],
+              ['root cause hunt across three scripts','wn']],
+         good:[['raw.orders.order_total widened: INT → DECIMAL(15,2)','wn'],
+               ['type promoted to accept both old and new values','ok'],
+               ['0 values lost, 0 truncated','ok'],
+               ['promotion on the schema-change record','ok']], h:[9,0] },
+  fail:{ bad:[['connection dropped mid-load at row 412,880','er'],
+              ['partial load committed; no checkpoint to resume from','er'],
+              ['truncate and reload the whole table: 4 h 20 m','wn'],
+              ['duplicate rows found the next morning','er']],
+         good:[['connection dropped mid-load at row 412,880','er'],
+               ['sync retried itself from the last checkpoint','ok'],
+               ['load is idempotent, so the re-run is safe','ok'],
+               ['row parity reconciles against the source','ok']], h:[5,0] }
+};
+$$('[data-drift]').forEach(b=>b.addEventListener('click',async()=>{
+  const k=b.dataset.drift;
+  if(k==='reset'){ driftBad.innerHTML='<span class="ph">Fire an event above.</span>';
+    driftGood.innerHTML='<span class="ph">Fire an event above.</span>';
+    driftHours={bad:0,good:0}; driftMeters(); return; }
+  const d=DRIFT[k], my=++RUN;
+  for(let i=0;i<d.bad.length;i++){
+    if(my!==RUN) return;
+    logLine(driftBad, d.bad[i][0], d.bad[i][1]);
+    logLine(driftGood, d.good[i][0], d.good[i][1]);
+    await sleep(430);
+  }
+  driftHours.bad += d.h[0]; driftMeters();
+}));
+
+/* ================================================================
+   SIM 02 · Manage, one write, every layer
+   ================================================================ */
+const MG_ENGINES = [
+  ['Databricks','Delta log','Unity Catalog'],
+  ['Snowflake','Iceberg metadata','Polaris'],
+  ['Athena','Iceberg metadata','Glue'],
+  ['BigQuery','Iceberg metadata','BigLake'],
+  ['DuckDB','Iceberg metadata','Polaris'],
+  ['Fabric Warehouse','Parquet directly','OneLake']
+];
+const MG_TRUTH = ['412,880','4,118,306.42','2026-08-13'];
+function mgReset(){
+  const t=$('#mgTable');
+  t.innerHTML = '<tr><th>Engine</th><th>Reads</th><th>Catalog</th><th>Row count</th><th>Sum(order_total)</th><th>Max(order_date)</th><th>Result</th></tr>';
+  MG_ENGINES.forEach(e=>{
+    const r=el('tr'); r.innerHTML=`<td><b>${e[0]}</b></td><td>${e[1]}</td><td>${e[2]}</td>
+      <td class="mono dim">–</td><td class="mono dim">–</td><td class="mono dim">–</td><td class="dim">waiting</td>`;
+    t.appendChild(r);
+  });
+  $('#mgLog').innerHTML='<span class="ph">Run the parity query to read the same files through every layer.</span>';
+}
+mgReset();
+$('#mgReset').addEventListener('click',mgReset);
+$('#mgRun').addEventListener('click',async()=>{
+  const my=++RUN; mgReset();
+  const log=$('#mgLog'), rows=$$('#mgTable tr').slice(1);
+  logLine(log,'one write: s3://acme-lake/fivetran/orders/ (Parquet)','em');
+  await sleep(320); if(my!==RUN) return;
+  logLine(log,'select count(*), sum(order_total), max(order_date) from orders');
+  for(let i=0;i<rows.length;i++){
+    await sleep(430); if(my!==RUN) return;
+    const cells=rows[i].children;
+    MG_TRUTH.forEach((v,j)=>{cells[3+j].textContent=v; cells[3+j].className='mono';});
+    cells[6].innerHTML='<span style="color:var(--ok);font-weight:700">identical</span>';
+    logLine(log,`${MG_ENGINES[i][0]} via ${MG_ENGINES[i][1]}: ${MG_TRUTH[0]} rows, values match`,'ok');
+  }
+  await sleep(320); if(my!==RUN) return;
+  logLine(log,'6 engines · 3 formats · 5 catalogs · 1 write · 0 copies','em');
+  logLine(log,'gate: same rows through every metadata layer: PASS','ok');
+  await sleep(280); if(my!==RUN) return;
+  logLine(log,'note: table maintenance runs automatically and is deliberately not in this gate','wn');
+});
+
+/* ================================================================
+   SIM 03 · Transform, blast radius + dbt State
+   ================================================================ */
+const DAG = [
+  {id:'raw.orders',      lvl:0, src:true,  deps:[]},
+  {id:'raw.customers',   lvl:0, src:true,  deps:[]},
+  {id:'raw.products',    lvl:0, src:true,  deps:[]},
+  {id:'stg_orders',      lvl:1, deps:['raw.orders']},
+  {id:'stg_customers',   lvl:1, deps:['raw.customers']},
+  {id:'stg_products',    lvl:1, deps:['raw.products']},
+  {id:'int_enriched_orders', lvl:2, deps:['stg_orders','stg_products']},
+  {id:'int_customer_geo',    lvl:2, deps:['stg_customers']},
+  {id:'fct_orders',      lvl:3, deps:['int_enriched_orders','int_customer_geo']},
+  {id:'dim_customers',   lvl:3, deps:['int_customer_geo']},
+  {id:'metric_revenue',  lvl:4, deps:['fct_orders']}
+];
+const MODELS = DAG.filter(n=>!n.src);
+function drawDag(){
+  const wrap=$('#stDag'); wrap.innerHTML='';
+  for(let lvl=0; lvl<=4; lvl++){
+    const col = el('div','dagcol');
+    DAG.filter(n=>n.lvl===lvl).forEach(n=>{
+      const node = el('div','node'+(n.src?' src':''));
+      node.dataset.id = n.id;
+      node.innerHTML = `<span class="pulse"></span><span class="nl">${n.src?'source':'model'}</span>${n.id}`;
+      col.appendChild(node);
+    });
+    wrap.appendChild(col);
+    if(lvl<4) wrap.appendChild(el('span','chev','▶'));
+  }
+}
+drawDag();
+let stMode='format';
+$$('#stMode button').forEach(b=>b.addEventListener('click',()=>{
+  $$('#stMode button').forEach(x=>x.classList.toggle('on',x===b)); stMode=b.dataset.m;
+}));
+function downstream(id){
+  const out=new Set(), walk=n=>DAG.filter(m=>m.deps.includes(n)).forEach(m=>{if(!out.has(m.id)){out.add(m.id);walk(m.id);}});
+  walk(id); return out;
+}
+$('#stRun').addEventListener('click',async()=>{
+  const my=++RUN, bad=$('#stBad'), good=$('#stGood');
+  bad.innerHTML=''; good.innerHTML='';
+  $$('#stDag .node').forEach(n=>n.className='node'+(DAG.find(d=>d.id===n.dataset.id).src?' src':''));
+  const total = MODELS.length;
+  let changed, goodSet, headline;
+
+  if(stMode==='format'){
+    changed='int_enriched_orders';
+    goodSet=new Set(); headline='reformat: whitespace and a renamed alias only';
+  } else if(stMode==='logic'){
+    changed='int_enriched_orders';
+    goodSet=new Set([changed,...downstream(changed)]); headline='logic change: round(sum(order_total), 2)';
+  } else {
+    changed=null;
+    goodSet=new Set(); headline='no upstream source moved since the last successful run';
+  }
+
+  logLine(bad, headline, 'em'); logLine(good, headline, 'em');
+  await sleep(340); if(my!==RUN) return;
+  if(changed){ const n=$(`#stDag .node[data-id="${changed}"]`); if(n) n.classList.add('changed'); }
+
+  logLine(good, 'dbt State: parsing SQL semantically, not diffing files');
+  await sleep(300); if(my!==RUN) return;
+  if(stMode==='format') logLine(good,'no semantic change detected in int_enriched_orders','ok');
+  if(stMode==='logic')  logLine(good,'semantic change in int_enriched_orders','wn');
+  if(stMode==='stale')  logLine(good,'source freshness: all sources unchanged','ok');
+  await sleep(260); if(my!==RUN) return;
+  if(stMode==='logic'){
+    logLine(good,`blast radius before the run: ${goodSet.size-1} downstream models`,'wn');
+    [...goodSet].filter(x=>x!==changed).forEach(x=>logLine(good,'  → '+x,'wn'));
+    await sleep(320); if(my!==RUN) return;
+  }
+
+  // full rebuild
+  for(let i=0;i<MODELS.length;i++){
+    if(my!==RUN) return;
+    logLine(bad, `${i+1} of ${total} OK created ${MODELS[i].id}`, 'er');
+    await sleep(150);
+  }
+  logLine(bad, `rebuilt ${total} of ${total} models`, 'er');
+  logLine(bad, `${total - goodSet.size} rebuilt with nothing that changed`, 'er');
+
+  // state run
+  let k=0;
+  for(const m of MODELS){
+    if(my!==RUN) return;
+    const n=$(`#stDag .node[data-id="${m.id}"]`);
+    if(goodSet.has(m.id)){ k++; if(n){n.classList.remove('changed');n.classList.add('rebuild');}
+      logLine(good, `${k} of ${goodSet.size} OK created ${m.id}`, 'ok'); await sleep(170); }
+    else { if(n) n.classList.add('skip'); }
+  }
+  if(goodSet.size===0) logLine(good,'nothing to do: 0 models rebuilt','ok');
+  logLine(good, `rebuilt ${goodSet.size}, reused ${total-goodSet.size}`, 'em');
+
+  $('#stBadN').textContent = `${total} / ${total}`;
+  $('#stGoodN').textContent = `${goodSet.size} / ${total}`;
+  $('#stBadB').style.width='100%';
+  $('#stGoodB').style.width = (goodSet.size/total*100)+'%';
+  $('#stSave').textContent = Math.round((1-goodSet.size/total)*100)+'%';
+});
+
+/* ================================================================
+   SIM 04 · Context, governed vs ungoverned
+   Verified dataset: max ltv 9999, max freq 26, max sat 0.99.
+   score = 0.4*ltv/max + 0.3*freq/max + 0.3*sat/max
+   ================================================================ */
+const CUST = [["Northwind Retail",9999,4,0.60],["Halcyon Provisions",9400,26,0.99],["Marlow Market",9350,2,0.41],["Quarry Goods",9200,3,0.48],["Cobalt Trading",9050,20,0.92],["Sable Living",8900,1,0.37],["Thistle Foods",8750,4,0.44],["Granite Supply",8600,2,0.52],["Ivory Lane Home",8450,3,0.39],["Kilnwood Tools",8300,1,0.46],["Cedar Lane Foods",7800,24,0.96],["Vertex Grocers",7350,25,0.94],["Orchard & Vine",6900,23,0.97],["Lumen Outdoor",6200,23,0.95],["Bright Cellars",5800,22,0.98],["Meridian Living",5400,22,0.93],["Atlas Sportswear",4900,21,0.96],["Juniper Provisions",4500,24,0.91],["Harbour & Co",1874,5,0.53],["Stellar Home",3373,16,0.67],["Kestrel Supply",1168,1,0.83],["Ironwood Tools",2821,9,0.63],["Solace Beauty",1685,16,0.62],["Tidal Apparel",3151,16,0.54],["Junction Books",1516,8,0.68],["Ember Kitchen",3042,13,0.74],["Pinegate Trading",3650,3,0.41],["Verity Goods",3321,2,0.49],["Bramble Foods",1027,9,0.58],["Foxglove Beauty",3844,13,0.72],["Copperfield Tools",2648,13,0.73],["Nimbus Supply",3263,15,0.86],["Larkspur Living",1449,12,0.37],["Alder Market",1456,16,0.44],["Beacon Outdoor",3652,14,0.76],["Driftwood Home",2133,14,0.60],["Elm Row Books",2480,12,0.62],["Fairweather Foods",2569,8,0.83],["Hollow Oak Goods",3693,1,0.80],["Lantern Provisions",3381,6,0.71]]
+  .map(([n,ltv,freq,sat])=>({n,ltv,freq,sat}));
+(function(){
+  const ml=Math.max(...CUST.map(c=>c.ltv)), mf=Math.max(...CUST.map(c=>c.freq)), ms=Math.max(...CUST.map(c=>c.sat));
+  CUST.forEach(c=>c.score = Math.round((0.4*c.ltv/ml + 0.3*c.freq/mf + 0.3*c.sat/ms)*100)/100);
+})();
+const govTop  = [...CUST].sort((a,b)=> b.score-a.score || a.n.localeCompare(b.n)).slice(0,10);
+const ungTop  = [...CUST].sort((a,b)=> b.ltv-a.ltv   || a.n.localeCompare(b.n)).slice(0,10);
+const govNames= new Set(govTop.map(c=>c.n));
+const money = v => '$'+v.toLocaleString('en-US');
+
+function agReset(){
+  $('#agBad').innerHTML='<div class="rl"><span class="nm ph">Not run yet.</span></div>';
+  $('#agGood').innerHTML='<div class="rl"><span class="nm ph">Not run yet.</span></div>';
+  $('#agLog').innerHTML='<span class="ph">Run to see how each agent resolves the question.</span>';
+  $('#agOv').textContent='–'; $('#agTop').textContent='–'; $('#agBest').textContent='–';
+}
+$('#agReset').addEventListener('click',agReset);
+$('#agRun').addEventListener('click',async()=>{
+  const my=++RUN; agReset();
+  const log=$('#agLog'), bad=$('#agBad'), good=$('#agGood');
+  bad.innerHTML=''; good.innerHTML='';
+
+  logLine(log,'ungoverned agent: no definition to resolve, picking a column','wn');
+  await sleep(360); if(my!==RUN) return;
+  logLine(log,'  select name, lifetime_value from customers order by 2 desc limit 10','wn');
+  await sleep(320); if(my!==RUN) return;
+  logLine(log,'governed agent: resolving customer_value_score before writing SQL','ok');
+  await sleep(320); if(my!==RUN) return;
+  logLine(log,'  definition found: 40% ltv + 30% frequency + 30% satisfaction','ok');
+  logLine(log,'  lineage: fct_orders → dim_customers · 4/4 tests passing','ok');
+  await sleep(340); if(my!==RUN) return;
+
+  for(let i=0;i<10;i++){
+    if(my!==RUN) return;
+    const u=ungTop[i], g=govTop[i], hit=govNames.has(u.n);
+    bad.appendChild(el('div','rl '+(hit?'hit':'miss'),
+      `<span class="rn">${i+1}</span><span class="nm">${u.n}</span>
+       <span class="vv">${money(u.ltv)}</span>
+       <span class="tag">${hit?'survives':'not in top 10'}</span>`));
+    good.appendChild(el('div','rl',
+      `<span class="rn">${i+1}</span><span class="nm">${g.n}</span>
+       <span class="vv">${g.score.toFixed(2)}</span>`));
+    await sleep(150);
+  }
+  const overlap = ungTop.filter(c=>govNames.has(c.n)).length;
+  $('#agOv').textContent = overlap+' of 10';
+  $('#agTop').textContent = ungTop[0].score.toFixed(2);
+  $('#agBest').textContent = govTop[0].score.toFixed(2);
+  await sleep(250); if(my!==RUN) return;
+  logLine(log,`top customer by lifetime value: ${ungTop[0].n}, ${money(ungTop[0].ltv)}, governed score ${ungTop[0].score.toFixed(2)}`,'wn');
+  logLine(log,`not in the governed top ten at all`,'er');
+  logLine(log,`${10-overlap} customers get treatment they did not earn, and ${10-overlap} who did are missed`,'er');
+  logLine(log,'no error was raised on either side','em');
+});
+
+/* ================================================================
+   SIM 05 · Agent, attach engines, then parity
+   ================================================================ */
+const ENGINES = [
+  {n:'Databricks', f:'Delta',   t:null, note:'reads the Delta log'},
+  {n:'Snowflake',  f:'Iceberg', t:null, note:'reads Iceberg metadata'},
+  {n:'PyIceberg',  f:'Iceberg', t:3,    note:'local script or agent; venv, install, point at the catalog'},
+  {n:'Trino',      f:'Iceberg', t:8,    note:'self-hosted container; mostly a one-time image pull'},
+  {n:'ClickHouse', f:'Iceberg', t:12,   note:'managed cloud warehouse, same region, vended credentials'},
+  {n:'Dremio',     f:'Iceberg', t:35,   note:'managed cloud engine; first-run account setup plus a region mismatch'},
+  {n:'DuckDB',     f:'Iceberg', t:null, note:'in-process on a laptop; no cluster, no standing cost'},
+  {n:'Athena',     f:'Iceberg', t:null, note:'reads Iceberg metadata via Glue'},
+  {n:'BigQuery',   f:'Iceberg', t:null, note:'reads Iceberg metadata via BigLake'},
+  {n:'Fabric',     f:'Parquet', t:null, note:'reads the Parquet directly via OneLake'}
+];
+const PARITY = [
+  ['Row count','the table is reachable, and nothing more','412,880'],
+  ['Distinct primary key','no duplication introduced by the read path','412,880'],
+  ['Sum(order_total)','the data files themselves are being read','4,118,306.42'],
+  ['Min and max order_date','the full range is visible, not a partition','2024-01-02 / 2026-08-13'],
+  ['Ranked top 10, deterministic tiebreak','ordering agrees, not just aggregates','identical'],
+  ['Null primary keys','zero, on every engine','0']
+];
+function engRender(){
+  const g=$('#engGrid'); g.innerHTML='';
+  ENGINES.forEach((e,i)=>{
+    const b=el('button','eng'); b.dataset.i=i; b.title=e.note;
+    b.innerHTML=`<span class="ck">✓</span><div class="en">${e.n}</div><div class="ef">${e.f}</div>
+      <div class="et">${e.t? '~'+e.t+' min (measured)' : 'validated'}</div>`;
+    b.addEventListener('click',()=>{b.classList.toggle('on'); engTally();});
+    g.appendChild(b);
+  });
+  engTally();
+}
+function engTally(){
+  const on=$$('#engGrid .eng.on');
+  $('#engN').textContent=on.length;
+  const mins=on.reduce((s,b)=>s+(ENGINES[b.dataset.i].t||0),0);
+  $('#engT').textContent=mins+' min';
+  $('#engC').textContent='0';
+}
+function engReset(){
+  $$('#engGrid .eng').forEach(b=>b.classList.remove('on')); engTally();
+  $('#engParityT').innerHTML='<tr><th>Parity check</th><th>What it proves</th><th>Result</th></tr>';
+  $('#engLog').innerHTML='<span class="ph">Attach at least two engines, then run the parity checks.</span>';
+}
+engRender();
+$('#engReset').addEventListener('click',engReset);
+$('#engAll').addEventListener('click',()=>{$$('#engGrid .eng').forEach(b=>b.classList.add('on')); engTally();});
+$('#engParity').addEventListener('click',async()=>{
+  const my=++RUN, log=$('#engLog'), t=$('#engParityT');
+  const on=$$('#engGrid .eng.on').map(b=>ENGINES[b.dataset.i]);
+  t.innerHTML='<tr><th>Parity check</th><th>What it proves</th><th>Result</th></tr>';
+  log.innerHTML='';
+  if(on.length<2){ logLine(log,'attach at least two engines: parity needs something to compare','wn'); return; }
+  logLine(log,`${on.length} engines attached · 0 bytes moved · 0 copies made`,'em');
+  await sleep(300); if(my!==RUN) return;
+  for(const p of PARITY){
+    await sleep(400); if(my!==RUN) return;
+    const r=el('tr');
+    r.innerHTML=`<td><b>${p[0]}</b></td><td class="dim">${p[1]}</td>
+      <td class="mono" style="color:var(--ok)">${p[2]}</td>`;
+    t.appendChild(r);
+    logLine(log,`${p[0]}: identical across ${on.map(e=>e.n).join(', ')}`,'ok');
+  }
+  await sleep(300); if(my!==RUN) return;
+  logLine(log,'gate: cross-engine parity: PASS','ok');
+  logLine(log,'parity is a property of the storage, not of any one engine','em');
+  if(!on.some(e=>e.f==='Delta') || !on.some(e=>e.f==='Parquet'))
+    logLine(log,'tip: attach Databricks and Fabric too, and all three formats are exercised live','wn');
+});
+
+/* ================================================================
+   SIM 06 · Activate, write-back with an exercised undo
+   ================================================================ */
+function acReset(){
+  $('#acLand').textContent='0';
+  $('#acState').textContent='Not sent';
+  $('#acState').style.color='';
+  $('#acLog').innerHTML='<span class="ph">Send the governed selection, then exercise the reversal.</span>';
+  $('#acUndo').disabled=true; $('#acSend').disabled=false;
+}
+acReset();
+$('#acReset').addEventListener('click',acReset);
+$('#acSend').addEventListener('click',async()=>{
+  const my=++RUN, log=$('#acLog'); log.innerHTML=''; $('#acSend').disabled=true;
+  const steps=[
+    ['selection: governed top 10 by customer_value_score','em'],
+    ['deliberate selection, not a mirror of everything that moved','ok'],
+    ['write-back through the same controls as the rest of the movement','ok'],
+    ['target: Salesforce Account.priority_tier','em']
+  ];
+  for(const s of steps){ if(my!==RUN) return; logLine(log,s[0],s[1]); await sleep(340); }
+  for(let i=1;i<=10;i++){ if(my!==RUN) return; $('#acLand').textContent=i; await sleep(110); }
+  logLine(log,'10 of 10 records landed','ok');
+  await sleep(300); if(my!==RUN) return;
+  logLine(log,'reconcile: what reached the target matches what was sent','ok');
+  $('#acState').textContent='Half the gate';
+  $('#acState').style.color='var(--warn)';
+  logLine(log,'gate half met. Nothing that writes into a live system should pass on this alone','wn');
+  $('#acUndo').disabled=false;
+});
+$('#acUndo').addEventListener('click',async()=>{
+  const my=++RUN, log=$('#acLog'); $('#acUndo').disabled=true;
+  logLine(log,'exercising the reversal path','em');
+  await sleep(400); if(my!==RUN) return;
+  for(let i=10;i>=0;i--){ if(my!==RUN) return; $('#acLand').textContent=i; await sleep(90); }
+  logLine(log,'prior values restored on all 10 records','ok');
+  await sleep(300); if(my!==RUN) return;
+  logLine(log,'reversal exercised rather than designed','ok');
+  $('#acState').textContent='Gate PASS';
+  $('#acState').style.color='var(--ok)';
+  logLine(log,'gate: the write-back lands what was intended, and can be undone: PASS','ok');
+});
+
+/* ================================================================
+   07 · Band calculator
+   ================================================================ */
+const BAND_OPTS = [
+  {k:'nodbt', w:0,  t:'The logic is not in a dbt project at all',
+   d:'Stored procedures, a third-party tool, notebooks, or SQL on a scheduler'},
+  {k:'inc',   w:7,  t:'Incremental models and semi-structured handling',
+   d:'Plus environment, catalog and permission changes'},
+  {k:'macro', w:5,  t:'Some platform-specific functions or macros',
+   d:'A handful of patterns rather than a pervasive style'},
+  {k:'variant',w:9, t:'Variant and flatten patterns, platform-specific date or window syntax',
+   d:'The project reaches for native behaviour where it is convenient'},
+  {k:'proc',  w:8,  t:'Stored procedures, tasks and streams',
+   d:'Platform objects with no equivalent on the target'},
+  {k:'merge', w:9,  t:'Custom incremental logic tied to that engine’s merge semantics',
+   d:'Plus tuning assumptions baked into the models'}
+];
+const BANDS = {
+  low:{name:'Low to medium', cls:'bandlow', dec:'0', run:'a flag',
+    desc:'Mostly ref() and source() driven, standard SQL transforms, packages, tests, snapshots and exposures. Little platform-specific syntax.',
+    meas:'One project with two targets, so the migration was a command-line flag. Four of four models moved with no edits, 22.5 seconds for a full build, identical values on both engines.',
+    advice:'A project kept portable stays in this band. The band is decided years before anybody opens a renewal.'},
+  med:{name:'Medium', cls:'bandmed', dec:'7 each way', run:'no edits',
+    desc:'Incremental models, semi-structured handling, some platform-specific functions or macros, and environment, catalog and permission changes.',
+    meas:'Three of three models rewritten with no human edits, first attempt, in both directions. Seven patterns decided once and then applied. No failures.',
+    advice:'Seven patterns decided once, then applied as volume. Volume is the part that automates; the deciding is not.'},
+  high:{name:'High', cls:'bandhigh', dec:'26 and 17', run:'a run, not a read',
+    desc:'Leans on platform-native behaviour: variant and flatten patterns, platform-specific date, time or window syntax, stored procedures, tasks and streams, tuning assumptions, custom incremental logic tied to that engine’s merge semantics.',
+    meas:'Six of nine models rewritten with no edits. Six first-attempt failures, most of them tooling and platform-object limits rather than dialect. One model reached no exact answer at all.',
+    advice:'Several of this band’s patterns only appeared once the migrated code ran, so budget it for a run and not only a read.'}
+};
+function renderBands(){
+  const p=$('#bandPick'); p.innerHTML='';
+  BAND_OPTS.forEach(o=>{
+    const b=el('button','opt'); b.dataset.k=o.k;
+    b.innerHTML=`<span class="bx">✓</span><span><b>${o.t}</b><br><span class="xs dim">${o.d}</span></span>`;
+    b.addEventListener('click',()=>{b.classList.toggle('on'); scoreBand();});
+    p.appendChild(b);
+  });
+  scoreBand();
+}
+function scoreBand(){
+  const on=$$('#bandPick .opt.on').map(b=>b.dataset.k);
+  const noDbt = on.includes('nodbt');
+  $('#bandNoDbt').style.display = noDbt?'flex':'none';
+  const w = BAND_OPTS.filter(o=>on.includes(o.k)).reduce((s,o)=>s+o.w,0);
+  const b = w===0 ? BANDS.low : w<=12 ? BANDS.med : BANDS.high;
+  const nm=$('#bandName');
+  nm.textContent=b.name; nm.className='vv2 '+b.cls;
+  $('#bandDesc').textContent=b.desc;
+  $('#bandDec').textContent=b.dec;
+  $('#bandRun').textContent=b.run;
+  $('#bandMeas').textContent=b.meas;
+  $('#bandAdvice').textContent=b.advice;
+}
+renderBands();
+$('#bandReset').addEventListener('click',()=>{$$('#bandPick .opt').forEach(b=>b.classList.remove('on')); scoreBand();});
+
+/* ================================================================
+   08 · Industry examples
+   ================================================================ */
+const IND = [
+  {k:'fs', label:'Financial services', h:'Financial services',
+   q:'Which customers should we call this quarter?',
+   metric:'customer_health_score', def:'40% satisfaction + 30% product affinity + 30% inverse churn',
+   ung:'Sorting by churn score alone.',
+   ungWhy:'Churn is one of three inputs. Rank by churn and you surface customers who are unhappy but hold one product, and miss the ones with three products and a satisfaction problem, who are worth far more to keep.',
+   stages:['move','transform','context','agent','activate'],
+   meas:'Products per customer', out:'Retention effort aimed at the accounts worth retaining.'},
+  {k:'hc', label:'Healthcare', h:'Healthcare and life sciences',
+   q:'Which patients need review before discharge?',
+   metric:'readmission_risk', def:'predicted probability, 0 to 1; above 0.6 is high',
+   ung:'Sorting by length of stay.',
+   ungWhy:'The longest stays are not the highest risk. In the worked data a patient at 365 days carries a readmission risk of 0.16, while the governed top-risk patient sits at 1.00 with a stay of 146. Length of stay is a proxy that feels right and points at the wrong beds.',
+   stages:['move','manage','transform','context','agent'],
+   meas:'30-day readmission rate', out:'Review capacity spent on the patients most likely to come back.'},
+  {k:'rt', label:'Retail', h:'Retail',
+   q:'Who are our most valuable customers?',
+   metric:'customer_value_score', def:'40% lifetime value + 30% order frequency + 30% satisfaction',
+   ung:'Sorting by lifetime value alone.',
+   ungWhy:'In the sample data the top customer by lifetime value has $9,999 and a governed value score of 0.63, and is not in the governed top ten at all. Two of that ungoverned top ten survive the governed ranking. Eight customers get treatment they did not earn, and eight who did are missed.',
+   stages:['move','transform','context','agent','activate'],
+   meas:'Repeat purchase rate', out:'Margin protected on the customers who actually carry it.',
+   sim:true},
+  {k:'cpg', label:'CPG', h:'Consumer packaged goods',
+   q:'Which promotions actually paid for themselves?',
+   metric:'promotion_return', def:'incremental sell-through against a modelled baseline, net of trade spend and of cannibalisation across the portfolio',
+   ung:'Ranking promotions by volume sold during the promotion window.',
+   ungWhy:'Volume during a promotion includes what would have sold anyway, units pulled forward from the next period, and units taken from the company’s own other lines. Rank by raw volume and the best-looking promotion is often the one that discounted something already selling.',
+   stages:['move','manage','transform','context','activate'],
+   meas:'Return on trade spend', out:'Promotion budget aimed at the lifts that were actually incremental.'},
+  {k:'mfg', label:'Manufacturing', h:'Manufacturing and supply chain',
+   q:'Where is demand actually moving?',
+   metric:'demand_signal_score', def:'promotion + category growth + consumer confidence + seasonality + competitor pricing + macro signal',
+   ung:'Sorting by raw forecast volume.',
+   ungWhy:'Raw volume is last quarter’s shape. The governed signal folds in promotion, seasonality and competitor pricing: the inputs that move the number before the volume does. Ranking by volume finds where demand was, not where it is going.',
+   stages:['move','manage','transform','context','activate'],
+   meas:'Stockouts and inventory carrying cost, moving together',
+   out:'Inventory positioned against the signal rather than against history.'}
+];
+const STAGE_LABEL={move:'MOVE',manage:'MANAGE',transform:'TRANSFORM',context:'CONTEXT',agent:'AGENT',activate:'ACTIVATE'};
+function renderInd(k){
+  const d=IND.find(x=>x.k===k);
+  $$('#indNav button').forEach(b=>b.classList.toggle('on',b.dataset.k===k));
+  const chips = STAGES.map(s=>
+    `<span class="chip ${d.stages.includes(s)?'ft':'off'}" style="cursor:pointer" data-go="${s}">${STAGE_LABEL[s]}</span>`).join(' ');
+  $('#indBody').innerHTML = `
+    <div class="card">
+      <h3 style="font-size:20px;margin-bottom:4px">${d.h}</h3>
+      <p class="muted" style="font-size:16px;font-style:italic;margin-bottom:16px">${d.q}</p>
+      <div class="indwrap">
+        <div>
+          <div class="subh" style="color:var(--ok)">The governed answer</div>
+          <p class="tiny dim" style="margin-bottom:9px">The agent resolves the definition before it writes a query.</p>
+          <div class="metricbox"><div class="mn">${d.metric}</div><div class="md">${d.def}</div></div>
+        </div>
+        <div>
+          <div class="subh" style="color:var(--bad)">What an agent does without it</div>
+          <p style="font-size:14.6px;font-weight:640;margin-bottom:7px">${d.ung}</p>
+          <p class="tiny muted">${d.ungWhy}</p>
+        </div>
+      </div>
+      <hr class="rule">
+      <div class="grid g3">
+        <div><div class="subh">Stages it uses</div><div style="display:flex;gap:4px;flex-wrap:wrap">${chips}</div></div>
+        <div><div class="subh">Measured by</div><p class="tiny muted">${d.meas}</p></div>
+        <div><div class="subh">Business outcome</div><p class="tiny muted">${d.out}</p></div>
+      </div>
+      ${d.sim?`<div style="margin-top:14px"><button class="btn sm btn-d" data-go="context">Run this one live in the Context simulator →</button></div>`:''}
+    </div>`;
+  store.set('ind',k);
+}
+(function(){
+  const nav=$('#indNav');
+  IND.forEach(d=>{
+    const b=el('button',null,d.label); b.dataset.k=d.k;
+    b.addEventListener('click',()=>renderInd(d.k)); nav.appendChild(b);
+  });
+  renderInd(store.get('ind','rt'));
+})();
+
+/* ================================================================
+   09 · Maturity ladder
+   ================================================================ */
+const MAT = [
+  {n:0, name:'Fragmented and reactive', pct:8,  db:'nothing standardized yet', ft:'nothing standardized yet',
+   band:'Trusted data',
+   read:'Every source is its own project and every number is somebody’s query. Nothing here is agent-ready, and the first honest conversation is about what a single governed write would change.',
+   sell:'Sell stage 1: one managed source, landed once, closed by row parity. Small, provable, and it is the gate a finance reader can check.'},
+  {n:1, name:'Standardized and reliable', pct:28, db:'dbt, in some form', ft:'SaaS connectors',
+   band:'Trusted data',
+   read:'Data arrives reliably and some logic is in dbt. The gap is governance: tests nobody has watched fail, and lineage that lives in somebody’s head.',
+   sell:'Sell stage 2: the dbt platform, Mesh where there are several teams, and MCP so the metadata is reachable. Close the Transform gate on the way through.'},
+  {n:2, name:'Scaled and governed', pct:52, db:'platform, Mesh, MCP', ft:'database and custom connectors, Activations',
+   band:'Trusted data',
+   read:'Governed transformation at scale, and the estate is broad rather than shallow. This is where most organizations are standing, one step short of the jump that matters.',
+   sell:'Sell stage 3: the Semantic Layer, dbt State, and the managed lake. This is the band shift from trusted data to trusted AI, and it is the one worth pricing properly.'},
+  {n:3, name:'Trusted and portable', pct:78, db:'Semantic Layer, Wizard, State', ft:'Managed Data Lake Service',
+   band:'Trusted AI and agents',
+   read:'Definitions are governed, the data is open in the client’s own storage, and an agent resolves before it queries. Portability is real and priceable.',
+   sell:'Sell stage 4: integrated workflows, orchestration in one system, and activation. Also the priced answer to “what would it cost to move”, which vendor management has never been given.'},
+  {n:4, name:'Unified and interoperable', pct:97, db:'integrated workflows and orchestration', ft:'integrated workflows and orchestration',
+   band:'Trusted AI and agents',
+   read:'One system from arrival to action, with every gate closable on demand. New capability plugs in rather than triggering a foundation project.',
+   sell:'Sell the drift. Everything here is running and everything here is ageing: sources change, schemas evolve, and the person who understood the design has moved on. Re-run a gate and the finding is the conversation.'}
+];
+function renderMat(n){
+  const d=MAT.find(m=>m.n===n);
+  $$('#matLadder .sl').forEach(b=>b.classList.toggle('on', +b.dataset.n===n));
+  $('#matBody').innerHTML = `
+    <div class="card">
+      <div style="display:flex;gap:12px;align-items:baseline;flex-wrap:wrap;margin-bottom:11px">
+        <h3 style="font-size:20px">Stage ${d.n} · ${d.name}</h3>
+        <span class="chip ${d.n>=3?'db':'ft'}">${d.band}</span>
+      </div>
+      <div class="grid g2">
+        <div class="card tight" style="background:var(--panel2)">
+          <div class="subh" style="color:var(--db)">dbt at this stage</div>
+          <p class="tiny muted">${d.db}</p>
+          <div class="subh" style="color:var(--ft);margin-top:11px">Fivetran at this stage</div>
+          <p class="tiny muted">${d.ft}</p>
+        </div>
+        <div class="card tight" style="background:var(--panel2)">
+          <div class="subh">How to read it</div>
+          <p class="tiny muted">${d.read}</p>
+        </div>
+      </div>
+      <div class="sellbox" style="margin-top:13px"><div class="subh">The next one to sell</div>
+        <span class="tiny">${d.sell}</span></div>
+    </div>`;
+  store.set('mat',n);
+}
+(function(){
+  const l=$('#matLadder');
+  MAT.forEach(m=>{
+    const b=el('button','sl'); b.dataset.n=m.n;
+    b.innerHTML=`<div class="sn">STAGE ${m.n}</div><div class="snm">${m.name}</div>
+      <div class="sbar"><i style="width:${m.pct}%"></i></div>
+      <div class="xs dim" style="margin-top:6px">${m.band}</div>`;
+    b.addEventListener('click',()=>renderMat(m.n)); l.appendChild(b);
+  });
+  renderMat(store.get('mat',2));
+})();
+
+/* ================================================================
+   10 · Gate scorecard
+   ================================================================ */
+const GATES = [
+  {k:'move', name:'01 Move',
+   t:'Row parity from source to destination, and the schema-drift record that proves nothing was silently dropped between them.'},
+  {k:'manage', name:'02 Manage',
+   t:'The same rows returned through every metadata layer the lake maintains, from one write, and the models that shape what lands ran in dependency order with readable run results.'},
+  {k:'transform', name:'03 Transform',
+   t:'The logic is in version control with tests, and the project can name what a change breaks before anything runs.'},
+  {k:'context', name:'04 Context',
+   t:'Every governed metric has a definition, a test, and lineage back to its source, and an agent resolves the definition before it queries.'},
+  {k:'agent', name:'05 Agent',
+   t:'Cross-engine parity: the same question, every attached engine, identical rows.'},
+  {k:'activate', name:'06 Activate',
+   t:'The write-back lands what was intended, and can be undone.'}
+];
+const READ = [
+  'Nothing closed yet. Start at Move: its gate reconciles against the source, so it is the easiest one to prove.',
+  'One gate closed. That is a scoped engagement with evidence attached, which is more than most estates can produce.',
+  'Two closed. The foundation is landing and being managed. The governance layers are where the outcome gets built.',
+  'Three closed. Trusted data. The band shift to trusted AI and agents is the next one, and it is the one worth pricing.',
+  'Four closed. Definitions are governed and countable. Cross-engine parity is the demonstration that ends the lock-in conversation.',
+  'Five closed. Everything but the loop. Without activation the open lake is a parking lot, and an empty one.',
+  'Six closed. Every claim in this framework is evidenced. Now re-run them quarterly, because a finished estate starts drifting the day you leave.'
+];
+function scoreRender(){
+  const saved = store.get('gates',{});
+  const list=$('#gateList'); list.innerHTML='';
+  GATES.forEach(g=>{
+    const b=el('button','gaterow'+(saved[g.k]?' on':'')); b.dataset.k=g.k;
+    b.innerHTML=`<span class="bx">✓</span><span><span class="gname">${g.name}</span>
+      <span class="gtxt" style="display:block">${g.t}</span></span>`;
+    b.addEventListener('click',()=>{
+      const s=store.get('gates',{}); s[g.k]=!s[g.k]; store.set('gates',s);
+      b.classList.toggle('on', s[g.k]); scoreUpdate();
+    });
+    list.appendChild(b);
+  });
+  scoreUpdate();
+}
+function scoreUpdate(){
+  const s=store.get('gates',{});
+  const n=GATES.filter(g=>s[g.k]).length;
+  $('#ringVal').textContent=n;
+  $('#ringArc').style.strokeDashoffset = (301.6*(1-n/6)).toFixed(1);
+  $('#scoreRead').textContent=READ[n];
+  const missing = GATES.filter(g=>!s[g.k]);
+  $('#scoreNext').textContent = missing.length
+    ? 'Still open: '+missing.map(g=>g.name).join(' · ')
+    : 'All six closed. Nothing here is asserted; all of it can be produced.';
+}
+scoreRender();
+$('#scoreReset').addEventListener('click',()=>{store.set('gates',{}); scoreRender();});
+
+/* ================================================================
+   11 · Objections
+   ================================================================ */
+const OBJ = [
+  {q:'Our analysts already know these definitions.',
+   a:'They do. The agent does not, and unlike an analyst it will not ask. It answers from whatever the column is called. The definitions are not being written for the people who already hold them; they are being written down so something without judgement can read them.',
+   go:'context'},
+  {q:'Can we not just put the definitions in the prompt?',
+   a:'You can, once. Then they live in every prompt, and changing one means finding all of them. A definition in the data layer is read by every consumer, including the next agent nobody has built yet, and it changes in one place. That is the entire difference between the two approaches.',
+   go:'context'},
+  {q:'We will add governance once the agent is working.',
+   a:'The agent will appear to work immediately, because a fluent wrong answer looks exactly like a right one. Governance added afterwards is a re-litigation of every answer already given, including the ones somebody acted on.',
+   go:'context'},
+  {q:'Our regulator says this data cannot leave our network.',
+   a:'Ask where the data is going to land. It is usually a cloud data platform, which is itself a SaaS service. That question separates a policy about the processing path from a policy about the data leaving at all, and those need different architectures. Hybrid Deployment answers the first; note that it cannot write to the managed lake, so that source lands in a warehouse destination and everything else lands in the lake as designed.',
+   go:'manage'},
+  {q:'Snowflake and Databricks are both in the building. Which do we pick?',
+   a:'Both, and neither decides the other. One write in open formats in your own storage is read by Databricks through the Delta log and by Snowflake through Iceberg metadata, with no copy. The engine choice becomes a workload decision rather than an architecture decision.',
+   go:'manage'},
+  {q:'Our warehouse bill doubled and nobody can tell me why.',
+   a:'Warehouse spend attributed per model turns that into the specific change that caused it. And with state-based runs, work stays proportional to change: a reformat rebuilds nothing, and a stale upstream rebuilds nothing.',
+   go:'transform'},
+  {q:'We already have a lake. Why would we change anything?',
+   a:'Probably nothing, if one engine reads it and no second one is planned. Say that plainly. The question worth asking is who maintains the table layer, and whether a second engine could read the same files today without a copy.',
+   go:'manage'},
+  {q:'Every new source turns into its own project.',
+   a:'The core systems are in the connector library. The long tail, the in-house application and the shop-floor system, is what shrinks a project, and that is what the Connector SDK removes. Proving one works live takes 15 to 20 minutes for a source whose auth and pagination are understood.',
+   go:'move'},
+  {q:'Is this not just reverse ETL with new branding?',
+   a:'Activation is the write-back, yes, and the gate is what makes it different: the reversal has to be exercised, not designed. Nothing that writes into a live business system should pass on "it landed" alone.',
+   go:'activate'},
+  {q:'We built the dashboards and nothing changed.',
+   a:'That is the sentence Activate exists for. Dashboards inform people who then act manually, which is data-adjacent rather than data-driven. The decision has to reach the system where the work already happens.',
+   go:'activate'}
+];
+(function(){
+  const w=$('#objList');
+  OBJ.forEach(o=>{
+    const a=el('div','acc');
+    a.innerHTML=`<button class="acc-h"><span style="font-style:italic;font-weight:600">“${o.q}”</span>
+      <span class="ac">▼</span></button>
+      <div class="acc-b"><p>${o.a}</p>
+      <button class="btn sm" data-go="${o.go}">Go to the stage that answers it →</button></div>`;
+    w.appendChild(a);
+  });
+})();
+
+/* ================================================================
+   12 · Product reference
+   ================================================================ */
+const PRODUCTS = [
+  {v:'ft', n:'Fivetran Connector SDK',
+   d:'Write a connector in Python for a source the library does not cover, and Fivetran hosts and schedules it like any other connection.'},
+  {v:'ft', n:'Fivetran Managed Data Lake Service',
+   d:'A managed data lake as the destination. The files stay in the client’s own cloud storage; Fivetran maintains the table format and catalog registration.'},
+  {v:'ft', n:'Fivetran Hybrid Deployment',
+   d:'Run the pipeline inside the client’s own network so source data never crosses their perimeter, while the platform is still operated as a service.'},
+  {v:'ft', n:'Fivetran Activations',
+   d:'Managed write-back from the warehouse or lake into the systems people work in. Formerly sold as reverse ETL.'},
+  {v:'db', n:'dbt platform',
+   d:'Where a dbt project is scheduled, environments are defined and run history lives, rather than each being assembled per client.'},
+  {v:'db', n:'dbt Catalog',
+   d:'Search and lineage across the compiled project: what a column means, where it came from, what tests it passed. Formerly dbt Explorer.'},
+  {v:'db', n:'dbt Semantic Layer',
+   d:'Metrics defined once on top of the models, so every consumer that asks for a number resolves the same definition.'},
+  {v:'db', n:'dbt State',
+   d:'Rebuilds only what actually changed. It reads the SQL semantically rather than diffing files, and it also checks whether the upstream data moved, so a reformat triggers nothing and a stale input does.'},
+  {v:'db', n:'dbt MCP server',
+   d:'The interface an agent uses to reach models, metrics, lineage and freshness through the same governance a person gets.'},
+  {v:'db', n:'Fusion', tag:'preview',
+   d:'A Rust execution engine that understands SQL across dialects, so errors surface before a query reaches the warehouse.'},
+  {v:'db', n:'dbt Wizard', tag:'preview',
+   d:'An agent grounded in the compiled project (lineage, state and metrics) for investigating, changing and validating dbt work.'},
+  {v:'db', n:'dbt Mesh',
+   d:'Governed model sharing across projects: public models with contracts and versions, so an upstream change does not silently break a downstream team.'},
+  {v:'open', n:'Apache Iceberg',
+   d:'A metadata layer over Parquet that makes a directory of files behave like a table. Always created by the managed lake.'},
+  {v:'open', n:'Delta Lake',
+   d:'The other metadata layer, created over the same Parquet when you enable it. Databricks reads this one.'},
+  {v:'open', n:'Apache Parquet',
+   d:'The columnar files that hold the actual data. Readable directly, with no metadata layer in the path at all.'}
+];
+const VN={ft:'Fivetran',db:'dbt Labs',open:'Open standard'};
+function renderProducts(){
+  const w=$('#prodList'); w.innerHTML='';
+  PRODUCTS.forEach(p=>{
+    const c=el('div','prod'); c.dataset.vendor=p.v;
+    c.dataset.q=(p.n+' '+p.d+' '+VN[p.v]).toLowerCase();
+    c.innerHTML=`<div class="pn">${p.n}</div>
+      <span class="chip ${p.v==='open'?'':p.v}" style="font-size:9.4px">${VN[p.v]}${p.tag?' · '+p.tag:''}</span>
+      <div class="pd">${p.d}</div>`;
+    w.appendChild(c);
+  });
+}
+renderProducts();
+let prodV='all';
+function filterProducts(){
+  const q=$('#prodSearch').value.trim().toLowerCase();
+  $$('#prodList .prod').forEach(c=>{
+    const okV = prodV==='all' || c.dataset.vendor===prodV;
+    const okQ = !q || c.dataset.q.includes(q);
+    c.classList.toggle('hide', !(okV&&okQ));
+  });
+}
+$('#prodSearch').addEventListener('input',filterProducts);
+$$('#prodFilter button').forEach(b=>b.addEventListener('click',()=>{
+  $$('#prodFilter button').forEach(x=>x.classList.toggle('on',x===b));
+  prodV=b.dataset.v; filterProducts();
+}));
+
+/* ================================================================
+   Keyboard
+   ================================================================ */
+addEventListener('keydown', e=>{
+  if(e.metaKey||e.ctrlKey||e.altKey) return;
+  if(/^(INPUT|TEXTAREA)$/.test(document.activeElement.tagName)) return;
+  const k=e.key.toLowerCase();
+  if(k==='t'){ flipTheme(); return; }
+  if(k==='arrowright'||k==='arrowleft'){
+    const cur = STAGES.indexOf(store.get('stage','move'));
+    const nx = k==='arrowright' ? Math.min(STAGES.length-1,cur+1) : Math.max(0,cur-1);
+    if(nx!==cur){ e.preventDefault(); goStage(STAGES[nx]); }
+    return;
+  }
+  if(k==='j'||k==='k'){
+    const y=scrollY+130;
+    let i=0; SECTIONS.forEach((s,n)=>{const el2=document.getElementById(s[0]); if(el2&&el2.offsetTop<=y) i=n;});
+    const nx = k==='j' ? Math.min(SECTIONS.length-1,i+1) : Math.max(0,i-1);
+    document.getElementById(SECTIONS[nx][0]).scrollIntoView({behavior:'smooth'});
+  }
+});
+
+/* restore stage + first paint */
+goStage(store.get('stage','move'), false);
+onScroll();
+</script>
+</body>
+</html>
