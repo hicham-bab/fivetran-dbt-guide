@@ -53,11 +53,11 @@ ul{margin:0;padding-left:1.1em}li{margin:.28em 0}
 .topnav{display:flex;gap:2px;background:rgba(255,255,255,.07);border-radius:14px;padding:5px;
   overflow-x:auto;scrollbar-width:none;max-width:100%}
 .topnav::-webkit-scrollbar{display:none}
-.tnb{flex:0 0 auto;padding:8px 14px;border-radius:10px;font-size:13.2px;font-weight:640;
+.tnb{flex:0 0 auto;padding:8px 9px;border-radius:10px;font-size:12.9px;font-weight:640;
   color:rgba(255,255,255,.66);white-space:nowrap;transition:.15s}
 .tnb:hover{color:#fff;background:rgba(255,255,255,.07)}
 .tnb.on{background:#fff;color:#0B1524;font-weight:730;box-shadow:0 1px 4px rgba(0,0,0,.2)}
-.tnb .own{display:inline-block;width:5px;height:5px;border-radius:2px;margin-right:6px;vertical-align:1px}
+.tnb .own{display:inline-block;width:5px;height:5px;border-radius:2px;margin-right:5px;vertical-align:1px}
 .tnb[data-own=ft] .own{background:var(--ft)}.tnb[data-own=db] .own{background:var(--db)}
 .tnb[data-own=both] .own{background:linear-gradient(120deg,var(--ft),var(--db))}
 .hero-bar{display:flex;gap:12px;align-items:center;justify-content:center;flex-wrap:wrap;padding:14px 0 18px}
@@ -418,6 +418,20 @@ html[data-theme=dark] .up-ok{color:#4FD9C0}html[data-theme=dark] .up-run{color:#
 .freshdot{display:inline-block;width:7px;height:7px;border-radius:99px;margin-right:5px}
 .fresh-ok{background:var(--grn)}.fresh-warn{background:var(--amb)}.fresh-err{background:var(--red)}
 
+/* ================= JAPANESE TYPOGRAPHY ================= */
+html[data-lang=ja]{--sans:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Hiragino Kaku Gothic ProN",
+  "Yu Gothic","Noto Sans JP","Meiryo",sans-serif}
+html[data-lang=ja] body{line-height:1.78;font-size:14.6px;word-break:normal;overflow-wrap:anywhere;line-break:strict}
+html[data-lang=ja] h1,html[data-lang=ja] h2,html[data-lang=ja] h3,html[data-lang=ja] h4{letter-spacing:0;line-height:1.42}
+html[data-lang=ja] .lead,html[data-lang=ja] .shead .desc{line-height:1.8}
+html[data-lang=ja] .subh,html[data-lang=ja] .chip,html[data-lang=ja] .sim-h .lab,
+html[data-lang=ja] .nat-h .lbl,html[data-lang=ja] .slab .sl{letter-spacing:.01em}
+html[data-lang=ja] .tnb{padding:8px 9px;font-size:12.4px}
+html[data-lang=ja] .tnb .own{margin-right:4px}
+html[data-lang=ja] .snb{padding:7px 12px;font-size:13px}
+html[data-lang=ja] .slab .cell{font-size:11.8px}
+html[data-lang=ja] .mono,html[data-lang=ja] pre.code,html[data-lang=ja] code{font-family:var(--mono)}
+
 /* ================= LENS VIS ================= */
 [data-lens]{display:none}
 html[data-view=bus] [data-lens~=bus],html[data-view=tech] [data-lens~=tech],html[data-view=partner] [data-lens~=partner]{display:block}
@@ -497,6 +511,774 @@ html[data-view=bus] [data-lens~=bus],html[data-view=tech] [data-lens~=tech],html
 </footer>
 
 <script>
+/* JA_BUNDLE_START  Japanese localisation. Preview only, reachable via ?lang=ja */
+/* ==================================================================
+   Japanese localisation runtime.
+   Keys are the exact English innerHTML as rendered, never a
+   target-language string. Coverage is measured on the rendered DOM.
+   ================================================================== */
+const JA={};
+/* Japanese, batch 01: chrome + chapter 0 (the stack).
+   Keys are the exact English innerHTML as rendered. Markup is preserved verbatim. */
+Object.assign(JA, {
+
+/* ---------- chrome ---------- */
+"Without it and with it, side by side against the native services, and every claim runnable as a simulation. Ten chapters from a source system to an agent that acts.":
+  "なしの場合とありの場合を並べ、ネイティブサービスと比較し、すべての主張をシミュレーションとして実行できます。ソースシステムから、実際に行動するエージェントまでの 10 章です。",
+"<span class=\"own\"></span>The stack": "<span class=\"own\"></span>スタック",
+"<span class=\"own\"></span>Ingestion": "<span class=\"own\"></span>取り込み",
+"<span class=\"own\"></span>Landing": "<span class=\"own\"></span>ランディング",
+"<span class=\"own\"></span>Models": "<span class=\"own\"></span>モデル",
+"<span class=\"own\"></span>Tests": "<span class=\"own\"></span>テスト",
+"<span class=\"own\"></span>Workflow": "<span class=\"own\"></span>ワークフロー",
+"<span class=\"own\"></span>Orchestration": "<span class=\"own\"></span>オーケストレーション",
+"<span class=\"own\"></span>Governance": "<span class=\"own\"></span>ガバナンス",
+"<span class=\"own\"></span>AI agents": "<span class=\"own\"></span>AI エージェント",
+"<span class=\"own\"></span>Activation": "<span class=\"own\"></span>アクティベーション",
+"<span class=\"own\"></span>Value": "<span class=\"own\"></span>価値",
+"11 chapters · press 1 to 11": "全 11 章 · 1 から 11 のキーで移動",
+"Business": "ビジネス",
+"Technical": "技術",
+"Partner": "パートナー",
+"Fivetran + dbt Labs.": "Fivetran + dbt Labs について",
+"Currency.": "情報の鮮度について",
+
+/* ---------- chapter 0: the stack ---------- */
+"Where Fivetran and dbt sit in the stack": "スタックのどこに Fivetran と dbt が入るのか",
+"Interactive diagram": "インタラクティブ図",
+"Every layer is a chapter in this guide. Select one above, or press play and watch it assemble.":
+  "各レイヤーがこのガイドの 1 章に対応しています。上のタブを選ぶか、再生を押して組み上がる様子をご覧ください。",
+"Baseline": "初期状態",
+"Move": "移動",
+"Land": "ランディング",
+"Transform": "変換",
+"Control plane": "コントロールプレーン",
+"Consumers": "利用者",
+"Activate": "アクティベート",
+"Play": "再生",
+"Pipeline": "パイプライン",
+"Data platform": "データプラットフォーム",
+"Data control plane": "データコントロールプレーン",
+"dbt platform": "dbt platform",
+"Orchestration": "オーケストレーション",
+"Observability": "オブザーバビリティ",
+"Cost": "コスト",
+"Catalog": "カタログ",
+"Semantics": "セマンティクス",
+"Ingestion": "取り込み",
+"Landing": "ランディング",
+"Models": "モデル",
+"Tests": "テスト",
+"Workflow": "ワークフロー",
+"Governance": "ガバナンス",
+"Activation": "アクティベーション",
+"Value and gates": "価値とゲート",
+"AI and agents": "AI とエージェント",
+"BI, analytics, AI": "BI、分析、AI",
+"Fivetran Managed Data Lake Service": "Fivetran Managed Data Lake Service",
+"Fivetran-Managed Apache Polaris™": "Fivetran-Managed Apache Polaris™",
+"a gap in the middle": "中間の空白",
+"via dbt Wizard": "dbt Wizard 経由",
+"dbt Wizard, and any agent": "dbt Wizard、および任意のエージェント",
+"BI and natural language": "BI と自然言語",
+
+/* ownership cards */
+"Fivetran owns": "Fivetran が担う領域",
+"The dbt platform owns": "dbt platform が担う領域",
+"The platform owns": "データプラットフォームが担う領域",
+"Getting every source in, completely and continuously, and getting the decision back out to the system the business works in.":
+  "あらゆるソースを、欠けなく継続的に取り込むこと。そして下された判断を、事業が実際に使っているシステムへ返すこと。",
+"Turning what landed into tested, version-controlled logic, and governing what it means so any consumer resolves the same definition. It is also the control plane over it: orchestration, observability, cost, catalog and semantics.":
+  "着地したデータを、テスト済みでバージョン管理されたロジックに変えること。そして意味をガバナンスし、どの利用者も同じ定義を解決できるようにすること。さらにその上のコントロールプレーンでもあります。オーケストレーション、オブザーバビリティ、コスト、カタログ、セマンティクスです。",
+"Compute. Whichever engine the client runs, and whichever one replaces it, reads the same governed data.":
+  "コンピュートです。顧客が今使っているエンジンでも、将来それを置き換えるエンジンでも、同じガバナンスされたデータを読みます。",
+
+/* lens labels */
+"Why it matters commercially": "商業的に重要な理由",
+"What to verify": "確認すべきこと",
+"For your practice": "あなたの実務にとって",
+"Three lenses.": "3 つの視点。",
+
+/* the ten chapters table */
+"Chapter": "章",
+"What it proves": "何を証明するか",
+"Runnable": "実行できるもの",
+"Every source lands, including the ones not in any catalog": "どのカタログにも無いものを含め、あらゆるソースが着地する",
+"Source coverage race · schema drift · SDK build": "ソース網羅性の比較 · スキーマドリフト · SDK でのコネクタ構築",
+"One write, read by every engine, in storage the client owns": "1 回の書き込みを、顧客所有のストレージ上であらゆるエンジンが読む",
+"Cross-layer parity · who pays for the merge": "レイヤー横断の一致 · マージ費用を誰が負担するか",
+"SQL becomes a tested, portable artifact instead of a script": "SQL がスクリプトではなく、テスト済みで可搬な成果物になる",
+"Compile and materialize · layer walk": "コンパイルと実体化 · レイヤーの通し見",
+"Bad data stops at the layer it appeared in": "不正なデータは、現れたレイヤーで止まる",
+"Build with a failing test": "テストが失敗する状態でのビルド",
+"A change reaches production through a gate a person can read": "変更は、人が読めるゲートを通って本番に届く",
+"Branch to prod · CI with data diff": "ブランチから本番まで · データ差分付きの CI",
+"Run order is derived, not maintained; runs cost what changed": "実行順序は維持するものではなく導出される。実行コストは変更分に比例する",
+"Dependency order · dbt State · cost attribution": "依存順序 · dbt State · コストの帰属",
+"A definition changes in one place and every consumer follows": "定義は 1 か所で変わり、すべての利用者がそれに追従する",
+"Contract break · Semantic Layer query": "コントラクト違反 · Semantic Layer のクエリ",
+"An agent resolves meaning before it answers": "エージェントは答える前に意味を解決する",
+"Governed vs ungoverned · engine parity · Wizard": "ガバナンスあり対なし · エンジン間の一致 · Wizard",
+"The decision reaches the system the business runs on": "判断が、事業を動かしているシステムに届く",
+"Write-back and undo": "書き戻しと取り消し",
+"Every claim above closes with evidence, not assertion": "上記のすべての主張は、断言ではなく証拠で閉じられる",
+"Gate scorecard · migration bands": "ゲートのスコアカード · 移行バンド"
+
+});
+
+/* Japanese, batch 02: chapter 1, Ingestion. */
+Object.assign(JA, {
+
+/* sub-tab bodies: source coverage */
+"Name the estate, then check who covers it": "対象システムを挙げて、どのベンダーが網羅しているか確認する",
+"Click the sources that are actually in the estate. The core systems are covered by everyone, so add the awkward ones: that is where the answer changes.":
+  "実際に社内にあるソースをクリックしてください。主要システムはどのベンダーでも対応済みなので、扱いにくいものを追加してみてください。そこで答えが変わります。",
+"Select all": "すべて選択",
+"Clear": "クリア",
+"Run the coverage check": "網羅性チェックを実行",
+"Reflects published GA catalogs in August 2026. Preview connectors move fast, so check current vendor docs before quoting a number in a deal.":
+  "2026 年 8 月時点で公開されている GA カタログに基づいています。プレビュー段階のコネクタは変化が速いため、商談で数字を出す前に各ベンダーの最新ドキュメントを確認してください。",
+"Fivetran: 3 from the library, 2 built with the SDK": "Fivetran: 3 件はコネクタライブラリ、2 件は Connector SDK で構築",
+"Snowflake Openflow GA connectors": "Snowflake Openflow の GA コネクタ",
+"Databricks Lakeflow Connect managed connectors": "Databricks Lakeflow Connect のマネージドコネクタ",
+"left over for the best native option, to hand-build and own": "最良のネイティブ選択肢でも残る件数。自前で構築し、自分で保守することになります",
+"What the catalogs actually cover": "各カタログが実際に網羅している範囲",
+"Managed connectors": "マネージドコネクタ",
+"Build your own": "自前で構築",
+"Lands into": "着地先",
+"Ingestion compute": "取り込みのコンピュート",
+"Neutral about the platform": "プラットフォームに中立か",
+"around <b>26</b>, all GA": "約 <b>26</b> 件、すべて GA",
+"Connector SDK": "Connector SDK",
+"NiFi-based custom processors": "NiFi ベースのカスタムプロセッサ",
+"Not a managed path; build with Auto Loader or Spark": "マネージドな手段はなく、Auto Loader や Spark で構築します",
+"200+ destinations, warehouses and an open lake the client owns": "200 以上の宛先。ウェアハウスと、顧客所有のオープンレイク",
+"Databricks Unity Catalog": "Databricks Unity Catalog",
+"Snowflake Openflow": "Snowflake Openflow",
+"Fivetran’s": "Fivetran 側",
+"Snowflake-hosted (SPCS) or bring your own compute": "Snowflake ホスト（SPCS）または自社コンピュート持ち込み",
+"Your DBUs, billed as Lakeflow pipeline compute": "自社の DBU。Lakeflow パイプラインのコンピュートとして課金されます",
+"GA for Salesforce, Workday, SQL Server; more in preview": "Salesforce、Workday、SQL Server が GA。ほかはプレビュー",
+"Yes": "はい",
+"No, by design": "いいえ（設計上）",
+"Vendor documentation, August 2026. Both native services are real and well built. The differences that matter are catalog breadth, who pays for the ingestion compute, and whether the landing place belongs to the client or to the platform.":
+  "出典は 2026 年 8 月時点の各ベンダー公式ドキュメントです。どちらのネイティブサービスも実在し、よくできています。重要な違いは 3 点です。カタログの広さ、取り込みのコンピュートを誰が負担するか、そして着地先が顧客のものかプラットフォームのものかです。",
+"Snowpipe and Auto Loader are not connectors.": "Snowpipe と Auto Loader はコネクタではありません。",
+
+/* source picker cells */
+"CRM": "CRM",
+"HR": "人事",
+"Database": "データベース",
+"ITSM": "ITSM",
+"ERP": "ERP",
+"Marketing": "マーケティング",
+"Dev tools": "開発ツール",
+"Commerce": "コマース",
+"Advertising": "広告",
+"Support": "サポート",
+"Streaming": "ストリーミング",
+"Files": "ファイル",
+"Custom REST": "独自 REST",
+"Custom SOAP": "独自 SOAP",
+"Custom": "独自",
+"Mainframe on SFTP": "SFTP 上のメインフレーム",
+"In-house pricing app": "自社開発の価格管理アプリ",
+"Shop-floor MES": "工場現場の MES",
+"Regional payments vendor": "地域の決済ベンダー",
+
+/* schema drift */
+"Fire a source change at three pipelines at once": "3 つのパイプラインに同時にソース変更をぶつける",
+"Source adds a column": "ソースが列を追加",
+"A type widens": "型が拡張される",
+"The sync dies mid-load": "ロード途中で同期が落ちる",
+"Reset": "リセット",
+"Fire an event above.": "上のボタンでイベントを発生させてください。",
+"<span>✕</span>Hand-rolled pipeline": "<span>✕</span>自前構築のパイプライン",
+"<span>~</span>Native file ingestion": "<span>~</span>ネイティブのファイル取り込み",
+"<span>✓</span>Fivetran managed connection": "<span>✓</span>Fivetran のマネージド接続",
+"Hand-rolled: engineer hours": "自前構築: エンジニア工数",
+"Native: engineer hours": "ネイティブ: エンジニア工数",
+"Fivetran: engineer hours": "Fivetran: エンジニア工数",
+"Schema drift, type promotion, auth, pagination, checkpointing, retries and health belong to the platform. Not to a team, and not to a scheduled job somebody inherited.":
+  "スキーマドリフト、型のプロモーション、認証、ページネーション、チェックポイント、リトライ、ヘルス監視はプラットフォームの責務です。チームの責務でもなく、誰かが引き継いだスケジュールジョブの責務でもありません。",
+"Without Fivetran": "Fivetran なし",
+"With Fivetran": "Fivetran あり",
+"Someone owns every column the source adds": "ソースが追加する列を、誰かが人手で面倒みることになる",
+"A hand-built pipeline has an explicit column list somewhere. When the source adds a column, the load fails or silently drops it, and either way a person is now in the loop.":
+  "自前構築のパイプラインには、どこかに明示的な列リストがあります。ソースが列を追加すると、ロードが失敗するか、黙って取り落とすかのどちらかです。いずれにしても、そこから人が介入することになります。",
+"A widened type truncates silently.": "型の拡張は、黙って切り捨てを起こします。",
+"A failed sync has no checkpoint.": "失敗した同期にはチェックポイントがありません。",
+"The schema history lives in git blame,": "スキーマの変更履歴は git blame の中にしかありません。",
+"The platform owns the shape of what lands": "着地するデータの形は、プラットフォームが受け持つ",
+"New column or table appears downstream on its own.": "新しい列やテーブルは、下流に自動で現れます。",
+"A widened type is promoted,": "拡張された型は昇格されます。",
+"Loading is idempotent.": "ロードは冪等です。",
+"The schema-change record is the evidence.": "スキーマ変更の記録が、そのまま証拠になります。",
+"What lands is a correct, queryable schema:": "着地するのは、正しくクエリ可能なスキーマです。",
+"The gate that closes this stage": "この段階を閉じるゲート",
+"Row parity from source to destination, and the schema-drift record that proves nothing was silently dropped between them. Counts and values reconcile against the source, or they do not, which is why this is the easiest place to start.":
+  "ソースから宛先までの行数の一致と、その間で何も黙って失われていないことを示すスキーマドリフトの記録です。件数と値はソースと突き合わせて一致するか、しないかのどちらかです。だからこそ、ここが最も着手しやすい出発点になります。",
+
+/* custom sources */
+"Build a connector for a source nobody has heard of": "誰も聞いたことのないソース向けにコネクタを構築する",
+"Live simulator": "ライブシミュレーター",
+"Proving it works": "つながることの証明",
+"Production, typical API": "本番向け、一般的な API",
+"Production, difficult source": "本番向け、難しいソース",
+"Run the build": "ビルドを実行",
+"15 to 20 minutes": "15 〜 20 分",
+"measured range for this mode": "このモードでの実測レンジ",
+"Python": "Python",
+"connector.py plus configuration.json": "connector.py と configuration.json",
+"Managed": "マネージド",
+"Fivetran hosts and schedules it like any other connection": "Fivetran が他の接続と同じようにホストし、スケジュールします",
+"A source whose pagination and auth are already understood, built and deployed live. A measured time, and the one that surprises people. Useful in a discovery meeting: stop debating whether the awkward system can be connected and just connect it.":
+  "ページネーションと認証が既に把握できているソースを、その場で構築してデプロイした場合の時間です。実測値であり、多くの人が驚く数字です。ディスカバリーの場で有効です。扱いにくいシステムがつながるかどうかを議論するのをやめて、実際につないでしまえます。",
+"Nothing here is bespoke in the sense that matters: it runs managed on the same platform as everything else, with the same syncs, the same monitoring and the same schema treatment.":
+  "ここで作るものは、問題になる意味での「作り込み」ではありません。他のすべてと同じプラットフォーム上でマネージドに動き、同じ同期、同じ監視、同じスキーマ処理が適用されます。",
+"Where the time actually goes": "時間が実際にどこへ消えるのか",
+"Not the request loop. It goes into the handful of API behaviours that decide the cursor design, and getting one wrong is a long debugging tail rather than a bug.":
+  "リクエストのループではありません。カーソル設計を左右する、ごく少数の API の挙動に消えていきます。そこを 1 つ間違えると、バグというよりも長く続くデバッグの尾を引きます。",
+"Inclusive range filters.": "両端を含む範囲フィルター。",
+"Per-sync caps with offset pagination.": "同期ごとの上限とオフセットページネーションの併用。",
+"Async polling, pagination tokens, query DSLs, streaming, multi-call-per-record.":
+  "非同期ポーリング、ページネーショントークン、クエリ DSL、ストリーミング、1 レコードあたり複数回の呼び出し。",
+"Profile the API before generating any code.": "コードを 1 行も生成する前に、API の性質を洗い出してください。",
+
+/* where it runs */
+"SaaS deployment": "SaaS デプロイ",
+"Hybrid Deployment": "Hybrid Deployment",
+"Processing happens in Fivetran’s cloud. This covers most of a client’s estate, because most sources carry no processing-path policy at all.":
+  "処理は Fivetran のクラウド上で行われます。ほとんどのソースには処理経路に関するポリシーが無いため、これで顧客環境の大部分がカバーできます。",
+"Processing happens inside the client’s own network; Fivetran’s cloud is used only to orchestrate. In neither model does Fivetran store or maintain the data. What persists is a cursor marking the last checkpoint.":
+  "処理は顧客自身のネットワーク内で行われ、Fivetran のクラウドはオーケストレーションにのみ使われます。どちらのモデルでも、Fivetran がデータを保存したり保持したりすることはありません。残るのは、最後のチェックポイントを示すカーソルだけです。",
+"The question that clarifies it": "論点をはっきりさせる質問",
+"When a source carries a no-SaaS-processing policy, ask where the data is going to land. It is usually a cloud data platform, which is itself a SaaS service. That is not a gotcha; it is the question that separates a policy about the processing path from a policy about the data leaving the environment at all. Those need different architectures, and clients frequently have not distinguished them.":
+  "あるソースに「SaaS で処理してはならない」というポリシーが付いている場合、そのデータがどこに着地する予定かを尋ねてください。多くの場合はクラウドデータプラットフォームであり、それ自体が SaaS サービスです。これは揚げ足取りではありません。処理経路に関するポリシーなのか、そもそもデータが環境外に出ることを禁じるポリシーなのかを切り分ける質問です。この 2 つは必要なアーキテクチャが異なり、顧客側で区別できていないことが少なくありません。",
+"The managed lake does not support Hybrid Deployment today.": "マネージドレイクは現時点で Hybrid Deployment に対応していません。"
+
+});
+
+/* Japanese, batch 03: chapter 2 (Landing) and chapter 4 (Tests). */
+Object.assign(JA, {
+
+/* ---------- chapter 2: landing and storage ---------- */
+"One write, every metadata layer, identical rows": "1 回の書き込み、すべてのメタデータレイヤー、まったく同じ行",
+"Run the parity query": "一致確認クエリを実行",
+"Run the query to read the same files through every layer.": "クエリを実行して、同じファイル群を各レイヤー経由で読み取ります。",
+"Each engine reads the layer it understands and none of them know about each other. That is what makes this a demonstration rather than a position.":
+  "各エンジンは自分が理解できるレイヤーを読むだけで、互いの存在を知りません。だからこれは主張ではなく実演になります。",
+"Engine": "エンジン", "Reads": "読み取り対象", "Rows": "行数", "Result": "結果", "waiting": "待機中",
+"Iceberg metadata": "Iceberg メタデータ", "Delta log": "Delta ログ", "Parquet directly": "Parquet を直接",
+"Fabric Warehouse": "Fabric Warehouse", "AWS Glue": "AWS Glue", "BigLake": "BigLake",
+"Unity Catalog": "Unity Catalog", "Microsoft OneLake": "Microsoft OneLake",
+"Without an open lake": "オープンレイクなし",
+"With the managed lake": "マネージドレイクあり",
+"A copy per engine, and a pipeline per copy": "エンジンごとにコピーが増え、コピーごとにパイプラインが増える",
+"Data in a proprietary store is readable only by the compute that owns it. A second engine means a second copy, which means a second pipeline, a reconciliation, and a lag between them.":
+  "独自形式のストアにあるデータは、それを所有するコンピュートからしか読めません。2 つ目のエンジンを使うということは、2 つ目のコピーを持つことであり、つまり 2 本目のパイプライン、突き合わせ作業、そして両者の間の遅延を抱えることです。",
+"Every new consumer is a new movement to maintain.": "利用者が増えるたびに、保守すべきデータ移動が 1 つ増えます。",
+"Every question goes through one vendor’s engine,": "あらゆる問いが 1 社のエンジンを通ることになります。",
+"The merge cost lands on your warehouse bill.": "マージのコストは自社のウェアハウス請求に乗ります。",
+"One physical write, three ways in": "物理的な書き込みは 1 回、入口は 3 つ",
+"The data is written once as Parquet. Iceberg metadata is always created over it, and Delta Lake metadata as well when you enable it. Two metadata layers over the Parquet, plus the Parquet itself, which anything can read directly.":
+  "データは Parquet として 1 度だけ書き込まれます。その上に Iceberg メタデータが必ず作られ、有効にすれば Delta Lake メタデータも作られます。Parquet の上に 2 つのメタデータレイヤー、加えて Parquet 自体も直接読み取れます。",
+"physical write": "物理的な書き込み",
+"open formats over it": "その上のオープンフォーマット",
+"copies of the data": "データのコピー数",
+"owns the bucket, catalog and credentials": "バケット、カタログ、認証情報を所有します",
+"Client": "顧客",
+"The two catalogs, and the difference that matters": "2 つのカタログと、その決定的な違い",
+"The lake catalog makes tables reachable": "レイクのカタログはテーブルに到達可能にする",
+"Polaris, Glue, Unity Catalog, BigLake, OneLake. It answers two questions: where is this table, and may I read it. That layer is what lets an engine plug in without a new pipeline.":
+  "Polaris、Glue、Unity Catalog、BigLake、OneLake です。答えるのは 2 つの問いだけです。このテーブルはどこにあるのか、そして読んでよいのか。このレイヤーがあるおかげで、新しいパイプラインなしでエンジンを接続できます。",
+"dbt Catalog makes them interpretable": "dbt Catalog はテーブルを解釈可能にする",
+"What a column means, where it came from, what tests it passed. Both are needed and neither substitutes for the other. An estate with only the first has data every engine can find and nobody can explain.":
+  "列が何を意味するのか、どこから来たのか、どのテストを通ったのか。両方が必要で、どちらも他方の代わりにはなりません。前者だけの環境では、あらゆるエンジンが見つけられるのに誰も説明できないデータが残ります。",
+"The same rows returned through every metadata layer the lake maintains, from one write, and the models that shape what lands ran in dependency order with run results you can read.":
+  "1 回の書き込みから、レイクが保持するすべてのメタデータレイヤー経由で同じ行が返ること。そして着地するデータを形づくるモデルが依存順に実行され、その実行結果を後から読めることです。",
+
+/* who pays for what */
+"Where the ingestion compute lands": "取り込みのコンピュートがどこに乗るか",
+"Live model": "ライブモデル",
+"This is a shape model, not a price. It shows which bill each unit of ingestion work lands on, which is the part that is rarely on the slide.":
+  "これは価格表ではなく、費用構造のモデルです。取り込み作業の各単位がどの請求に乗るのかを示します。スライドにはまず出てこない部分です。",
+"Sources in the estate": "社内のソース数",
+"Change data capture on the databases": "データベースの変更データキャプチャ",
+"40 sources": "40 ソース",
+"On": "オン", "Off": "オフ", "You": "自社",
+"merge units per day at this shape, wherever they run": "この構成での 1 日あたりのマージ処理量（どこで実行されるかに関わらず）",
+"of them on the client’s warehouse with Fivetran": "そのうち Fivetran 利用時に顧客のウェアハウスで実行される分",
+"of them on the client’s warehouse with native ingestion": "そのうちネイティブ取り込み利用時に顧客のウェアハウスで実行される分",
+"Unit of work": "作業の単位",
+"Hand-rolled": "自前構築",
+"Native managed connectors": "ネイティブのマネージドコネクタ",
+"Reading the source API or log": "ソースの API またはログの読み取り",
+"Landing the raw records": "生レコードの着地",
+"The merge that applies changes": "変更を適用するマージ",
+"Schema evolution and type promotion": "スキーマ進化と型のプロモーション",
+"Table and metadata maintenance": "テーブルとメタデータの保守",
+"Storage": "ストレージ",
+"Compute that reads it": "それを読むコンピュート",
+"Your platform": "自社プラットフォーム",
+"Your warehouse": "自社ウェアハウス",
+"Your DBUs": "自社の DBU",
+"Your engineers": "自社エンジニア",
+"Your jobs": "自社のジョブ",
+"Partly managed": "一部マネージド",
+"Native managed ingestion is billed as your platform compute. That is not hidden and it is not unfair, but it does mean ingestion cost grows on the same bill as your analytics, and the two become hard to tell apart at renewal.":
+  "ネイティブのマネージド取り込みは、自社プラットフォームのコンピュートとして課金されます。それは隠されていないし、不当でもありません。ただし取り込みコストが分析と同じ請求書の上で増えていくため、更新交渉の時期に両者を切り分けるのが難しくなります。",
+"The operating model, stated plainly": "運用モデルを率直に述べると",
+"Fivetran manages the ingestion and the table layer: reading the source, writing the tables, the merges that apply changes, metadata handling, table maintenance and the managed catalog. The compute to do all of that is Fivetran’s, not the client’s. The client pays for their own cloud storage, because the data lives in their account, and for whatever compute they point at it to read.":
+  "Fivetran が取り込みとテーブルレイヤーを管理します。ソースの読み取り、テーブルの書き込み、変更を適用するマージ、メタデータの処理、テーブル保守、マネージドカタログです。これらを実行するコンピュートは Fivetran のもので、顧客のものではありません。顧客が支払うのは、データが自社アカウント内にあるための自社クラウドストレージと、それを読むために向けたコンピュートです。",
+"That is the operating model, and it is as far as this page goes. Rates, tiers and actual numbers are a conversation with Fivetran rather than something to quote from an architecture page.":
+  "これが運用モデルであり、このページで踏み込むのはここまでです。料率、階層、実際の金額は Fivetran との個別の会話であり、アーキテクチャの資料から引用するものではありません。",
+"Where ingestion compute is billed": "取り込みコンピュートの課金先",
+"<i></i>Fivetran": "<i></i>Fivetran",
+"<i></i>Snowflake Openflow": "<i></i>Snowflake Openflow",
+"<i></i>Databricks Lakeflow Connect": "<i></i>Databricks Lakeflow Connect",
+"Extract, load and merge run on Fivetran’s compute.": "抽出、ロード、マージは Fivetran のコンピュートで実行されます。",
+"Table maintenance is included and invisible.": "テーブル保守は含まれており、意識する必要がありません。",
+"The client pays storage plus whatever reads it.": "顧客が支払うのは、ストレージとそれを読む分だけです。",
+"Managed connectors have compute-based pricing.": "マネージドコネクタはコンピュート課金です。",
+"So the ingestion compute is the client’s.": "つまり取り込みのコンピュートは顧客負担です。",
+"Auto Loader is a file primitive, not a connector.": "Auto Loader はファイル取り込みの基本機能であり、コネクタではありません。",
+"Convenience is real here: one vendor, one bill, one support path. Say that out loud. The trade is catalog breadth, whose compute runs it, and the fact that it lands in Databricks.":
+  "ここでの利便性は本物です。ベンダーは 1 社、請求は 1 本、サポート窓口も 1 つ。そこは声に出して認めてください。引き換えになるのは、カタログの広さ、誰のコンピュートで動くか、そして着地先が Databricks であるという事実です。",
+"Around 26 GA connectors,": "GA コネクタは約 26 件で、",
+"Runs Snowflake-hosted on container services, or on your own compute.": "Snowflake のコンテナサービス上、または自社コンピュート上で動作します。",
+"Snowpipe and Snowpipe Streaming are landing primitives.": "Snowpipe と Snowpipe Streaming は着地のための基本機能です。",
+"For a Snowflake-only estate with sources inside that catalog, this is a reasonable answer and you should say so. It stops being the answer at the first source that is not in the list, or the first consumer that is not Snowflake.":
+  "Snowflake だけの環境で、ソースがそのカタログに収まっているなら、これは妥当な答えです。そう言うべきです。ただしリストに無いソースが 1 つ出た時点で、あるいは Snowflake 以外の利用者が 1 つ出た時点で、答えではなくなります。",
+
+/* maintenance */
+"What the managed service does": "マネージドサービスが行うこと",
+"Task": "処理",
+"Snapshot expiry": "スナップショットの期限切れ",
+"Snapshots older than the retention period are expired daily, with at least the last two always kept.":
+  "保持期間を過ぎたスナップショットは毎日期限切れになりますが、直近 2 世代は必ず残されます。",
+"Delete markers": "削除マーカー",
+"Delta delete markers are held for up to seven days, or the retention period if that is shorter.":
+  "Delta の削除マーカーは最大 7 日間、保持期間がそれより短い場合はその期間だけ保持されます。",
+"Metadata versions": "メタデータのバージョン",
+"Three previous versions of the metadata files are retained.": "メタデータファイルは過去 3 世代が保持されます。",
+"Orphan files": "孤立ファイル",
+"Staged on alternate Saturdays and removed on the following pass.": "隔週の土曜日にステージングされ、次回の処理で削除されます。",
+"Documented behaviours of the managed service. Not something a client tunes, and not something a delivery team writes a job for.":
+  "いずれもマネージドサービスの文書化された挙動です。顧客がチューニングするものでも、導入チームがジョブを書くものでもありません。",
+"What the docs do not claim, this page does not either.": "ドキュメントが主張していないことは、このページでも主張しません。",
+"Two costs that are the client’s, and get missed": "顧客負担なのに見落とされがちな 2 つのコスト",
+"Geography": "地理的な配置",
+"\"Any cloud, any engine\" is architecturally true and has a bill. If the lake sits in one region and the engine reads it from another, or from another cloud, that traffic is charged to the client. Establish where the lake lives before anyone attaches an engine somewhere convenient.":
+  "「どのクラウドでも、どのエンジンでも」はアーキテクチャとしては正しく、そして請求も発生します。レイクが 1 つのリージョンにあり、エンジンが別のリージョン、あるいは別のクラウドから読む場合、その通信は顧客に課金されます。誰かが都合のよい場所にエンジンをつなぐ前に、レイクの所在地を確定させてください。",
+"A second catalog": "2 つ目のカタログ",
+"Registering the same tables in Glue, Unity Catalog, BigLake or OneLake is reasonable and often right for survivability. Book it as a client platform cost rather than assuming it comes with the managed service.":
+  "同じテーブルを Glue、Unity Catalog、BigLake、OneLake に登録するのは妥当で、可用性の観点からは正しい選択であることも多いです。ただしそれはマネージドサービスに含まれると考えず、顧客側プラットフォームのコストとして計上してください。",
+"When multi-format is the wrong call.": "マルチフォーマットが適切でない場合。",
+
+/* ---------- chapter 4: tests ---------- */
+"Every test is a query that returns failing rows": "テストはすべて、失敗した行を返すクエリである",
+"Interactive": "インタラクティブ",
+"unique": "unique", "not_null": "not_null", "accepted_values": "accepted_values", "relationships": "relationships",
+"What you write": "書くもの",
+"What dbt runs": "dbt が実行するもの",
+"When it fails:": "失敗した場合:",
+"Zero rows returned means the test passed. That is the entire mechanism, which is why a custom test is just a query you already know how to write.":
+  "返る行が 0 件ならテストは合格です。仕組みはこれだけです。だからこそ独自テストは、すでに書き方を知っているクエリにすぎません。",
+"Without dbt": "dbt なし",
+"With dbt": "dbt あり",
+"Every check is hand-written, and someone has to remember to run it": "チェックはすべて手書きで、誰かが実行を覚えていなければならない",
+"The queries are not the problem. The problem is that they are unowned, unscheduled, and hardcode the table name in every one.":
+  "問題はクエリそのものではありません。所有者がおらず、スケジュールもされておらず、しかもすべてのクエリにテーブル名が直接書き込まれていることです。",
+"Change the table name and you fix each query by hand.": "テーブル名を変えれば、各クエリを手作業で直すことになります。",
+"A failing check does not stop anything.": "チェックが失敗しても、何も止まりません。",
+"Declared next to the model, run on every build": "モデルの隣で宣言し、ビルドごとに実行される",
+"Four lines of YAML express what would otherwise be four hand-written queries, and they run as part of the build rather than when somebody remembers.":
+  "4 行の YAML が、手書きなら 4 本になるクエリを表現します。しかも誰かが思い出したときではなく、ビルドの一部として実行されます。",
+"Start simple, then add configuration.": "まず単純に始めて、後から設定を足していきます。",
+"A failing test blocks what is downstream of it.": "失敗したテストは、その下流をブロックします。",
+"Run dbt build with a failing test": "テストが失敗する状態で dbt build を実行する",
+"Duplicate keys arrive": "重複キーが届く",
+"Clean data arrives": "正常なデータが届く",
+"Run dbt build": "dbt build を実行",
+"Run the build to see models and tests execute in DAG order.": "ビルドを実行すると、モデルとテストが DAG の順に実行される様子が見られます。",
+"models built": "ビルドされたモデル",
+"tests passed": "合格したテスト",
+"models skipped": "スキップされたモデル",
+"Bad data in stg_orders was blocked from propagating downstream. That is the difference between a test suite and a gate.":
+  "stg_orders の不正なデータが、下流への伝播を止められました。これがテストスイートとゲートの違いです。",
+"This is the difference between a test suite and a gate. A test that reports a failure into a dashboard nobody reads has cost you compute and bought you nothing. A test that stops the build has kept eight downstream tables, three dashboards and one agent from confidently answering with data that was already known to be wrong.":
+  "これがテストスイートとゲートの違いです。誰も見ないダッシュボードに失敗を報告するだけのテストは、コンピュートを消費して何も得ていません。ビルドを止めるテストは、下流の 8 テーブル、3 つのダッシュボード、1 つのエージェントが、すでに誤りだと分かっているデータで自信たっぷりに答えるのを防いだのです。",
+"Break one model on purpose and confirm the tests catch it.": "意図的にモデルを 1 つ壊して、テストがそれを捕まえることを確認してください。",
+"The logic is in version control with tests, and the project can name what a change breaks before anything runs. Coverage is countable from the compiled project: either every model carries a test, or you can name the ones that do not.":
+  "ロジックがテスト付きでバージョン管理され、何かを実行する前に、その変更が何を壊すかをプロジェクトが名指しできることです。カバレッジはコンパイル済みプロジェクトから数えられます。すべてのモデルにテストがあるか、無いものを名指しできるかのどちらかです。",
+"model": "モデル", "source": "ソース"
+
+});
+
+/* Japanese, batch 04: chapter 3 (Models and layers) and chapter 7 (Governance and semantics). */
+Object.assign(JA, {
+
+/* ---------- chapter 3: models and layers ---------- */
+"Watch a model compile and materialize": "モデルがコンパイルされ、実体化される様子を見る",
+"1 · your model file": "1 · あなたのモデルファイル",
+"2 · compiled SQL": "2 · コンパイル後の SQL",
+"3 · objects in the platform": "3 · プラットフォーム上のオブジェクト",
+"Nothing built yet.": "まだ何もビルドされていません。",
+"Pick an environment and run.": "環境を選んで実行してください。",
+"Dev": "開発", "CI": "CI", "Production": "本番", "Development": "開発",
+"The SQL you wrote never changed. What changed is the schema it resolved to, and dbt wrote the DDL.":
+  "あなたが書いた SQL は一切変わっていません。変わったのは解決されたスキーマだけで、DDL は dbt が書きました。",
+"A traditional SQL script": "従来の SQL スクリプト",
+"A dbt model": "dbt のモデル",
+"CREATE TABLE is your job": "CREATE TABLE は自分の仕事になる",
+"Table names are baked in, the environment is baked in, and the dependency on other scripts exists only in whoever wrote it.":
+  "テーブル名が埋め込まれ、環境も埋め込まれ、他のスクリプトへの依存関係は書いた人の頭の中にしか存在しません。",
+"Hardcoded references.": "参照がハードコードされています。",
+"No dependency tracking.": "依存関係が追跡されません。",
+"DDL is yours to maintain,": "DDL は自分で保守することになります。",
+"You write the transformation, dbt writes the DDL": "変換ロジックはあなたが書き、DDL は dbt が書く",
+"One file, three things declared: how to materialize it, what it reads, and the logic. Everything else is derived.":
+  "1 つのファイルで宣言するのは 3 つだけです。どう実体化するか、何を読むか、そしてロジックです。それ以外はすべて導出されます。",
+"config() tells dbt how to build it.": "config() が dbt にビルド方法を伝えます。",
+"ref() declares the dependency and resolves the schema at compile time.": "ref() が依存関係を宣言し、コンパイル時にスキーマを解決します。",
+"No CREATE TABLE, no environment strings.": "CREATE TABLE も、環境を表す文字列も書きません。",
+
+"The four layers, without dbt and with dbt": "4 つのレイヤー、dbt なしと dbt あり",
+"Sources": "ソース", "Staging": "ステージング", "Intermediate": "中間", "Marts": "マート",
+"Layer": "レイヤー",
+"What belongs there": "そこに置くもの",
+"What goes wrong without it": "無い場合に何が起きるか",
+"Tables with no context": "文脈のないテーブル群",
+"Nothing marks what is raw, what is derived, or whether it is stale. Nobody knows if today’s number used yesterday’s data.":
+  "どれが生データで、どれが派生で、鮮度が落ちているかを示すものが何もありません。今日の数字が昨日のデータを使っているかどうか、誰も分かりません。",
+"Raw tables declared in YAML, with freshness tolerances you configure per table.":
+  "生テーブルを YAML で宣言し、鮮度の許容値をテーブルごとに設定します。",
+"No single place to standardize. Every downstream join re-does the same casting, differently.":
+  "標準化する場所が 1 つもありません。下流の結合ごとに、同じキャストを少しずつ違う形でやり直します。",
+"One model per source table: renaming, casting, light cleanup, key tests. Nothing else.":
+  "ソーステーブルごとに 1 モデル。リネーム、キャスト、軽い整形、キーのテストだけです。それ以上はしません。",
+"The same CTE is copy-pasted into three scripts and they drift. One gets fixed.":
+  "同じ CTE が 3 つのスクリプトにコピーされ、やがて内容がずれます。直されるのは 1 つだけです。",
+"Shared logic several marts reuse. Zero to many per project; forcing one is as wrong as forcing none.":
+  "複数のマートが再利用する共通ロジックです。プロジェクトごとに 0 個から複数個。1 個に強制するのは、0 個に強制するのと同じくらい誤りです。",
+"Every team builds its own customer table and none of them agree. The board sees three numbers.":
+  "各チームが独自の顧客テーブルを作り、どれも一致しません。経営会議には 3 つの数字が並びます。",
+"One concept, one model, wide enough to answer questions about that entity.":
+  "1 つの概念に 1 つのモデル。そのエンティティに関する問いに答えられる幅を持たせます。",
+"One concept, one model.": "1 つの概念に 1 つのモデル。",
+"transformed": "変換済み", "table": "テーブル", "read": "読み取り", "write": "書き込み",
+"fresh": "新鮮", "stale": "古い",
+
+"One codebase, three destinations": "1 つのコードベース、3 つの宛先",
+"The same model file": "同じモデルファイル",
+"Compiled for development": "開発向けにコンパイル",
+"Development environment · connects as your personal user": "開発環境 · あなた個人のユーザーとして接続",
+"Connection": "接続", "Target schema": "書き込み先スキーマ", "Threads": "スレッド数", "Runs on": "実行契機",
+"your credentials, not a service account": "サービスアカウントではなく、あなたの認証情報",
+"your command": "あなたのコマンド",
+"Each developer gets their own schema. Safe to break things.": "開発者ごとに専用スキーマが与えられます。壊しても安全です。",
+"A personal sandbox per developer, with their own schema and their own credentials. Safe to break.":
+  "開発者ごとの個人サンドボックスです。専用のスキーマと専用の認証情報を持ち、壊しても安全です。",
+"A schema created per pull request, built and torn down automatically. Nobody triggers it.":
+  "プルリクエストごとに作られるスキーマです。自動で構築され、自動で破棄されます。誰も手動で起動しません。",
+"A service account, a scheduled job, and the schema dashboards read from.":
+  "サービスアカウント、スケジュールされたジョブ、そしてダッシュボードが参照するスキーマです。",
+"dbt acts on your behalf.": "dbt はあなたの権限で動きます。",
+"The SQL did not change. Only the destination schema did, because ref() resolves at compile time.":
+  "SQL は変わっていません。変わったのは書き込み先スキーマだけです。ref() がコンパイル時に解決するからです。",
+
+/* ---------- chapter 7: governance and semantics ---------- */
+"Rename a column that two other teams depend on": "他の 2 チームが依存している列をリネームする",
+"No contract": "コントラクトなし",
+"Contract plus versions": "コントラクトとバージョン",
+"Rename customer_name to full_name": "customer_name を full_name にリネーム",
+"Platform team · dim_customers": "プラットフォームチーム · dim_customers",
+"Marketing · campaign_attribution": "マーケティング · campaign_attribution",
+"Finance · revenue_by_account": "財務 · revenue_by_account",
+"reads dim_customers.customer_name": "dim_customers.customer_name を読み取り",
+"customer_name": "customer_name",
+"Rename the column and see what happens downstream.": "列をリネームして、下流で何が起きるか確認してください。",
+"A contract means the model cannot change shape without a new version. v1 stays stable while downstream teams adopt v2 and validate on their own cadence.":
+  "コントラクトがあると、新しいバージョンなしでモデルの形を変えられません。v1 は安定したまま残り、下流のチームは各自のペースで v2 を採用し検証できます。",
+"Without contracts": "コントラクトなし",
+"With contracts and versions": "コントラクトとバージョンあり",
+"An upstream edit flows through instantly": "上流の変更が即座に流れ込む",
+"Renaming a column is a one-line change for the team that owns the model and an outage for everyone who built on it. Neither team knew the other existed.":
+  "列のリネームは、モデルを所有するチームには 1 行の変更ですが、その上に構築した全員には障害です。どちらのチームも、相手の存在を知りませんでした。",
+"Nothing declares what is safe to build on.": "何の上に構築してよいかを宣言するものがありません。",
+"A break is discovered by the consumer,": "破損は利用者側で発見されます。",
+"v1 stays stable while v2 is adopted": "v2 が採用される間、v1 は安定したまま",
+"A contract means the model cannot change shape without a new version. Downstream teams migrate on their own cadence and validate before they switch.":
+  "コントラクトがあると、新しいバージョンなしでモデルの形を変えられません。下流のチームは各自のペースで移行し、切り替える前に検証します。",
+"access: public is a promise, and private is a boundary.": "access: public は約束であり、private は境界です。",
+"A deprecation date makes the migration a plan": "廃止予定日があることで、移行が計画になります",
+
+"Without a catalog": "カタログなし",
+"With dbt Catalog": "dbt Catalog あり",
+"Hundreds of tables and no way to pick the right one": "数百のテーブルがあり、正しいものを選ぶ手段がない",
+"The information exists. It is spread across a wiki nobody updated, a Slack thread, and the person who left.":
+  "情報は存在します。ただし誰も更新していない wiki、Slack のスレッド、そして退職した人の中に散らばっています。",
+"No way to trace where a column came from,": "列がどこから来たのかを追跡する手段がありません。",
+"Column meanings are unknown.": "列の意味が分かりません。",
+"No sign of when data last loaded": "データが最後にロードされた時期を示すものがありません",
+"Generated from the compiled project, so it cannot drift": "コンパイル済みプロジェクトから生成されるため、ずれようがない",
+"What a column means, where it came from, what tests it passed, and how fresh it is. Produced by the run rather than written after it.":
+  "列が何を意味するのか、どこから来たのか、どのテストを通ったのか、そしてどれだけ新しいのか。実行後に人が書くのではなく、実行そのものが生成します。",
+"Scoped lineage by default, full graph on demand.": "既定では範囲を絞ったリネージ、必要なときに全体グラフ。",
+"This is what makes a natural-language answer possible.": "これが自然言語での回答を可能にします。",
+"Two catalogs, two jobs.": "2 つのカタログ、2 つの役割。",
+
+"Ask a question and watch it resolve": "質問を投げて、解決される様子を見る",
+"Asked in natural language": "自然言語での質問",
+"What was revenue by region last quarter?": "前四半期の地域別売上はどうでしたか？",
+"Run the query": "クエリを実行",
+"Run to walk through the resolution.": "実行すると、解決の過程を順に追えます。",
+"revenue": "revenue", "order_count": "order_count", "profit": "profit",
+"The consumer never wrote SQL and never picked a table. It asked for a metric that exists, with a dimension that exists, and the layer wrote the query.":
+  "利用者は SQL を書いておらず、テーブルも選んでいません。存在するメトリクスを、存在するディメンションで求めただけです。クエリはレイヤーが書きました。",
+"Without a Semantic Layer": "Semantic Layer なし",
+"With the Semantic Layer": "Semantic Layer あり",
+"Metrics live everywhere and nowhere": "メトリクスはどこにでもあり、どこにもない",
+"Three teams, three definitions of revenue, and the board sees a different number depending on who built the report.":
+  "3 つのチームに 3 つの売上定義があり、経営会議で見える数字はレポートを作った人によって変わります。",
+"Hundreds of tables, thousands of columns.": "数百のテーブル、数千の列。",
+"Giving a model raw access to all of it is too ambitious.": "そのすべてに素のままアクセスさせるのは、無理があります。",
+"One definition, every consumer": "定義は 1 つ、利用者はすべて",
+"You hand-pick the validated models to expose, define each metric once, and every consumer resolves that definition rather than writing its own SQL.":
+  "公開する検証済みモデルを人が選び、各メトリクスを 1 度だけ定義します。以降はどの利用者も、自前の SQL を書く代わりにその定義を解決します。",
+"Consumers query metrics, not tables.": "利用者が問い合わせるのはメトリクスであり、テーブルではありません。",
+"The definition is version-controlled and reviewed.": "定義はバージョン管理され、レビューを受けます。",
+"Available over MCP, APIs and JDBC,": "MCP、API、JDBC から利用できます。",
+"Every governed metric has a definition, a test, and lineage back to its source, and an agent resolves the definition before it queries. Coverage is countable from the compiled project.":
+  "ガバナンス対象のすべてのメトリクスに、定義、テスト、ソースまでのリネージがあること。そしてエージェントがクエリを書く前に定義を解決することです。カバレッジはコンパイル済みプロジェクトから数えられます。"
+
+});
+
+/* Japanese, batch 05: chapter titles, sub-tab labels and sub-tab descriptions.
+   These live in the section head, which my first extractor did not walk, so they
+   were outside the measured denominator. Re-keyed here by English source string. */
+Object.assign(JA, {
+
+/* ---------- chapter titles ---------- */
+"Where Fivetran and dbt sit": "Fivetran と dbt の位置",
+"Ingestion": "取り込み",
+"Landing and storage": "ランディングとストレージ",
+"Models and layers": "モデルとレイヤー",
+"Tests and data quality": "テストとデータ品質",
+"Development workflow": "開発ワークフロー",
+"Orchestration and cost": "オーケストレーションとコスト",
+"Governance and semantics": "ガバナンスとセマンティクス",
+"Activation": "アクティベーション",
+
+/* ---------- sub-tab labels ---------- */
+"Build the stack": "スタックを組み立てる",
+"The ten chapters": "10 の章",
+"Source coverage": "ソースの網羅性",
+"Schema drift": "スキーマドリフト",
+"Custom sources": "独自ソース",
+"Where it runs": "実行される場所",
+"One write, many readers": "1 回の書き込み、多数の読み手",
+"Who pays for what": "誰が何を負担するか",
+"Maintenance": "メンテナンス",
+"What a model is": "モデルとは何か",
+"The four layers": "4 つのレイヤー",
+"Environments": "環境",
+"Tests are just SQL": "テストは SQL にすぎない",
+"Failure stops the line": "失敗はラインを止める",
+"Develop": "開発",
+"QA and CI": "QA と CI",
+"Run order": "実行順序",
+"dbt State": "dbt State",
+"Cost attribution": "コストの帰属",
+"Contracts and versions": "コントラクトとバージョン",
+"Catalog and lineage": "カタログとリネージ",
+"Semantic Layer": "Semantic Layer",
+"Governed vs ungoverned": "ガバナンスの有無",
+"How an agent reads it": "エージェントの読み方",
+"Any engine, any agent": "どのエンジンでも、どのエージェントでも",
+"dbt Wizard": "dbt Wizard",
+"What you send": "何を送るか",
+"Person or agent": "人かエージェントか",
+"How it gets built": "どう構築するか",
+"The six gates": "6 つのゲート",
+"What breaks without it": "これがないと何が壊れるか",
+"What ownership buys": "所有がもたらすもの",
+"Where a client is": "顧客の現在地",
+"Objections": "反論への対応",
+"Product reference": "製品リファレンス",
+
+/* ---------- sub-tab descriptions ---------- */
+"A data platform with raw data in one end and consumers at the other, and two gaps in the middle. Build it up one layer at a time.":
+  "一方の端に生データ、もう一方の端に利用者がいるデータプラットフォーム。その中間に 2 つの空白があります。一層ずつ組み立てていきます。",
+"What each chapter proves, and what you can run in front of a client when you get there.":
+  "各章が何を証明するのか、そして現場に立ったときに顧客の前で何を実行できるのか。",
+"The core systems are covered by everyone. The argument is about the long tail, which is where scope gets cut.":
+  "主要システムはどのベンダーでも対応済みです。論点はロングテールにあり、そこでプロジェクトの範囲が削られます。",
+"Sources change constantly. The only question is whether a person finds out from a monitor or from finance.":
+  "ソースは絶えず変化します。問題は、それを監視で知るのか、財務部門から知らされるのかだけです。",
+"What a connector for the source nobody has ever heard of actually takes, and where the time really goes.":
+  "誰も聞いたことのないソース向けコネクタが実際にどれだけかかるのか、そして時間が本当にどこへ消えるのか。",
+"The residency question, which attaches to a source rather than to a client, and the one constraint that is absolute.":
+  "データ所在地の問題は、顧客ではなくソースに紐づきます。そして絶対に譲れない唯一の制約について。",
+"Written once as Parquet, in the client’s own bucket, with more than one metadata layer over the same files.":
+  "顧客自身のバケットに Parquet として 1 度だけ書き込み、同じファイル群の上に複数のメタデータレイヤーを持ちます。",
+"The operating model, and the cost line that moves when ingestion stops running on your warehouse.":
+  "運用モデルと、取り込みが自社ウェアハウス上で動かなくなったときに動くコスト項目。",
+"The part nobody wants to own, and the reason it is described here but deliberately absent from the gate.":
+  "誰も抱えたくない部分。ここで説明しつつ、ゲートからは意図的に外している理由も含めて。",
+"A SQL SELECT that becomes a table, a view or an incremental load, with no DDL of your own.":
+  "テーブル、ビュー、または増分ロードになる SQL の SELECT。DDL は自分で書きません。",
+"Sources, staging, intermediate, marts. Data gets cleaner and more business-shaped at each step.":
+  "ソース、ステージング、中間、マート。各段階でデータはより整い、より業務の形に近づきます。",
+"The same code, three destinations. What changes is the schema it writes to, not the SQL.":
+  "同じコードで 3 つの宛先。変わるのは書き込み先スキーマであり、SQL ではありません。",
+"Every dbt test compiles to a query that returns failing rows. Zero rows means it passed.":
+  "dbt のテストはすべて、失敗した行を返すクエリにコンパイルされます。0 行なら合格です。",
+"dbt build runs and tests each model in dependency order. When a test fails, downstream models are skipped rather than fed bad data.":
+  "dbt build は依存関係の順にモデルを構築しテストします。テストが失敗すると、下流のモデルは誤ったデータを渡されるのではなくスキップされます。",
+"Four steps from opening the dbt platform to a commit on a feature branch. Nobody writes to main.":
+  "dbt platform を開いてからフィーチャーブランチへのコミットまでの 4 ステップ。main に直接書き込む人はいません。",
+"The moment a pull request opens, a CI job creates its own schema, builds only what changed, and reports back.":
+  "プルリクエストが開かれた瞬間に、CI ジョブが専用スキーマを作成し、変更分だけを構築して結果を返します。",
+"A scheduled job, a service account, and a run somebody can read afterwards.":
+  "スケジュールされたジョブ、サービスアカウント、そして後から誰でも読める実行記録。",
+"Without dbt, you declare the order every model runs in. This is the comparison that lands hardest with a platform team.":
+  "dbt がなければ、各モデルの実行順序を自分で宣言することになります。プラットフォームチームに最も響く比較です。",
+"Rebuild only what actually changed, where changed is judged semantically rather than by diffing files.":
+  "実際に変わったものだけを再構築します。変更の判定はファイル差分ではなく意味的に行われます。",
+"Warehouse spend attributed to the model that caused it, which turns a cost argument into a cost conversation.":
+  "ウェアハウス費用を、それを引き起こしたモデルに帰属させます。コストの言い争いがコストの会話に変わります。",
+"Scale from one project to many without an upstream edit breaking a downstream team at 3am.":
+  "上流の変更が午前 3 時に下流チームを壊すことなく、1 プロジェクトから多数へ拡張します。",
+"Documentation nobody can search is documentation nobody uses, and the same is true for an agent.":
+  "検索できないドキュメントは誰も使わないドキュメントです。エージェントについても同じことが言えます。",
+"A metric defined once, resolved the same way by a person, a dashboard and an agent.":
+  "一度定義したメトリクスを、人、ダッシュボード、エージェントが同じように解決します。",
+"The same question, the same data, no error on either side, and two different answers.":
+  "同じ質問、同じデータ、どちらにもエラーはなく、それでも答えは 2 つに分かれます。",
+"Four routes into the governed layer, and which question each one answers.":
+  "ガバナンス層への 4 つの経路と、それぞれがどの問いに答えるのか。",
+"Pick the agent backend per workload rather than per dataset. The data underneath does not change.":
+  "エージェントのバックエンドは、データセット単位ではなくワークロード単位で選びます。下にあるデータは変わりません。",
+"An agent grounded in the compiled project, versus one that guesses from the files.":
+  "コンパイル済みプロジェクトに根拠を持つエージェントと、ファイルから推測するエージェントの違い。",
+"The insight does not stop at a query. It reaches the system the business actually works in.":
+  "インサイトはクエリで終わりません。事業が実際に動いているシステムまで届きます。",
+"Activation is a deliberate selection rather than a mirror. Pick the records, the field and the moment.":
+  "アクティベーションは鏡写しではなく、意図的な選択です。レコード、書き込み先フィールド、送信タイミングを選びます。",
+"The consumer at the end can be either, and the governed layer does not change. What changes is how fast a wrong decision spreads.":
+  "最終利用者はどちらでもよく、ガバナンス層は変わりません。変わるのは、誤った判断が広がる速さです。",
+"Managed activation, a hand-rolled script, or pushing out from the warehouse, and the honest trade in each.":
+  "マネージドなアクティベーション、自前スクリプト、ウェアハウスからの押し出し。それぞれの正直なトレードオフ。",
+"A gate is evidence you can produce and put in front of a client, not an assertion that the work went well. Tick what you could evidence today.":
+  "ゲートとは、顧客の前に出せる証拠のことであり、うまくいったという主張ではありません。今日証明できるものにチェックを入れてください。",
+"Three failure modes, and the sentence each one arrives as.":
+  "3 つの故障モードと、それぞれが現れるときの一言。",
+"Open formats in the client’s own storage, and what that is worth on an ordinary Tuesday rather than at a migration.":
+  "顧客自身のストレージにあるオープンフォーマット。その価値は、移行のときよりも、ごく普通の火曜日に現れます。",
+"Five stages, and the next one to sell. A map to read, not a form to fill in.":
+  "5 つの段階と、次に売るべきもの。記入する書式ではなく、読むための地図です。",
+"Ten sentences you will hear in the room, and the answer that holds.":
+  "現場で必ず聞く 10 の言葉と、それに耐える答え。",
+"Everything named in this guide, in one place, with what it actually does.":
+  "このガイドで名前が出たすべてを 1 か所に、実際に何をするのかとともに。",
+
+/* nav and footer chrome that sits outside #body */
+"Previous": "前へ",
+"← Previous": "← 前へ",
+"Done": "完了"
+
+});
+
+let UI_LANG='en';
+let LOCALIZING=false;
+function jaLookup(s){ const k=s.trim().replace(/\s+/g,' '); return JA[k]; }
+function localize(root){
+  if(UI_LANG!=='ja'||LOCALIZING) return;
+  LOCALIZING=true;
+  try{ localizeInner(root); } finally { LOCALIZING=false; }
+}
+function localizeInner(root){
+  const skip=el=>['PRE','CODE','SVG','PATH','INPUT','SCRIPT','STYLE'].includes(el.tagName)
+    || /\b(mono|filetree|uifield|log)\b/.test(el.className||'')
+    || el.closest('pre,.filetree,.uifield')
+    /* an element that wraps code is not itself translatable */
+    || el.querySelector('pre,code,.log,.filetree,.uifield');
+  const q=[...root.querySelectorAll('*')].filter(el=>{
+    if(skip(el)) return false;
+    const t=(el.textContent||'').trim();
+    return t && /[A-Za-z]{2}/.test(t);
+  });
+  const deepest=q.filter(el=>!q.some(o=>o!==el && el.contains(o)));
+  deepest.forEach(el=>{
+    if(el.dataset && el.dataset.ja) return;          /* already localised */
+    const v=jaLookup(el.innerHTML);
+    if(v!==undefined){ el.innerHTML=v; if(el.dataset) el.dataset.ja='1'; }
+  });
+}
+
+/* Dynamic panels and simulators rebuild the DOM constantly, so watch for it
+   rather than trying to hook every render path. */
+function startLocalizeObserver(){
+  const mo=new MutationObserver(()=>{ if(UI_LANG==='ja') localize(document.body); });
+  mo.observe(document.body,{childList:true,subtree:true,attributes:false});
+  return mo;
+}
+
+/* Preview gate: Japanese is reachable by URL only until coverage clears the
+   target, so a partly translated guide is never shown by default. */
+function initJaPreview(){
+  const q=new URLSearchParams(location.search);
+  const on = q.get('lang')==='ja' || location.hash==='#ja';
+  if(!on) return false;
+  UI_LANG='ja';
+  document.documentElement.lang='ja';
+  document.documentElement.dataset.lang='ja';
+  localize(document.body);
+  startLocalizeObserver();
+  showJaBadge();
+  return true;
+}
+function showJaBadge(){
+  const b=document.createElement('div');
+  b.id='jaBadge';
+  b.style.cssText='position:fixed;right:14px;bottom:14px;z-index:200;background:#0B1524;color:#fff;'+
+    'border-radius:999px;padding:8px 14px;font-size:12.5px;font-weight:650;box-shadow:0 6px 20px -8px rgba(0,0,0,.6);'+
+    'display:flex;gap:9px;align-items:center;font-family:inherit';
+  const pct=()=>{ const c=jaCoverage(document.querySelector('#body')||document.body);
+    return c.total?Math.round(100*c.hit/c.total):0; };
+  const paint=()=>{ b.innerHTML='日本語プレビュー · このページ '+pct()+'% 翻訳済み'+
+    '<a href="?" style="color:#8FB2FF;text-decoration:none">English</a>'; };
+  paint();
+  document.body.appendChild(b);
+  new MutationObserver(()=>paint()).observe(document.querySelector('#body'),{childList:true,subtree:true});
+}
+/* coverage, for the test harness: [translated, total] over the given root */
+function jaCoverage(root){
+  const skip=el=>['PRE','CODE','SVG','PATH','INPUT','SCRIPT','STYLE'].includes(el.tagName)
+    || /\b(mono|filetree|uifield|log)\b/.test(el.className||'')
+    || el.closest('pre,.filetree,.uifield')
+    /* an element that wraps code is not itself translatable */
+    || el.querySelector('pre,code,.log,.filetree,.uifield');
+  const q=[...root.querySelectorAll('*')].filter(el=>{
+    if(skip(el)) return false;
+    const t=(el.textContent||'').trim();
+    return t && /[A-Za-z]{2}/.test(t);
+  });
+  const deepest=q.filter(el=>!q.some(o=>o!==el && el.contains(o)));
+  let hit=0, miss=[];
+  deepest.forEach(el=>{
+    if(el.dataset && el.dataset.ja){ hit++; return; }   /* already localised */
+    const s=el.innerHTML.trim().replace(/\s+/g,' ');
+    if(jaLookup(s)!==undefined) hit++; else miss.push(s);
+  });
+  return {hit, total:deepest.length, miss};
+}
+
+/* JA_BUNDLE_END */
+</script>
+<script>
 /* ==================================================================
    Framework: chapters, sub-tabs, block renderer, sim registry
    ================================================================== */
@@ -562,6 +1344,11 @@ L.en={
 'c9.s1.tab':'What you send','c9.s1.desc':'Activation is a deliberate selection rather than a mirror. Pick the records, the field and the moment.',
 'c9.s2.tab':'Person or agent','c9.s2.desc':'The consumer at the end can be either, and the governed layer does not change. What changes is how fast a wrong decision spreads.',
 'c9.s3.tab':'How it gets built','c9.s3.desc':'Managed activation, a hand-rolled script, or pushing out from the warehouse, and the honest trade in each.',
+'c11.tab':'Core vs platform','c11.title':'dbt Core or the dbt platform',
+'c11.s0.tab':'The engines','c11.s0.desc':'Core v2, the Fusion binary and the dbt platform are three distributions over one shared Rust runtime. Knowing which line is which is the whole conversation.',
+'c11.s1.tab':'What self-hosting means','c11.s1.desc':'The engine is free. What you take on is the control plane around it, and every piece of it pages somebody.',
+'c11.s2.tab':'What the platform adds','c11.s2.desc':'Capabilities that are platform-level rather than engine-level, including the four you cannot build from the open source at any price.',
+'c11.s3.tab':'When Core is right','c11.s3.desc':'The honest counter-case, because for some teams self-hosting is the correct answer and saying so earns the rest of the conversation.',
 'c10.tab':'Value','c10.title':'Value and gates',
 'c10.s0.tab':'The six gates','c10.s0.desc':'A gate is evidence you can produce and put in front of a client, not an assertion that the work went well. Tick what you could evidence today.',
 'c10.s1.tab':'What breaks without it','c10.s1.desc':'Three failure modes, and the sentence each one arrives as.',
@@ -1535,6 +2322,88 @@ function buildGuide(){ return [
       bus:'Activation is where an engagement becomes an annuity, because it is the layer the business notices when it stops working.',
       tech:'Whichever path you pick, the gate is the same: reconcile what landed against what was sent, then exercise the reversal.',
       partner:'Activation and agent enablement are the highest-value, stickiest layer you deliver on the foundation, and the point where a build engagement turns into managed services.'}
+   ]}
+ ]},
+
+/* ================= 12 · CORE OR PLATFORM ================= */
+{tab:T('c11.tab'), own:'db', title:T('c11.title'),
+ subs:[
+  {tab:T('c11.s0.tab'), desc:T('c11.s0.desc'),
+   blocks:[
+    {t:'sim', id:'engines'},
+    {t:'ft', x:'<b>What changed in June 2026.</b> dbt Core v2.0 shipped its first alpha on 1 June 2026, rebuilt on the same Rust foundations as Fusion, and a large amount of Fusion code was open-sourced into the <code>dbt-core</code> repository under Apache 2.0. The two-engine era is closing: Core and Fusion now share one runtime. If your notes still say Fusion is a separate ELv2 engine you should not plan around, they are out of date.'},
+    {t:'table', head:['Distribution','Licence','Cost','What it is'],
+     rows:[
+      ['<b>dbt Core v1.12</b> (Python)','Apache 2.0','free','The Python engine. Still available on PyPI and GitHub, in beta, and <b>not receiving new features</b>.'],
+      ['<b>dbt Core v2.0</b> (Rust)','Apache 2.0','free','The open-source baseline, built on the same foundations as Fusion. First alpha 1 June 2026.'],
+      ['<b>Fusion binary</b>','more permissive than ELv2','<b>free locally and in production</b>','The enhanced precompiled binary of v2. Contains some proprietary optimisations, including a built-in high-performance SQL linter. Premium features unlock with a free login or a payment method.'],
+      ['<b>dbt platform</b>','subscription','paid','Premium capabilities layered on the shared runtime. The control plane, not the engine.']],
+     cap:'From the dbt Labs announcement of dbt Core v2, June 2026. dbt Labs explicitly states the Fusion binary can be used free forever, including to power products that compete with Fivetran + dbt Labs.'},
+    {t:'warn', x:'<b>Do not sell the engine.</b> This is the single most common mistake in this conversation. The best free dbt CLI is Fusion, and dbt Labs says so in writing. If your pitch is "the platform gives you a faster engine", a technical buyer who has read the blog will correct you, and you will lose the room. The engine is the shared floor. The platform is what sits above it.'},
+    {t:'lens',
+      bus:'The engine being free and open is a reason to trust the vendor, not an objection. It means the transformation logic is portable by construction, and the paid layer has to earn its money on operations rather than on lock-in.',
+      tech:'Check which distribution the client is on. Python v1.x is on a maintenance path with no new features, so the question is not whether to move to the Rust runtime but when, and whether they run it themselves.',
+      partner:'Recommend Fusion for local and production CLI use without hesitation, because it is free and it is the best experience. Your commercial conversation is about the control plane, and it is a stronger conversation for being separated from the engine.'}
+   ]},
+  {tab:T('c11.s1.tab'), desc:T('c11.s1.desc'),
+   blocks:[
+    {t:'sim', id:'selfhost'},
+    {t:'h', x:'The engine is the cheap part'},
+    {t:'p', x:'A team that installs Fusion has a first-class transformation engine, for free, forever. Nothing in this chapter argues otherwise. What a self-hosted setup does not have is everything that turns that engine into a service other people can depend on: a scheduler, isolated environments, credentials handling, a CI path with per-pull-request schemas, run history somebody can read next quarter, alerting, a searchable catalog, access control, and an audit trail.'},
+    {t:'bul', x:[
+      ['Each of those is somebody’s weekend at some point.','Not because the software is bad, but because the person who set it up moves teams and the runbook was in their head.'],
+      ['The cost is not the build, it is the ownership.','Standing up Airflow plus dbt is a known quantity and a competent team does it in weeks. Running it for three years, through upgrades, staff changes and an audit, is the actual line item.'],
+      ['Four capabilities are not buildable from the open source at all.','Not "hard", not "expensive": not available. The next tab names them precisely, and is careful about the ones that are available.']]},
+    {t:'warn', x:'<b>Be careful with day estimates.</b> This guide does not put a number of engineer-days on self-hosting, because any number I gave you would be invented and a good architect would say so. What it does instead is count the components you would run and the things that page somebody, which is checkable against the client’s own estate.'}
+   ]},
+  {tab:T('c11.s2.tab'), desc:T('c11.s2.desc'),
+   blocks:[
+    {t:'wow', x:[
+      {tab:'What the engine gives you', title:'Free, open, and genuinely good',
+       sub:'This is the floor, identical whether you are on Core v2 or the Fusion binary, and it is a high floor.',
+       blocks:[
+        {t:'bul', k:'ok', x:[
+          ['Parse, compile and run, on the Rust runtime.','With the parse-time improvements on large projects that came with v2.'],
+          ['A tightly defined language spec.','Configuration typos are caught rather than silently ignored, which is a real class of bug removed.'],
+          ['Tests, contracts, snapshots, exposures, the semantic manifest.','The modelling and governance primitives are in the open source.'],
+          ['Parquet artifacts and a revamped local docs experience.','Artifacts are queryable directly with DuckDB, which is genuinely useful for your own tooling.'],
+          ['A built-in SQL linter, in the Fusion binary.','Free, and one of the proprietary optimisations that distribution carries.']]}
+       ]},
+      {tab:'What the platform adds', title:'The control plane, and four things you cannot build',
+       sub:'Most of what follows you could assemble yourself. Four items you could not, and those are the ones worth being precise about.',
+       blocks:[
+        {t:'table', head:['Capability','Self-hosted','dbt platform'],
+         rows:[
+          ['Scheduling and orchestration','Airflow, Dagster, cron or Kubernetes, that you run','Included, with run history'],
+          ['Per-pull-request CI with an isolated schema','You build it in your CI system','Included, triggered by the git platform'],
+          ['Deferral to production artifacts','You manage manifest storage and retrieval yourself','Managed'],
+          ['Run history, logs, alerting','You keep and rotate them','Included and searchable'],
+          ['Searchable catalog and lineage across teams','You host generated docs somewhere','<b>dbt Catalog</b>'],
+          ['Environments, credentials, RBAC, SSO, audit','You build and own it','Included'],
+          ['Cost attribution per model','Not available from the open source','<b>Platform only</b>'],
+          ['<b>Data diff against production</b>','Not available from the open source','<b>Platform only</b>'],
+          ['<b>Semantic Layer served over JDBC, APIs and MCP</b>','Semantic definitions are open; the serving layer is not','<b>Platform only</b>'],
+          ['dbt MCP server for agents','Open source, and you can run it yourself','Managed, and it reaches the governed metadata and Semantic Layer above'],
+          ['dbt Wizard','Not available','Platform'],
+          ['<b>Cross-project refs with contracts and versions</b>','Contracts are in the open source; cross-project resolution is not','<b>Platform only</b>']]},
+        {t:'ok', x:'<b>The honest headline.</b> You can self-host a very good transformation engine for nothing, and you can self-host the MCP server too. What you cannot self-host is a governed Semantic Layer served to consumers, a data diff against production, per-model cost attribution, and cross-project references with contracts. If the client’s roadmap has agents on it, that first item is the line that decides this, and it decides it on capability rather than on price.'}
+       ]}]},
+    {t:'lens',
+      bus:'Frame it as what the business gets that it currently cannot buy at any price internally: a number an agent can resolve, a change a reviewer can see the data impact of, and a bill attributable to the model that caused it.',
+      tech:'Ask which of the four platform-only rows the client needs in the next twelve months. If the answer is none, Core plus their existing orchestrator is a defensible architecture and you should say so.',
+      partner:'This is the most useful qualification conversation you can have early. It sorts a client into "wants a managed control plane" or "wants help running their own", and both are billable engagements with different shapes.'}
+   ]},
+  {tab:T('c11.s3.tab'), desc:T('c11.s3.desc'),
+   blocks:[
+    {t:'h', x:'When self-hosted Core is the right answer'},
+    {t:'bul', x:[
+      ['A mature platform team that already runs Airflow well.','If orchestration, secrets, CI and observability are already solved and staffed, the platform is buying a smaller delta and you should size it honestly.'],
+      ['A small team, one project, few consumers.','The governance features earn their money at the point where several teams depend on each other. Before that they are optionality.'],
+      ['A hard constraint on running software outside the perimeter.','Some regulated environments settle this before the value conversation starts. Note that this is the same class of question as the Fivetran residency one in chapter 2.'],
+      ['Cost sensitivity with genuine engineering capacity to spend.','A team with time and no budget is a legitimate position. The platform trades money for their time; if they have more time than money, the trade is worse.']]},
+    {t:'bad', x:'<b>What is not a good reason.</b> "We want to avoid lock-in" does not argue for self-hosting, because the engine and the project are Apache 2.0 either way and the models are portable by construction. Lock-in lives in where the data sits and in how platform-specific the SQL was allowed to become, which is chapters 2 and 10, not this one.'},
+    {t:'ok', x:'<b>Say the counter-case out loud.</b> A partner who names the cases where the client does not need the platform is the partner the client believes when they say they do. This tab exists so you can have that sentence ready rather than improvising it under pressure.'},
+    {t:'gate', label:'How to close this conversation', x:'Name which platform-only capabilities the client needs inside twelve months, and which components they would otherwise run themselves. If the first list is empty, recommend Fusion and their existing orchestrator, and mean it.'}
    ]}
  ]},
 
@@ -3084,6 +3953,108 @@ SIMS.actagent=function(el){
   reset();
 };
 
+/* ---------- 32 · the engines, one shared runtime ---------- */
+SIMS.engines=function(el){
+  const L=[
+    {k:'v1',  n:'dbt Core v1.12',   sub:'Python engine',              lic:'Apache 2.0', cost:'free',
+     note:'Still on PyPI and GitHub, in beta, and not receiving new features. A maintenance path, not a destination.', cls:'mid'},
+    {k:'v2',  n:'dbt Core v2.0',    sub:'Rust runtime, open source',  lic:'Apache 2.0', cost:'free',
+     note:'First alpha 1 June 2026, built on the same foundations as Fusion. A large amount of Fusion code was open-sourced into dbt-core.', cls:'good'},
+    {k:'fus', n:'Fusion binary',    sub:'enhanced distribution of v2',lic:'more permissive than ELv2', cost:'free, local and production',
+     note:'The best free dbt CLI. Precompiled, with some proprietary optimisations including a built-in SQL linter. Premium features unlock with a free login or a payment method.', cls:'good'},
+    {k:'plat',n:'dbt platform',     sub:'the control plane',          lic:'subscription', cost:'paid',
+     note:'Premium capabilities layered on the shared runtime. Orchestration, CI, catalog, Semantic Layer serving, cost attribution, MCP for agents.', cls:'ft'}
+  ];
+  let at='fus';
+  const c=simShell(el,'Interactive','Four distributions, one shared runtime');
+  c.head.appendChild(mkSeg(L.map(x=>[x.k,x.n]),v=>{at=v;draw()}));
+  const stack=E('div','blk'), out=E('div','blk');
+  c.body.appendChild(E('p','lead blk','Since June 2026 the engine is one Rust runtime with several distributions over it. Select a line to see what it is, what it costs and where it sits.'));
+  c.body.appendChild(stack); c.body.appendChild(out);
+  c.foot('The two-engine era is closing. dbt Core and Fusion are now built on a shared foundation, which is why the commercial conversation moved off the engine and onto the control plane.');
+  $$('button',c.head.querySelector('.seg')).forEach(b=>b.classList.toggle('on',b.dataset.v===at));
+  function draw(){
+    stack.innerHTML='<div class="tcards">'+L.map(x=>{
+      const on=x.k===at;
+      return '<div class="tcard'+(on?' new':'')+'" style="'+(on?'':'opacity:.55')+'">'+
+        '<div class="th"><span class="tn">'+(x.k==='plat'?'$':'OS')+'</span><span class="tt">'+x.n+'</span>'+
+        '<span class="tg">'+x.sub+'</span></div>'+
+        '<div style="padding:11px 13px;font-size:12.8px;color:var(--ink2)">'+
+        '<span class="chip '+(x.cost==='paid'?'db':'ok')+'">'+x.cost+'</span> '+
+        '<span class="chip">'+x.lic+'</span></div></div>';
+    }).join('')+'</div>';
+    const d=L.find(x=>x.k===at);
+    out.innerHTML='<div class="callout c-'+(d.cls==='ft'?'ft':d.cls==='mid'?'warn':'ok')+'">'+
+      '<span class="ci">i</span><div><b>'+d.n+'</b><br>'+d.note+'</div></div>'+
+      (at==='fus'?'<div class="callout c-warn" style="margin-top:10px"><span class="ci">!</span><div>'+
+        'This is the one people get wrong. Fusion is free to use locally and in production, forever, and dbt Labs '+
+        'says so in writing. Do not present the platform as the way to get a faster engine.</div></div>':'')+
+      (at==='v1'?'<div class="callout c-warn" style="margin-top:10px"><span class="ci">!</span><div>'+
+        'If a client is here, the question is not whether to move to the Rust runtime but when. Path: upgrade to '+
+        'v1.12 or the Latest track, run <code>dbt parse --use-v2-parser</code>, then move to v2.</div></div>':'');
+  }
+  draw();
+};
+
+/* ---------- 33 · what self-hosting actually means ---------- */
+SIMS.selfhost=function(el){
+  const CAP=[
+    {k:'run',   n:'Parse, compile and run models',        eng:1, own:0, page:0, only:0},
+    {k:'lint',  n:'SQL linting',                          eng:1, own:0, page:0, only:0},
+    {k:'docs',  n:'Local documentation',                  eng:1, own:0, page:0, only:0},
+    {k:'sched', n:'Scheduling and orchestration',          eng:0, own:1, page:1, only:0},
+    {k:'ci',    n:'CI with a schema per pull request',     eng:0, own:1, page:1, only:0},
+    {k:'defer', n:'Deferral to production artifacts',      eng:0, own:1, page:0, only:0},
+    {k:'hist',  n:'Run history and log retention',         eng:0, own:1, page:0, only:0},
+    {k:'alert', n:'Failure alerting',                      eng:0, own:1, page:1, only:0},
+    {k:'cat',   n:'Searchable catalog and lineage',         eng:0, own:1, page:0, only:0},
+    {k:'rbac',  n:'Environments, credentials, RBAC, audit', eng:0, own:1, page:1, only:0},
+    {k:'cost',  n:'Cost attribution per model',            eng:0, own:0, page:0, only:1},
+    {k:'diff',  n:'Data diff against production',          eng:0, own:0, page:0, only:1},
+    {k:'sl',    n:'Semantic Layer served over JDBC, APIs, MCP', eng:0, own:0, page:0, only:1},
+    {k:'mcp',   n:'MCP server an agent can query',         eng:0, own:1, page:0, only:0},
+    {k:'mesh',  n:'Cross-project refs with contracts and versions', eng:0, own:0, page:0, only:1}
+  ];
+  const need=new Set(['run','lint','sched','ci','hist','alert','cat','rbac']);
+  const c=simShell(el,'Scoping tool','Tick what this client actually needs');
+  c.head.appendChild(mkBtn('Everything','',()=>{CAP.forEach(x=>need.add(x.k));paint()}));
+  c.head.appendChild(mkBtn('Engine only','',()=>{need.clear();['run','lint','docs'].forEach(k=>need.add(k));paint()}));
+  const grid=E('div','grid g2 blk'), out=E('div','blk');
+  c.body.appendChild(E('p','lead blk','This counts components and on-call surface, not engineer-days, because any day estimate here would be invented. The counts are checkable against the client’s own estate.'));
+  c.body.appendChild(grid); c.body.appendChild(out);
+  c.foot('The engine is free and excellent. What a self-hosted setup takes on is the control plane around it, and four capabilities are not available from the open source at any price.');
+  CAP.forEach(x=>{
+    const b=E('button','opt');
+    b.dataset.k=x.k;
+    b.innerHTML='<span class="bx">✓</span><span>'+x.n+
+      (x.only?' <span class="chip db">platform only</span>':x.eng?' <span class="chip ok">in the engine</span>':'')+'</span>';
+    b.addEventListener('click',()=>{need.has(x.k)?need.delete(x.k):need.add(x.k);paint()});
+    grid.appendChild(b);
+  });
+  function paint(){
+    $$('.opt',grid).forEach(b=>b.classList.toggle('on',need.has(b.dataset.k)));
+    const sel=CAP.filter(x=>need.has(x.k));
+    const eng=sel.filter(x=>x.eng).length;
+    const own=sel.filter(x=>x.own).length;
+    const page=sel.filter(x=>x.page).length;
+    const only=sel.filter(x=>x.only);
+    out.innerHTML='<div class="grid g4">'+
+      '<div class="stat"><b style="color:var(--grn)">'+eng+'</b><span>free in the engine, whichever distribution</span></div>'+
+      '<div class="stat"><b style="color:var(--amb)">'+own+'</b><span>components you would run and own yourself</span></div>'+
+      '<div class="stat"><b style="color:var(--red)">'+page+'</b><span>of those page somebody when they break</span></div>'+
+      '<div class="stat"><b style="color:var(--dbd)">'+only.length+'</b><span>not available from the open source at any price</span></div></div>'+
+      (only.length
+        ? '<div class="callout c-db" style="margin-top:12px"><span class="ci">i</span><div><b>These decide it on capability, not price:</b> '+
+          only.map(x=>x.n).join('; ')+'. If any of these is on the twelve-month roadmap, the platform is not an optimisation, it is the only way to get them.</div></div>'
+        : '<div class="callout c-ok" style="margin-top:12px"><span class="ci">✓</span><div><b>Nothing selected is platform-only.</b> '+
+          (own?'This client could run Fusion plus their existing orchestrator, and you should say so. The platform would be buying operational relief for '+own+' component'+(own>1?'s':'')+', which is a real but smaller argument.'
+              :'This is an engine-only need. Recommend Fusion, take no money for a control plane they do not want, and keep the credibility.')+'</div></div>')+
+      (own>=5?'<div class="callout c-warn" style="margin-top:10px"><span class="ci">!</span><div>At '+own+
+        ' self-owned components, the question stops being cost and starts being who is on call, and whether that person is still here next year.</div></div>':'');
+  }
+  paint();
+};
+
 /* ---------- 25 · gate scorecard ---------- */
 const GATES=[
   ['move','01 Ingestion','Row parity from source to destination, and the schema-drift record that proves nothing was silently dropped between them.'],
@@ -3261,9 +4232,10 @@ SIMS.products=function(el){
     ['db','dbt Catalog','Search and lineage across the compiled project: what a column means, where it came from, what tests it passed. Formerly dbt Explorer.'],
     ['db','dbt Semantic Layer','Metrics defined once on top of the models, so every consumer that asks for a number resolves the same definition.'],
     ['db','dbt State','Rebuilds only what actually changed. It reads the SQL semantically rather than diffing files, and it also checks whether the upstream data moved.'],
+    ['db','dbt Core v2','The open-source Rust baseline under Apache 2.0, sharing its foundations with Fusion. First alpha June 2026; the Python v1.x line is on maintenance.'],
     ['db','dbt Mesh','Governed model sharing across projects: public models with contracts and versions, so an upstream change does not silently break a downstream team.'],
     ['db','dbt MCP server','The interface an agent uses to reach models, metrics, lineage and freshness through the same governance a person gets.'],
-    ['db','Fusion · preview','A Rust execution engine that understands SQL across dialects, so errors surface before a query reaches the warehouse.'],
+    ['db','Fusion','The enhanced free distribution of the Rust engine. Understands SQL across dialects, so errors surface before a query reaches the warehouse, and carries a built-in SQL linter. Free locally and in production.'],
     ['db','dbt Wizard · preview','An agent grounded in the compiled project (lineage, state and metrics) for investigating, changing and validating dbt work.'],
     ['open','Apache Iceberg','A metadata layer over Parquet that makes a directory of files behave like a table. Always created by the managed lake.'],
     ['open','Delta Lake','The other metadata layer, created over the same Parquet when you enable it. Databricks reads this one.'],
@@ -3303,6 +4275,7 @@ setTheme(store.g('theme','light'));
 applyChrome();
 const _p=store.g('pos',[0,0]);
 go(_p[0],_p[1],false);
+initJaPreview();
 </script>
 </body>
 </html>
