@@ -866,7 +866,7 @@ function buildGuide(){ return [
     {t:'sim', id:'stackbuild'},
     {t:'grid', cols:3, x:[
       ['Fivetran owns','Getting every source in, completely and continuously, and getting the decision back out to the system the business works in.'],
-      ['dbt owns','Turning what landed into tested, version-controlled logic, and governing what it means so any consumer resolves the same definition.'],
+      ['The dbt platform owns','Turning what landed into tested, version-controlled logic, and governing what it means so any consumer resolves the same definition. It is also the control plane over it: orchestration, observability, cost, catalog and semantics.'],
       ['The platform owns','Compute. Whichever engine the client runs, and whichever one replaces it, reads the same governed data.']]},
     {t:'lens',
       bus:'Neither product replaces the data platform. Both expand what the client can do on the platform they already bought, which is why this is a footprint conversation rather than a competitive one.',
@@ -1601,20 +1601,20 @@ SIMS.stackbuild=function(el){
     {n:'Move', cap:'<b>Fivetran fills the first gap.</b> Every source lands once, completely and continuously, without a pipeline per consumer.'},
     {n:'Land', cap:'<b>It lands in storage the client owns,</b> in open formats. The <b>Fivetran Managed Data Lake Service</b> writes it once and maintains the table format and catalog registration, so the write is not tied to the engine that reads it.'},
     {n:'Transform', cap:'<b>dbt fills the second gap.</b> The transformation layer that turns raw data into trusted, usable data as tested, version-controlled code.'},
-    {n:'Control plane', cap:'<b>dbt is not just transformation.</b> It powers the control plane: orchestration, observability, cost, catalog and semantics.'},
-    {n:'Consumers', cap:'<b>And it is built for everyone.</b> Engineers, agents and business stakeholders read the same governed definitions, on whichever engine they run.'},
+    {n:'Control plane', cap:'<b>The dbt platform is not just transformation.</b> It is the data control plane: orchestration, observability, cost, catalog and semantics, over one set of governed definitions.'},
+    {n:'Consumers', cap:'<b>And it is built for everyone.</b> Engineers, dbt Wizard, other AI agents and business stakeholders all read the same governed definitions, on whichever engine they run.'},
     {n:'Activate', cap:'<b>Fivetran closes the loop.</b> The decision reaches the system the business already works in, from whichever engine produced it.'}
   ];
   let at=0;
   const c=simShell(el,'Interactive diagram','Where Fivetran and dbt sit in the stack');
   const wrap=E('div','stackwrap');
   wrap.innerHTML=
-    '<div class="slab meta" data-l="meta"><div class="sl">Unified metadata<span class="by">dbt</span></div><div class="row">'+
+    '<div class="slab meta" data-l="meta"><div class="sl">Data control plane<span class="by">dbt platform</span></div><div class="row">'+
       '<span class="cell">Orchestration</span><span class="cell">Observability</span><span class="cell">Cost</span>'+
       '<span class="cell">Catalog</span><span class="cell">Semantics</span></div></div>'+
     '<div class="slab pers" data-l="pers"><div class="sl">Consumers</div><div class="row">'+
-      '<span class="cell">Data and analytics engineers</span><span class="cell">AI agents</span>'+
-      '<span class="cell">Analysts and stakeholders</span></div></div>'+
+      '<span class="cell">Data and analytics engineers</span><span class="cell">dbt Wizard</span>'+
+      '<span class="cell">AI agents</span><span class="cell">Analysts and stakeholders</span></div></div>'+
     '<div class="slab pipe on" data-l="pipe"><div class="sl">Pipeline</div>'+
       '<div class="pipeline" id="sbPipe"></div></div>'+
     '<div class="slab lake" data-l="lake"><div class="sl">Open lake, in the client\'s own cloud storage'+
@@ -1641,7 +1641,7 @@ SIMS.stackbuild=function(el){
     const box=(cls,label,who)=>'<div class="pbox '+cls+'">'+label+(who?'<span class="who">'+who+'</span>':'')+'</div>';
     const arr='<span class="parrow">&#9656;</span>';
     let html=box(i>=1?'ftb':'','Ingestion',i>=1?'Fivetran':'')+arr;
-    html+= i>=3 ? box('dbtb','Transformation','dbt, on the Fusion engine')+arr : box('gap','?')+arr;
+    html+= i>=3 ? box('dbtb','Transformation','dbt platform, on the Fusion engine')+arr : box('gap','?')+arr;
     html+= box('','BI, analytics, AI');
     if(i>=6) html+=arr+box('ftb','Activation','Fivetran');
     $('#sbPipe',wrap).innerHTML=html;
