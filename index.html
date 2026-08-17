@@ -1346,7 +1346,7 @@ L.en={
 'c9.s3.tab':'How it gets built','c9.s3.desc':'Managed activation, a hand-rolled script, or pushing out from the warehouse, and the honest trade in each.',
 'c11.tab':'Core vs platform','c11.title':'dbt Core or the dbt platform',
 'c11.s0.tab':'The engines','c11.s0.desc':'Core v2, the Fusion binary and the dbt platform are three distributions over one shared Rust runtime. Knowing which line is which is the whole conversation.',
-'c11.s1.tab':'What self-hosting means','c11.s1.desc':'The engine is free. What you take on is the control plane around it, and every piece of it pages somebody.',
+'c11.s1.tab':'What self-hosting means','c11.s1.desc':'The engine is free. For the control plane around it, dbt Core ships nothing at all, so it is the platform or it is software you select, integrate and staff.',
 'c11.s2.tab':'What the platform adds','c11.s2.desc':'Capabilities that are platform-level rather than engine-level, including the four you cannot build from the open source at any price.',
 'c11.s3.tab':'When Core is right','c11.s3.desc':'The honest counter-case, because for some teams self-hosting is the correct answer and saying so earns the rest of the conversation.',
 'c10.tab':'Value','c10.title':'Value and gates',
@@ -2349,8 +2349,9 @@ function buildGuide(){ return [
    blocks:[
     {t:'sim', id:'selfhost'},
     {t:'h', x:'The engine is the cheap part'},
-    {t:'p', x:'A team that installs Fusion has a first-class transformation engine, for free, forever. Nothing in this chapter argues otherwise. What a self-hosted setup does not have is everything that turns that engine into a service other people can depend on: a scheduler, isolated environments, credentials handling, a CI path with per-pull-request schemas, run history somebody can read next quarter, alerting, a searchable catalog, access control, and an audit trail.'},
+    {t:'p', x:'A team that installs Fusion has a first-class transformation engine, for free, forever. Nothing in this chapter argues otherwise. The point is narrower and sharper than "the platform is more convenient": for the whole control plane, <b>dbt Core ships nothing at all</b>. There is no scheduler in it, no alerting, no run-history store, no RBAC, no per-pull-request CI, and no hosted catalog that several teams can search. Those are not thin features you switch on. They are separate pieces of software that somebody has to choose, deploy, secure, upgrade and answer the phone for.'},
     {t:'bul', x:[
+      ['This is the comparison people get wrong in the client’s favour.','They compare a licence fee against zero, when the honest comparison is a licence fee against selecting, integrating and staffing six or seven pieces of infrastructure.'],
       ['Each of those is somebody’s weekend at some point.','Not because the software is bad, but because the person who set it up moves teams and the runbook was in their head.'],
       ['The cost is not the build, it is the ownership.','Standing up Airflow plus dbt is a known quantity and a competent team does it in weeks. Running it for three years, through upgrades, staff changes and an audit, is the actual line item.'],
       ['Four capabilities are not buildable from the open source at all.','Not "hard", not "expensive": not available. The next tab names them precisely, and is careful about the ones that are available.']]},
@@ -2369,23 +2370,24 @@ function buildGuide(){ return [
           ['Parquet artifacts and a revamped local docs experience.','Artifacts are queryable directly with DuckDB, which is genuinely useful for your own tooling.'],
           ['A built-in SQL linter, in the Fusion binary.','Free, and one of the proprietary optimisations that distribution carries.']]}
        ]},
-      {tab:'What the platform adds', title:'The control plane, and four things you cannot build',
-       sub:'Most of what follows you could assemble yourself. Four items you could not, and those are the ones worth being precise about.',
+      {tab:'What the platform adds', title:'The control plane dbt Core does not attempt, and four things you cannot build',
+       sub:'Three tiers. A high free floor in the engine, then a control plane dbt Core does not attempt at all, then four capabilities that are not in the open source at any price.',
        blocks:[
-        {t:'table', head:['Capability','Self-hosted','dbt platform'],
+        {t:'table', head:['Capability','In dbt Core','Self-hosted route','dbt platform'],
          rows:[
-          ['Scheduling and orchestration','Airflow, Dagster, cron or Kubernetes, that you run','Included, with run history'],
-          ['Per-pull-request CI with an isolated schema','You build it in your CI system','Included, triggered by the git platform'],
-          ['Deferral to production artifacts','You manage manifest storage and retrieval yourself','Managed'],
-          ['Run history, logs, alerting','You keep and rotate them','Included and searchable'],
-          ['Searchable catalog and lineage across teams','You host generated docs somewhere','<b>dbt Catalog</b>'],
-          ['Environments, credentials, RBAC, SSO, audit','You build and own it','Included'],
-          ['Cost attribution per model','Not available from the open source','<b>Platform only</b>'],
-          ['<b>Data diff against production</b>','Not available from the open source','<b>Platform only</b>'],
-          ['<b>Semantic Layer served over JDBC, APIs and MCP</b>','Semantic definitions are open; the serving layer is not','<b>Platform only</b>'],
-          ['dbt MCP server for agents','Open source, and you can run it yourself','Managed, and it reaches the governed metadata and Semantic Layer above'],
-          ['dbt Wizard','Not available','Platform'],
-          ['<b>Cross-project refs with contracts and versions</b>','Contracts are in the open source; cross-project resolution is not','<b>Platform only</b>']]},
+          ['Scheduling and orchestration','<b>Nothing</b>','Airflow, Dagster, cron or Kubernetes that you deploy, upgrade and run','Included, with run history'],
+          ['CI with a schema per pull request','<b>Nothing</b>','Your CI system, plus scripts to create and drop the schema and report back','Included, fired by the git platform'],
+          ['Deferral to production artifacts','Flags exist','You store, version and fetch the manifest yourself','Managed'],
+          ['Run history and log retention','<b>Nothing</b>','A log store, a retention policy, and a way to search runs months later','Included and searchable'],
+          ['Failure alerting','<b>Nothing</b>','Your alerting stack, plus glue that knows what a dbt failure means','Included'],
+          ['Searchable catalog and lineage','Static docs per project','Host the docs yourself: no auth, no cross-team search, stale unless you rewire it','<b>dbt Catalog</b>'],
+          ['Environments, credentials, RBAC, SSO, audit','<b>Nothing</b>','Your secret manager and identity provider, wired up and audited by you','Included'],
+          ['dbt MCP server for agents','Open source','You can run it; it exposes local CLI and artifact tools','Managed, and reaches the governed metadata below'],
+          ['Cost attribution per model','<b>Nothing</b>','<b>Not possible</b>','<b>Platform only</b>'],
+          ['<b>Data diff against production</b>','<b>Nothing</b>','<b>Not possible</b>','<b>Platform only</b>'],
+          ['<b>Semantic Layer served over JDBC, APIs and MCP</b>','Definitions only','<b>Not possible</b>: the serving layer is not open','<b>Platform only</b>'],
+          ['<b>Cross-project refs with contracts and versions</b>','Contracts only','<b>Not possible</b>: cross-project resolution is not open','<b>Platform only</b>'],
+          ['dbt Wizard','<b>Nothing</b>','<b>Not possible</b>','Platform']]},
         {t:'ok', x:'<b>The honest headline.</b> You can self-host a very good transformation engine for nothing, and you can self-host the MCP server too. What you cannot self-host is a governed Semantic Layer served to consumers, a data diff against production, per-model cost attribution, and cross-project references with contracts. If the client’s roadmap has agents on it, that first item is the line that decides this, and it decides it on capability rather than on price.'}
        ]}]},
     {t:'lens',
@@ -3996,61 +3998,88 @@ SIMS.engines=function(el){
   draw();
 };
 
-/* ---------- 33 · what self-hosting actually means ---------- */
+/* ---------- 33 · what self-hosting actually means ----------
+   Three tiers, not two. The middle tier is the important one: dbt Core ships
+   nothing for these, so it is the platform or it is third-party software you
+   go and get, integrate and own. */
 SIMS.selfhost=function(el){
   const CAP=[
-    {k:'run',   n:'Parse, compile and run models',        eng:1, own:0, page:0, only:0},
-    {k:'lint',  n:'SQL linting',                          eng:1, own:0, page:0, only:0},
-    {k:'docs',  n:'Local documentation',                  eng:1, own:0, page:0, only:0},
-    {k:'sched', n:'Scheduling and orchestration',          eng:0, own:1, page:1, only:0},
-    {k:'ci',    n:'CI with a schema per pull request',     eng:0, own:1, page:1, only:0},
-    {k:'defer', n:'Deferral to production artifacts',      eng:0, own:1, page:0, only:0},
-    {k:'hist',  n:'Run history and log retention',         eng:0, own:1, page:0, only:0},
-    {k:'alert', n:'Failure alerting',                      eng:0, own:1, page:1, only:0},
-    {k:'cat',   n:'Searchable catalog and lineage',         eng:0, own:1, page:0, only:0},
-    {k:'rbac',  n:'Environments, credentials, RBAC, audit', eng:0, own:1, page:1, only:0},
-    {k:'cost',  n:'Cost attribution per model',            eng:0, own:0, page:0, only:1},
-    {k:'diff',  n:'Data diff against production',          eng:0, own:0, page:0, only:1},
-    {k:'sl',    n:'Semantic Layer served over JDBC, APIs, MCP', eng:0, own:0, page:0, only:1},
-    {k:'mcp',   n:'MCP server an agent can query',         eng:0, own:1, page:0, only:0},
-    {k:'mesh',  n:'Cross-project refs with contracts and versions', eng:0, own:0, page:0, only:1}
+    /* tier A: free in the engine, works out of the box */
+    {k:'run',   n:'Parse, compile and run models',            t:'eng'},
+    {k:'lint',  n:'SQL linting',                              t:'eng'},
+    {k:'docs',  n:'Local documentation and artifacts',        t:'eng'},
+    /* tier B: dbt Core ships nothing. Platform, or you assemble it. */
+    {k:'sched', n:'Scheduling and orchestration',             t:'asm', page:1,
+     what:'Airflow, Dagster, cron or Kubernetes, that you deploy, upgrade and run'},
+    {k:'ci',    n:'CI with a schema per pull request',         t:'asm', page:1,
+     what:'your CI system, plus scripts that create and drop the schema and wire results back to the PR'},
+    {k:'defer', n:'Deferral to production artifacts',         t:'asm',
+     what:'you store, version and fetch the production manifest yourself'},
+    {k:'hist',  n:'Run history and log retention',            t:'asm',
+     what:'a log store, a retention policy, and something that makes runs searchable months later'},
+    {k:'alert', n:'Failure alerting',                          t:'asm', page:1,
+     what:'your alerting stack, plus glue that understands what a dbt failure actually means'},
+    {k:'cat',   n:'Searchable catalog and lineage',            t:'asm',
+     what:'host the generated static docs yourself: one project at a time, no access control, no cross-team search, stale unless you wire regeneration'},
+    {k:'rbac',  n:'Environments, credentials, RBAC, SSO, audit', t:'asm', page:1,
+     what:'your secret manager and identity provider, wired up by you, with the audit trail you build'},
+    {k:'mcp',   n:'MCP server an agent can query',             t:'asm',
+     what:'the dbt MCP server is open source and you can run it; without the platform it exposes local CLI and artifact tools rather than governed metadata'},
+    /* tier C: not available from the open source at any price */
+    {k:'cost',  n:'Cost attribution per model',               t:'only'},
+    {k:'diff',  n:'Data diff against production',             t:'only'},
+    {k:'sl',    n:'Semantic Layer served over JDBC, APIs, MCP', t:'only'},
+    {k:'mesh',  n:'Cross-project refs with contracts and versions', t:'only'}
   ];
+  const LBL={eng:'in the engine',asm:'platform, or assemble it',only:'platform only'};
+  const CHIP={eng:'ok',asm:'amb',only:'db'};
   const need=new Set(['run','lint','sched','ci','hist','alert','cat','rbac']);
   const c=simShell(el,'Scoping tool','Tick what this client actually needs');
   c.head.appendChild(mkBtn('Everything','',()=>{CAP.forEach(x=>need.add(x.k));paint()}));
   c.head.appendChild(mkBtn('Engine only','',()=>{need.clear();['run','lint','docs'].forEach(k=>need.add(k));paint()}));
   const grid=E('div','grid g2 blk'), out=E('div','blk');
-  c.body.appendChild(E('p','lead blk','This counts components and on-call surface, not engineer-days, because any day estimate here would be invented. The counts are checkable against the client’s own estate.'));
+  c.body.appendChild(E('p','lead blk','Three tiers, and the middle one is where the argument lives. dbt Core ships nothing for those: it is either the platform, or third-party software you go and get, integrate and own. This counts components and on-call surface rather than engineer-days, because any day estimate here would be invented.'));
   c.body.appendChild(grid); c.body.appendChild(out);
-  c.foot('The engine is free and excellent. What a self-hosted setup takes on is the control plane around it, and four capabilities are not available from the open source at any price.');
+  c.foot('Free and excellent engine. Then a control plane that dbt Core does not attempt, and four capabilities that are not in the open source at any price.');
   CAP.forEach(x=>{
-    const b=E('button','opt');
-    b.dataset.k=x.k;
-    b.innerHTML='<span class="bx">✓</span><span>'+x.n+
-      (x.only?' <span class="chip db">platform only</span>':x.eng?' <span class="chip ok">in the engine</span>':'')+'</span>';
+    const b=E('button','opt'); b.dataset.k=x.k;
+    b.innerHTML='<span class="bx">✓</span><span>'+x.n+' <span class="chip '+CHIP[x.t]+'">'+LBL[x.t]+'</span>'+
+      (x.what?'<br><span class="cap">'+x.what+'</span>':'')+'</span>';
     b.addEventListener('click',()=>{need.has(x.k)?need.delete(x.k):need.add(x.k);paint()});
     grid.appendChild(b);
   });
   function paint(){
     $$('.opt',grid).forEach(b=>b.classList.toggle('on',need.has(b.dataset.k)));
     const sel=CAP.filter(x=>need.has(x.k));
-    const eng=sel.filter(x=>x.eng).length;
-    const own=sel.filter(x=>x.own).length;
+    const eng=sel.filter(x=>x.t==='eng').length;
+    const asm=sel.filter(x=>x.t==='asm');
     const page=sel.filter(x=>x.page).length;
-    const only=sel.filter(x=>x.only);
+    const only=sel.filter(x=>x.t==='only');
     out.innerHTML='<div class="grid g4">'+
       '<div class="stat"><b style="color:var(--grn)">'+eng+'</b><span>free in the engine, whichever distribution</span></div>'+
-      '<div class="stat"><b style="color:var(--amb)">'+own+'</b><span>components you would run and own yourself</span></div>'+
+      '<div class="stat"><b style="color:var(--amb)">'+asm.length+'</b><span>dbt Core ships nothing: platform, or software you assemble and own</span></div>'+
       '<div class="stat"><b style="color:var(--red)">'+page+'</b><span>of those page somebody when they break</span></div>'+
-      '<div class="stat"><b style="color:var(--dbd)">'+only.length+'</b><span>not available from the open source at any price</span></div></div>'+
-      (only.length
-        ? '<div class="callout c-db" style="margin-top:12px"><span class="ci">i</span><div><b>These decide it on capability, not price:</b> '+
-          only.map(x=>x.n).join('; ')+'. If any of these is on the twelve-month roadmap, the platform is not an optimisation, it is the only way to get them.</div></div>'
-        : '<div class="callout c-ok" style="margin-top:12px"><span class="ci">✓</span><div><b>Nothing selected is platform-only.</b> '+
-          (own?'This client could run Fusion plus their existing orchestrator, and you should say so. The platform would be buying operational relief for '+own+' component'+(own>1?'s':'')+', which is a real but smaller argument.'
-              :'This is an engine-only need. Recommend Fusion, take no money for a control plane they do not want, and keep the credibility.')+'</div></div>')+
-      (own>=5?'<div class="callout c-warn" style="margin-top:10px"><span class="ci">!</span><div>At '+own+
-        ' self-owned components, the question stops being cost and starts being who is on call, and whether that person is still here next year.</div></div>':'');
+      '<div class="stat"><b style="color:var(--dbd)">'+only.length+'</b><span>not in the open source at any price</span></div></div>';
+    let verdict='';
+    if(only.length){
+      verdict='<div class="callout c-db" style="margin-top:12px"><span class="ci">i</span><div>'+
+        '<b>Decided on capability, not price.</b> '+only.map(x=>x.n).join('; ')+
+        '. If any of these is on the twelve-month roadmap, the platform is not an optimisation, it is the only way to get them'+
+        (asm.length?', and it also removes the '+asm.length+' pieces below.':'.')+'</div></div>';
+    } else if(asm.length){
+      verdict='<div class="callout c-warn" style="margin-top:12px"><span class="ci">!</span><div>'+
+        '<b>None of these ship with dbt Core.</b> Not one. So the choice is the platform, or '+asm.length+
+        ' piece'+(asm.length>1?'s':'')+' of third-party software that somebody selects, deploys, upgrades, secures and stays on call for'+
+        (page?', '+page+' of which page a human when they break':'')+
+        '. That is the real comparison, and it is a bigger one than the licence fee.</div></div>';
+    } else {
+      verdict='<div class="callout c-ok" style="margin-top:12px"><span class="ci">✓</span><div>'+
+        '<b>This is an engine-only need.</b> Recommend Fusion, take no money for a control plane they do not want, and keep the credibility for the conversation where it matters.</div></div>';
+    }
+    if(asm.length>=5) verdict+='<div class="callout c-bad" style="margin-top:10px"><span class="ci">!</span><div>'+
+      'At '+asm.length+' assembled components this has stopped being a tooling decision. It is a platform team with a '+
+      'roadmap, a rota and a bus factor, and the person who wired it together will not be here in three years.</div></div>';
+    out.innerHTML+=verdict;
   }
   paint();
 };
