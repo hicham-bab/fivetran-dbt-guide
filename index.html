@@ -249,7 +249,9 @@ html[data-theme=dark] .col.good .ch{color:#4FD9C0}
 .slab .row{display:flex;gap:8px;flex-wrap:wrap}
 .slab .cell{flex:1;min-width:96px;background:var(--panel);border-radius:9px;padding:9px 11px;text-align:center;
   font-size:12.4px;font-weight:670;border:1px solid var(--line);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
-  display:flex;align-items:center;justify-content:center}
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}
+.slab .cell .via{font-size:10.4px;font-weight:640;opacity:.72;white-space:nowrap}
+.slab.pers .cell .via{color:#fff;opacity:.82}
 .slab.lake .cell{white-space:normal;overflow:visible;text-overflow:clip;line-height:1.35;min-width:118px}
 .slab.meta{background:linear-gradient(100deg,var(--dbd),#F08A5D)}
 .slab.meta .sl{color:rgba(255,255,255,.92)}
@@ -1602,7 +1604,7 @@ SIMS.stackbuild=function(el){
     {n:'Land', cap:'<b>It lands in storage the client owns,</b> in open formats. The <b>Fivetran Managed Data Lake Service</b> writes it once and maintains the table format and catalog registration, so the write is not tied to the engine that reads it.'},
     {n:'Transform', cap:'<b>dbt fills the second gap.</b> The transformation layer that turns raw data into trusted, usable data as tested, version-controlled code.'},
     {n:'Control plane', cap:'<b>The dbt platform is not just transformation.</b> It is the data control plane: orchestration, observability, cost, catalog and semantics, over one set of governed definitions.'},
-    {n:'Consumers', cap:'<b>And it is built for everyone.</b> Engineers, dbt Wizard, other AI agents and business stakeholders all read the same governed definitions, on whichever engine they run.'},
+    {n:'Consumers', cap:'<b>And it is built for everyone.</b> Engineers work through dbt Wizard, agents resolve the same definitions (dbt Wizard being one of them), and stakeholders read the same numbers. One governed layer, three ways in.'},
     {n:'Activate', cap:'<b>Fivetran closes the loop.</b> The decision reaches the system the business already works in, from whichever engine produced it.'}
   ];
   let at=0;
@@ -1613,8 +1615,10 @@ SIMS.stackbuild=function(el){
       '<span class="cell">Orchestration</span><span class="cell">Observability</span><span class="cell">Cost</span>'+
       '<span class="cell">Catalog</span><span class="cell">Semantics</span></div></div>'+
     '<div class="slab pers" data-l="pers"><div class="sl">Consumers</div><div class="row">'+
-      '<span class="cell">Data and analytics engineers</span><span class="cell">dbt Wizard</span>'+
-      '<span class="cell">AI agents</span><span class="cell">Analysts and stakeholders</span></div></div>'+
+      '<span class="cell">Data and analytics engineers<span class="via">via dbt Wizard</span></span>'+
+      '<span class="cell">AI agents<span class="via">dbt Wizard, and any agent</span></span>'+
+      '<span class="cell">Analysts and stakeholders<span class="via">BI and natural language</span></span>'+
+      '</div></div>'+
     '<div class="slab pipe on" data-l="pipe"><div class="sl">Pipeline</div>'+
       '<div class="pipeline" id="sbPipe"></div></div>'+
     '<div class="slab lake" data-l="lake"><div class="sl">Open lake, in the client\'s own cloud storage'+
