@@ -552,7 +552,7 @@ Object.assign(JA, {
   "各レイヤーがこのガイドの 1 章に対応しています。上のタブを選ぶか、再生を押して組み上がる様子をご覧ください。",
 "Baseline": "初期状態",
 "Move": "移動",
-"Land": "ランディング",
+"Manage": "管理",
 "Transform": "変換",
 "Control plane": "コントロールプレーン",
 "Consumers": "利用者",
@@ -2474,7 +2474,7 @@ SIMS.stackbuild=function(el){
   const STEPS=[
     {n:'Baseline', cap:'A data platform with raw data flowing in and consumers waiting downstream, and <b>a gap in the middle</b>. Nothing here is wrong. It is just not finished.'},
     {n:'Move', cap:'<b>Fivetran fills the first gap.</b> Every source lands once, completely and continuously, without a pipeline per consumer.'},
-    {n:'Land', cap:'<b>It lands in storage the client owns,</b> in open formats. The <b>Fivetran Managed Data Lake Service</b> writes it once and maintains the table format and catalog registration, so the write is not tied to the engine that reads it.'},
+    {n:'Manage', cap:'<b>It lands in storage the client owns,</b> in open formats. The <b>Fivetran Managed Data Lake Service</b> writes it once and maintains the table format and catalog registration, so the write is not tied to the engine that reads it.'},
     {n:'Transform', cap:'<b>dbt fills the second gap.</b> The transformation layer that turns raw data into trusted, usable data as tested, version-controlled code.'},
     {n:'Control plane', cap:'<b>The dbt platform is not just transformation.</b> It is the data control plane: orchestration, observability, cost, catalog and semantics, over one set of governed definitions.'},
     {n:'Consumers', cap:'<b>And it is built for everyone.</b> Engineers work through dbt Wizard, agents resolve the same definitions (dbt Wizard being one of them), and stakeholders read the same numbers. One governed layer, three ways in.'},
