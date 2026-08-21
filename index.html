@@ -513,7 +513,7 @@ html[data-aud=sf] [data-hideaud~=sf],html[data-aud=dbx] [data-hideaud~=dbx]{disp
       defined in this page, so the numbers on screen are the numbers the code produces.
     </div>
     <div style="max-width:54ch">
-      <b>Currency.</b> Native-service facts checked against vendor documentation in August 2026: Fivetran 700+
+      <b>Currency.</b> Native-service facts checked against vendor documentation in August 2026: Fivetran 750+
       connectors plus the Connector SDK; Snowflake Openflow around 26 GA connectors; Databricks Lakeflow Connect
       managed connectors GA for Salesforce, Workday and SQL Server, more in preview. Migration bands measured
       30 July 2026. Rates and tiers are deliberately absent.
@@ -1317,12 +1317,12 @@ L.en={
 'c0.tab':'The stack','c0.title':'Where Fivetran and dbt sit',
 'c0.s0.tab':'Build the stack','c0.s0.desc':'A data platform with raw data in one end and consumers at the other, and two gaps in the middle. Build it up one layer at a time.',
 'c0.s1.tab':'The ten chapters','c0.s1.desc':'What each chapter proves, and what you can run in front of a client when you get there.',
-'c1.tab':'Ingestion','c1.title':'Ingestion',
+'c1.tab':'Move','c1.title':'Move',
 'c1.s0.tab':'Source coverage','c1.s0.desc':'The core systems are covered by everyone. The argument is about the long tail, which is where scope gets cut.',
 'c1.s1.tab':'Schema drift','c1.s1.desc':'Sources change constantly. The only question is whether a person finds out from a monitor or from finance.',
 'c1.s2.tab':'Custom sources','c1.s2.desc':'What a connector for the source nobody has ever heard of actually takes, and where the time really goes.',
 'c1.s3.tab':'Where it runs','c1.s3.desc':'The residency question, which attaches to a source rather than to a client, and the one constraint that is absolute.',
-'c2.tab':'Landing','c2.title':'Landing and storage',
+'c2.tab':'Manage','c2.title':'Manage and storage',
 'c2.s0.tab':'One write, many readers','c2.s0.desc':'Written once as Parquet, in the client’s own bucket, with more than one metadata layer over the same files.',
 'c2.s1.tab':'Who pays for what','c2.s1.desc':'The operating model, and the cost line that moves when ingestion stops running on your warehouse.',
 'c2.s2.tab':'Maintenance','c2.s2.desc':'The part nobody wants to own, and the reason it is described here but deliberately absent from the gate.',
@@ -1694,8 +1694,8 @@ function buildGuide(){ return [
    blocks:[
     {t:'table', head:['Chapter','What it proves','Runnable'],
      rows:[
-      ['<b>Ingestion</b> <span class="chip ft">Fivetran</span>','Every source lands, including the ones not in any catalog','Source coverage race · schema drift · SDK build'],
-      ['<b>Landing</b> <span class="chip ft">Fivetran</span>','One write, read by every engine, in storage the client owns','Cross-layer parity · who pays for the merge'],
+      ['<b>Move</b> <span class="chip ft">Fivetran</span>','Every source lands, including the ones not in any catalog','Source coverage race · schema drift · SDK build'],
+      ['<b>Manage</b> <span class="chip ft">Fivetran</span>','One write, read by every engine, in storage the client owns','Cross-layer parity · who pays for the merge'],
       ['<b>Models</b> <span class="chip db">dbt</span>','SQL becomes a tested, portable artifact instead of a script','Compile and materialize · layer walk'],
       ['<b>Tests</b> <span class="chip db">dbt</span>','Bad data stops at the layer it appeared in','Build with a failing test'],
       ['<b>Workflow</b> <span class="chip db">dbt</span>','A change reaches production through a gate a person can read','Branch to prod · CI with data diff'],
@@ -1717,7 +1717,7 @@ function buildGuide(){ return [
     {t:'h', x:'What the catalogs actually cover'},
     {t:'table', head:['','Fivetran','Snowflake Openflow','Databricks Lakeflow Connect'], audCols:{2:'dbx',3:'sf'},
      rows:[
-      ['Managed connectors','<b>700+</b>','around <b>26</b>, all GA','GA for Salesforce, Workday, SQL Server; more in preview'],
+      ['Managed connectors','<b>750+</b>','around <b>26</b>, all GA','GA for Salesforce, Workday, SQL Server; more in preview'],
       ['Build your own','<b>Connector SDK</b> in Python, hosted and scheduled by Fivetran','NiFi-based custom processors','Not a managed path; build with Auto Loader or Spark'],
       ['Lands into','200+ destinations, warehouses and an open lake the client owns','Snowflake','Databricks Unity Catalog'],
       ['Ingestion compute','Fivetran’s','Snowflake-hosted (SPCS) or bring your own compute','Your DBUs, billed as Lakeflow pipeline compute'],
@@ -2251,9 +2251,9 @@ function buildGuide(){ return [
    blocks:[
     {t:'sim', id:'engattach'},
     {t:'bul', x:[
-      ['Ten engines, five catalogs, three open formats, one write, zero copies.','Raw SQL, no agent and no semantic layer in the path, and every number identical.'],
+      ['Eleven engines, six catalogs, three open formats, one write, zero copies.','Raw SQL, no agent and no semantic layer in the path, and every number identical.'],
       ['A laptop counts.','An in-process engine reads the same tables through the same catalog as the warehouse did. No cluster, no warehouse, no standing cost.'],
-      ['Adding an engine is a configuration change measured in minutes.','The slowest of the four we timed was 35, and that included first-run account setup.']]},
+      ['Adding an engine is a configuration change measured in seconds to minutes.','Nine of eleven attach in under a minute once warm. The two outliers are one-time costs, not steady-state attach: Databricks reruns its full setup-test suite (about 2 minutes), and Athena’s number is a one-time Glue registration resync.']]},
     {t:'warn', x:'<b>Validate with a real data read, never a row count.</b> A count can be answered from table metadata without touching a data file, so it will pass while the actual reads are broken. And do not turn the cost comparison into an engine ranking: agent-side cost is uniformly small, and claiming one engine is inherently leaner is the fastest way to lose an architect who has measured it.'},
     {t:'gate', x:'Cross-engine parity: the same question, every attached engine, identical rows. Row count, distinct key, aggregate, min and max, a ranked result with a deterministic tiebreak, and zero null keys.'}
    ]},
@@ -2555,7 +2555,7 @@ SIMS.stackbuild=function(el){
     if(i>=7) wrap.querySelector('.slab[data-l="full"]').classList.add('on');
     const box=(cls,label,who)=>'<div class="pbox '+cls+'">'+label+(who?'<span class="who">'+who+'</span>':'')+'</div>';
     const arr='<span class="parrow">&#9656;</span>';
-    let html=box(i>=1?'ftb':'','Ingestion',i>=1?'Fivetran':'')+arr;
+    let html=box(i>=1?'ftb':'','Move',i>=1?'Fivetran':'')+arr;
     html+= i>=3 ? box('dbtb','Transformation','dbt platform, on the Fusion engine')+arr : box('gap','?')+arr;
     html+= box('','BI, analytics, AI');
     if(i>=6) html+=arr+box('ftb','Activation','Fivetran');
@@ -4130,13 +4130,13 @@ SIMS.selfhost=function(el){
 
 /* ---------- 25 · gate scorecard ---------- */
 const GATES=[
-  ['move','01 Ingestion','Row parity from source to destination, and the schema-drift record that proves nothing was silently dropped between them.'],
-  ['land','02 Landing','The same rows returned through every metadata layer the lake maintains, from one write, and the models that shape what lands ran in dependency order.'],
+  ['move','01 Move','Row parity from source to destination, and the schema-drift record that proves nothing was silently dropped between them.'],
+  ['land','02 Manage','The same rows returned through every metadata layer the lake maintains, from one write, and the models that shape what lands ran in dependency order.'],
   ['model','03 Transform','The logic is in version control with tests, and the project can name what a change breaks before anything runs.'],
   ['ctx','04 Context','Every governed metric has a definition, a test, and lineage back to its source, and an agent resolves the definition before it queries.'],
   ['agent','05 Agent','Cross-engine parity: the same question, every attached engine, identical rows.'],
   ['act','06 Activation','The write-back lands what was intended, and can be undone.']];
-const READ=['Nothing closed yet. Start at Ingestion: its gate reconciles against the source, so it is the easiest one to prove.',
+const READ=['Nothing closed yet. Start at Move: its gate reconciles against the source, so it is the easiest one to prove.',
   'One gate closed. That is a scoped engagement with evidence attached, which is more than most estates can produce.',
   'Two closed. The foundation is landing and being managed. The governance layers are where the outcome gets built.',
   'Three closed. Trusted data. The band shift to trusted AI and agents is next, and it is the one worth pricing properly.',
@@ -4296,7 +4296,7 @@ SIMS.objections=function(el){
 /* ---------- 29 · product reference ---------- */
 SIMS.products=function(el){
   const P=[
-    ['ft','Fivetran connector library','700+ managed connectors that Fivetran designs, builds, operates and maintains, including SAP, Oracle, Salesforce and ServiceNow.'],
+    ['ft','Fivetran connector library','750+ managed connectors that Fivetran designs, builds, operates and maintains, including SAP, Oracle, Salesforce and ServiceNow.'],
     ['ft','Fivetran Connector SDK','Write a connector in Python for a source the library does not cover, and Fivetran hosts and schedules it like any other connection.'],
     ['ft','Fivetran Managed Data Lake Service','A managed data lake as the destination. The files stay in the client’s own cloud storage; Fivetran maintains the table format and catalog registration.'],
     ['ft','Fivetran Hybrid Deployment','Run the pipeline inside the client’s own network so source data never crosses their perimeter, while the platform is still operated as a service.'],
