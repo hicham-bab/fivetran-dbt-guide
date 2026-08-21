@@ -435,8 +435,17 @@ html[data-lang=ja] .slab .cell{font-size:11.8px}
 html[data-lang=ja] .mono,html[data-lang=ja] pre.code,html[data-lang=ja] code{font-family:var(--mono)}
 
 /* ================= LENS VIS ================= */
-[data-lens]{display:none}
-html[data-view=bus] [data-lens~=bus],html[data-view=tech] [data-lens~=tech],html[data-view=partner] [data-lens~=partner]{display:block}
+/* The Business/Technical/Partner switcher is gone from the header; data-view stays
+   fixed at whatever was last stored (default "tech"), and .lensbox content is
+   still gated by it below. Scoped to .lensbox specifically, not a bare [data-lens]
+   selector, which used to also match the (now-removed) header toggle buttons. */
+.lensbox[data-lens]{display:none}
+html[data-view=bus] .lensbox[data-lens~=bus],html[data-view=tech] .lensbox[data-lens~=tech],html[data-view=partner] .lensbox[data-lens~=partner]{display:block}
+
+/* ================= AUDIENCE VIS ================= */
+/* data-hideaud="sf" hides that element when presenting to a Snowflake audience (dbx-specific content);
+   data-hideaud="dbx" hides it when presenting to a Databricks audience (sf-specific content). */
+html[data-aud=sf] [data-hideaud~=sf],html[data-aud=dbx] [data-hideaud~=dbx]{display:none!important}
 
 @media (max-width:1000px){
   .g4,.g5{grid-template-columns:repeat(2,minmax(0,1fr))}
@@ -467,10 +476,10 @@ html[data-view=bus] [data-lens~=bus],html[data-view=tech] [data-lens~=tech],html
     <p class="tl" id="tagline"></p>
     <nav class="topnav" id="topnav"></nav>
     <div class="hero-bar">
-      <div class="seg wt" id="lensSeg">
-        <button data-lens="bus">Business</button>
-        <button data-lens="tech">Technical</button>
-        <button data-lens="partner">Partner</button>
+      <div class="seg wt" id="audSeg" title="Presenting in front of one platform's own team? Hide the other platform's native-tool comparisons.">
+        <button data-aud="both">Both platforms</button>
+        <button data-aud="sf">In front of Snowflake</button>
+        <button data-aud="dbx">In front of Databricks</button>
       </div>
       <span class="hero-sub" id="chapCount"></span>
       <button class="iconbtn" id="themeBtn" title="Light or dark"
@@ -1398,8 +1407,9 @@ function block(b){
       const ic={warn:'!',ok:'✓',bad:'✕',ft:'i',db:'i'}[b.t];
       return E('div','callout c-'+b.t+' blk','<span class="ci">'+ic+'</span><div>'+b.x+'</div>');}
     case 'table':{const w=E('div','blk scrollx');const t=E('table','t');
-      t.appendChild(E('tr',null,b.head.map(h=>'<th>'+h+'</th>').join('')));
-      b.rows.forEach(r=>t.appendChild(E('tr',null,r.map(c=>'<td>'+c+'</td>').join(''))));
+      const ca=i=>b.audCols&&b.audCols[i]?' data-hideaud="'+b.audCols[i]+'"':'';
+      t.appendChild(E('tr',null,b.head.map((h,i)=>'<th'+ca(i)+'>'+h+'</th>').join('')));
+      b.rows.forEach(r=>t.appendChild(E('tr',null,r.map((c,i)=>'<td'+ca(i)+'>'+c+'</td>').join(''))));
       w.appendChild(t); if(b.cap)w.appendChild(E('div','cap',b.cap)); return w;}
     case 'gate': return E('div','gate blk',
       '<div class="subh">'+(b.label||T('ui.gate'))+'</div><div class="gx">'+b.x+'</div>');
@@ -1443,14 +1453,20 @@ function wowBlock(b){
 
 /* ---------- native comparison ---------- */
 const VLAB={sf:'Snowflake',dbx:'Databricks',af:'Airflow',diy:'Hand-rolled',ft:'Fivetran',dbt:'dbt'};
+const AUD_OPPOSITE={sf:'dbx',dbx:'sf'};
 function natBlock(b){
   const w=E('div','nat blk');
   const h=E('div','nat-h','<span class="lbl">'+(b.label||T('ui.natlabel'))+'</span>');
   const body=E('div','nat-b');
+  const curAud=document.documentElement.dataset.aud;
+  const hiddenNow=v=>AUD_OPPOSITE[v]&&curAud===AUD_OPPOSITE[v];
+  const defIdx=Math.max(0,b.x.findIndex(v=>!hiddenNow(v.v)));
   b.x.forEach((v,i)=>{
-    const btn=E('button','vend'+(i===0?' on':''),'<i></i>'+(v.name||VLAB[v.v]));
+    const btn=E('button','vend'+(i===defIdx?' on':''),'<i></i>'+(v.name||VLAB[v.v]));
     btn.dataset.v=v.v;
-    const pane=E('div','pane'+(i===0?' on':''));
+    if(AUD_OPPOSITE[v.v]) btn.dataset.hideaud=AUD_OPPOSITE[v.v];
+    const pane=E('div','pane'+(i===defIdx?' on':''));
+    if(AUD_OPPOSITE[v.v]) pane.dataset.hideaud=AUD_OPPOSITE[v.v];
     blocks(v.blocks,pane);
     btn.addEventListener('click',()=>{
       $$('.vend',h).forEach(x=>x.classList.toggle('on',x===btn));
@@ -1566,9 +1582,13 @@ function simShell(el,lab,title,controls){
 const mkBtn=(label,cls,fn)=>{const b=E('button','btn sm'+(cls?' '+cls:''),label);b.addEventListener('click',fn);return b};
 const mkSeg=(items,fn,cls)=>{
   const s=E('div','seg sm'+(cls?' '+cls:''));
+  const curAud=document.documentElement.dataset.aud;
+  const hiddenNow=v=>AUD_OPPOSITE[v]&&curAud===AUD_OPPOSITE[v];
+  const defIdx=Math.max(0,items.findIndex(it=>!hiddenNow(it[0])));
   items.forEach((it,i)=>{
-    const b=E('button',i===0?'on':null,it[1]);
+    const b=E('button',i===defIdx?'on':null,it[1]);
     b.dataset.v=it[0];
+    if(AUD_OPPOSITE[it[0]]) b.dataset.hideaud=AUD_OPPOSITE[it[0]];
     b.addEventListener('click',()=>{$$('button',s).forEach(x=>x.classList.toggle('on',x===b));fn(it[0])});
     s.appendChild(b);
   });
@@ -1627,12 +1647,18 @@ function go(ci,si,scroll){
 /* ---------- lens + theme + keys ---------- */
 function applyChrome(){
   $('#tagline').textContent=T('ui.tagline');
-  $$('#lensSeg button').forEach(b=>b.textContent=T('ui.'+b.dataset.lens));
   $('#themeBtn').title=T('ui.theme');
 }
-function setLens(v){ document.documentElement.dataset.view=v; store.s('lens',v);
-  $$('#lensSeg button').forEach(b=>b.classList.toggle('on',b.dataset.lens===v)); }
-$$('#lensSeg button').forEach(b=>b.addEventListener('click',()=>setLens(b.dataset.lens)));
+function setLens(v){ document.documentElement.dataset.view=v; store.s('lens',v); }
+function setAud(v){ document.documentElement.dataset.aud=v; store.s('aud',v);
+  $$('#audSeg button').forEach(b=>b.classList.toggle('on',b.dataset.aud===v));
+  $$('.nat-h, .seg').forEach(h=>{
+    if(h.id==='audSeg') return;
+    const on=h.querySelector('button.on, .vend.on');
+    if(on && on.dataset.hideaud===v){ const alt=$$('button, .vend',h).find(b=>b.dataset.hideaud!==v); if(alt) alt.click(); }
+  });
+}
+$$('#audSeg button').forEach(b=>b.addEventListener('click',()=>setAud(b.dataset.aud)));
 function setTheme(t){document.documentElement.dataset.theme=t;store.s('theme',t)}
 $('#themeBtn').addEventListener('click',()=>setTheme(document.documentElement.dataset.theme==='dark'?'light':'dark'));
 addEventListener('keydown',e=>{
@@ -1689,7 +1715,7 @@ function buildGuide(){ return [
    blocks:[
     {t:'sim', id:'srcpick'},
     {t:'h', x:'What the catalogs actually cover'},
-    {t:'table', head:['','Fivetran','Snowflake Openflow','Databricks Lakeflow Connect'],
+    {t:'table', head:['','Fivetran','Snowflake Openflow','Databricks Lakeflow Connect'], audCols:{2:'dbx',3:'sf'},
      rows:[
       ['Managed connectors','<b>700+</b>','around <b>26</b>, all GA','GA for Salesforce, Workday, SQL Server; more in preview'],
       ['Build your own','<b>Connector SDK</b> in Python, hosted and scheduled by Fivetran','NiFi-based custom processors','Not a managed path; build with Auto Loader or Spark'],
@@ -2593,6 +2619,10 @@ SIMS.srcpick=function(el){
       dbx:list.filter(s=>s.dbx===1).length,
       dbxFile:list.filter(s=>s.dbx==='file').length};
   }
+  function bestNative(t){
+    const aud=document.documentElement.dataset.aud;
+    return aud==='sf'?t.sf:aud==='dbx'?t.dbx:Math.max(t.sf,t.dbx);
+  }
   function score(){
     const t=tally(), n=t.list.length;
     out.innerHTML='';
@@ -2600,9 +2630,9 @@ SIMS.srcpick=function(el){
     const g=E('div','grid g4');
     g.innerHTML=
       '<div class="stat"><b style="color:var(--ftd)">'+(t.ftLib+t.ftSdk)+' / '+n+'</b><span>Fivetran: '+t.ftLib+' from the library, '+t.ftSdk+' built with the SDK</span></div>'+
-      '<div class="stat"><b>'+t.sf+' / '+n+'</b><span>Snowflake Openflow GA connectors</span></div>'+
-      '<div class="stat"><b>'+t.dbx+' / '+n+'</b><span>Databricks Lakeflow Connect managed connectors</span></div>'+
-      '<div class="stat"><b style="color:var(--red)">'+(n-Math.max(t.sf,t.dbx))+'</b><span>left over for the best native option, to hand-build and own</span></div>';
+      '<div class="stat" data-hideaud="dbx"><b>'+t.sf+' / '+n+'</b><span>Snowflake Openflow GA connectors</span></div>'+
+      '<div class="stat" data-hideaud="sf"><b>'+t.dbx+' / '+n+'</b><span>Databricks Lakeflow Connect managed connectors</span></div>'+
+      '<div class="stat"><b style="color:var(--red)">'+(n-bestNative(t))+'</b><span>left over for the best native option, to hand-build and own</span></div>';
     out.appendChild(g);
   }
   async function run(){
@@ -2610,7 +2640,7 @@ SIMS.srcpick=function(el){
     if(!t.list.length) return;
     res.innerHTML='';
     const tbl=E('table','t');
-    tbl.appendChild(E('tr',null,'<th>Source</th><th>Fivetran</th><th>Snowflake Openflow</th><th>Databricks Lakeflow</th>'));
+    tbl.appendChild(E('tr',null,'<th>Source</th><th>Fivetran</th><th data-hideaud="dbx">Snowflake Openflow</th><th data-hideaud="sf">Databricks Lakeflow</th>'));
     const w=E('div','scrollx');w.appendChild(tbl);res.appendChild(w);
     const log=E('div','log');log.style.marginTop='12px';res.appendChild(log);
     for(const s of t.list){
@@ -2622,13 +2652,13 @@ SIMS.srcpick=function(el){
       };
       const ftp = s.ft==='lib' ? '<span class="pillv pv-ok">library</span>'
                                : '<span class="pillv pv-ok">Connector SDK</span>';
-      tbl.appendChild(E('tr',null,'<td><b>'+s.n+'</b><div class="cap">'+s.c+'</div></td><td>'+ftp+'</td><td>'+pv(s.sf)+'</td><td>'+pv(s.dbx)+'</td>'));
+      tbl.appendChild(E('tr',null,'<td><b>'+s.n+'</b><div class="cap">'+s.c+'</div></td><td>'+ftp+'</td><td data-hideaud="dbx">'+pv(s.sf)+'</td><td data-hideaud="sf">'+pv(s.dbx)+'</td>'));
       lg(log,s.n+': '+(s.ft==='lib'?'in the connector library':'Connector SDK, hosted and scheduled like any other connection'),'ok');
       if(!s.sf&&!s.dbx) lg(log,'  neither native catalog covers it: this is where a project gets smaller','er');
     }
     await S(300); if(my!==RUN)return;
     lg(log,t.list.length+' sources · Fivetran covers all of them, '+t.ftSdk+' via the SDK','em');
-    lg(log,'best native option covers '+Math.max(t.sf,t.dbx)+', leaving '+(t.list.length-Math.max(t.sf,t.dbx))+' to build and own','wn');
+    lg(log,'best native option covers '+bestNative(t)+', leaving '+(t.list.length-bestNative(t))+' to build and own','wn');
     score();
   }
   paint(); score();
@@ -4315,6 +4345,7 @@ setLangCSS();
 renderNav();
 setLens(store.g('lens','tech'));
 setTheme(store.g('theme','light'));
+setAud(store.g('aud','both'));
 applyChrome();
 const _p=store.g('pos',[0,0]);
 go(_p[0],_p[1],false);
