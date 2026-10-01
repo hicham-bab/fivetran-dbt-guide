@@ -1315,6 +1315,7 @@ const L={en:{}};
 /* chapter and sub-tab labels */
 L.en={
 'c0.tab':'The stack','c0.title':'Where Fivetran and dbt sit',
+'c0.before.tab':'Before','c0.before.desc':'The gap in the middle is rarely empty. Two common shapes, and the failure mode both share.',
 'c0.s0.tab':'Build the stack','c0.s0.desc':'A data platform with raw data in one end and consumers at the other, and two gaps in the middle. Build it up one layer at a time.',
 'c0.s1.tab':'The ten chapters','c0.s1.desc':'What each chapter proves, and what you can run in front of a client when you get there.',
 'c1.tab':'Move','c1.title':'Move',
@@ -1678,6 +1679,102 @@ function buildGuide(){ return [
 /* ================= 1 · THE STACK ================= */
 {tab:T('c0.tab'), own:'both', title:T('c0.title'),
  subs:[
+  {tab:T('c0.before.tab'), desc:T('c0.before.desc'),
+   blocks:[
+    {t:'h', x:'Where most estates start'},
+    {t:'p', x:'Not a clean pipeline. Every source-to-report path is its own hand-built connection, drawn by whoever needed that report first.'},
+    {t:'html', x:(function(){
+      const SRC=[['Salesforce',20],['SAP ERP',86],['PostgreSQL',152],['Flat files / SFTP',218],['Support tool',284]];
+      const DST=[['Finance report',40],['Ops dashboard',120],['Exec BI deck',200],['Support metrics',280]];
+      const COL={etl:'#E8A33D',sp:'#E5484D',man:'#7A8CA3'};
+      const LINK=[[0,0,'etl'],[0,2,'etl'],[1,0,'sp'],[1,1,'etl'],[2,1,'man'],[2,3,'etl'],[3,3,'man'],[3,0,'sp'],[4,2,'man'],[4,1,'etl']];
+      const box=(x,w,y,label)=>'<rect x="'+x+'" y="'+(y-17)+'" width="'+w+'" height="34" rx="8" fill="var(--panel)" stroke="var(--line2)"/>'+
+        '<text x="'+(x+w/2)+'" y="'+(y+4)+'" text-anchor="middle" font-size="11.5" font-weight="620" fill="var(--ink)">'+label+'</text>';
+      const lines=LINK.map(l=>'<line x1="180" y1="'+SRC[l[0]][1]+'" x2="500" y2="'+DST[l[1]][1]+'" stroke="'+COL[l[2]]+'" stroke-width="1.6" opacity=".62"/>').join('');
+      const srcBoxes=SRC.map(s=>box(20,160,s[1],s[0])).join('');
+      const dstBoxes=DST.map(d=>box(500,160,d[1],d[0])).join('');
+      return '<div class="blk"><svg width="100%" viewBox="0 0 680 320" role="img" style="font-family:anthropic-sans,-apple-system,\'system-ui\',\'Segoe UI\',sans-serif">'+
+        '<g>'+lines+'</g><g>'+srcBoxes+dstBoxes+'</g></svg>'+
+        '<div class="cap" style="display:flex;gap:16px;flex-wrap:wrap;margin-top:2px">'+
+        '<span><i style="display:inline-block;width:9px;height:9px;border-radius:99px;background:'+COL.etl+';margin-right:5px"></i>On-prem ETL tool (Informatica, Talend)</span>'+
+        '<span><i style="display:inline-block;width:9px;height:9px;border-radius:99px;background:'+COL.sp+';margin-right:5px"></i>Stored procedure</span>'+
+        '<span><i style="display:inline-block;width:9px;height:9px;border-radius:99px;background:'+COL.man+';margin-right:5px"></i>Cron, script or manual file drop</span></div>'+
+        '<div class="cap">5 sources, 4 reports, 10 point-to-point pipelines. Add a sixth source, or a fifth report, and every new line is drawn by hand.</div></div>';
+    })()},
+    {t:'ft', x:'Industry already has a name for this, coined by architect Jerry Foster in 2001 and popularised since: <b>Integration Spaghetti&trade;</b>, connectivity "so complex that everyone is afraid of touching it." This is not a metaphor invented for this guide.'},
+    {t:'mode', x:[
+      {tab:'Getting data in', cap:'Ingestion before Fivetran: a process someone owns, sized once for the source and the network it was built on.', blocks:[
+        {t:'nat', label:'Pick the approach to see what actually moves the data', x:[
+          {v:'cus', name:'Hand-rolled scripts', blocks:[
+            {t:'html', x:'<div class="tcards">'+[
+              [1,'extract_customers.py','cron, 02:00 daily',
+               'connect via JDBC to the source database\ncursor.execute("SELECT * FROM customers")\nwrite every row to customers.csv\nno incremental key, no watermark: a full table pull every night'],
+              [2,'When a column changes','no schema drift handling',
+               'the SELECT * still runs\nthe CSV gains a new column\ndownstream either fails on a column-count mismatch, or silently ignores it']]
+              .map(t=>'<div class="tcard"><div class="th"><span class="tn">'+t[0]+'</span><span class="tt">'+t[1]+
+                '</span><span class="tg">'+t[2]+'</span></div><pre class="code">'+t[3]+'</pre></div>').join('')+'</div>'},
+            {t:'bad', x:'Every new source is another script, another set of credentials to rotate, and another engineer who has to remember this one exists. None of it scales past the person who wrote it.'}]},
+          {v:'pwx', name:'PowerExchange / Talend connectors', blocks:[
+            {t:'html', x:'<div class="tcards">'+[
+              [1,'PWXPC listener','installed next to the source, licensed per connector',
+               'A capture agent runs on, or next to, the source database.\nChange data capture reads the transaction log through that listener.\nNo listener running, no capture: it is a standing service to patch and keep alive.'],
+              [2,'Reaching a cloud warehouse','bolted on after the fact',
+               'The connector was built to land rows in an on-prem staging table.\nA cloud-storage writer was added later as an export option, not a redesign.\nThe same listener still sizes the whole pipeline.']]
+              .map(t=>'<div class="tcard"><div class="th"><span class="tn">'+t[0]+'</span><span class="tt">'+t[1]+
+                '</span><span class="tg">'+t[2]+'</span></div><pre class="code">'+t[3]+'</pre></div>').join('')+'</div>'},
+            {t:'bad', x:'The agent is priced and sized for one job: run next to this source, on this network, at this volume. Pointing it at a warehouse across the internet moved the constraint; it did not remove it.'}]},
+          {v:'sftp', name:'Flat files over SFTP', blocks:[
+            {t:'html', x:'<div class="tcards">'+[
+              [1,'export_customers.sh','nightly, on the source server',
+               'a dump utility writes customers_20260828.csv.gz\nthe file is pushed to an SFTP folder\na second, unrelated job polls that folder every 15 minutes'],
+              [2,'What happens on failure','no checksum, no manifest',
+               'the export job dies at 40% written\nthe poller finds a file and ingests it anyway\nnobody downstream can tell a partial file from a complete one']]
+              .map(t=>'<div class="tcard"><div class="th"><span class="tn">'+t[0]+'</span><span class="tt">'+t[1]+
+                '</span><span class="tg">'+t[2]+'</span></div><pre class="code">'+t[3]+'</pre></div>').join('')+'</div>'},
+            {t:'bad', x:'There is no cursor and no watermark, and nothing confirms that the file which landed is the file that was meant to land.'}]}
+         ]},
+        {t:'bad', x:'All three assume a process running next to the source, sized once for a fixed on-premises load. None of it becomes cloud-native just because the output now points at a cloud warehouse instead of a local disk.'}
+      ]},
+      {tab:'Turning it into something usable', cap:'Once it lands, the same shape repeats one layer up.', blocks:[
+        {t:'nat', label:'Pick the tool to see what actually sits in the gap', x:[
+          {v:'inf', name:'Informatica PowerCenter', blocks:[
+            {t:'html', x:'<div class="tcards">'+[
+              [1,'m_stg_customers','PowerCenter Designer',
+               'Source Qualifier reads RAW_CUSTOMERS\nExpression transformation renames 4 columns\nTarget: STG_CUSTOMERS, insert only'],
+              [2,'s_m_stg_customers','Workflow Manager, wf_daily_load',
+               'Session wraps the mapping above.\nLink condition: runs only after s_m_stg_orders succeeds.\nScheduled 02:00 UTC via a pmcmd cron trigger.']]
+              .map(t=>'<div class="tcard"><div class="th"><span class="tn">'+t[0]+'</span><span class="tt">'+t[1]+
+                '</span><span class="tg">'+t[2]+'</span></div><pre class="code">'+t[3]+'</pre></div>').join('')+
+              '<div class="cap">and 30-odd more sessions in the same workflow, each link condition wired by hand</div></div>'},
+            {t:'bad', x:'What a reviewer gets is a binary repository export: GUID-keyed objects, not a diff of the transformation logic. Nobody currently on the team wrote most of these mappings.'}]},
+          {v:'tal', name:'Talend', blocks:[
+            {t:'html', x:'<div class="tcards">'+[
+              [1,'stg_customers.job','Talend Studio canvas',
+               'tDBInput (RAW_CUSTOMERS) → tMap (rename 4 columns) → tDBOutput (STG_CUSTOMERS)\nWired by dragging connectors between components.'],
+              [2,'Run order','Talend Administration Center',
+               'tRunJob triggers chain stg_customers.job → stg_orders.job → fct_orders.job.\nThe chain lives in the scheduler, not in any of the three jobs.']]
+              .map(t=>'<div class="tcard"><div class="th"><span class="tn">'+t[0]+'</span><span class="tt">'+t[1]+
+                '</span><span class="tg">'+t[2]+'</span></div><pre class="code">'+t[3]+'</pre></div>').join('')+'</div>'},
+            {t:'bad', x:'Version control tracks the .item XML the Studio writes out, not the transformation itself. Seeing what changed means opening Talend Studio and clicking through the canvas.'}]},
+          {v:'sp', name:'Stored procedures', blocks:[
+            {t:'html', x:'<div class="tcards">'+[
+              [1,'sp_load_stg_customers','runs directly against prod',
+               '<span class="k">CREATE OR REPLACE PROCEDURE</span> sp_load_stg_customers()\n<span class="k">RETURNS</span> STRING\n<span class="k">AS</span> $$\n  <span class="k">INSERT INTO</span> stg_customers\n  <span class="k">SELECT</span> * <span class="k">FROM</span> raw_customers;\n$$;'],
+              [2,'Scheduling','a cron-style task, bolted on after the move to cloud',
+               '<span class="c">-- lifted to the cloud warehouse, same shape as before</span>\n<span class="k">CREATE TASK</span> t_load_stg_customers\n  <span class="k">SCHEDULE</span> = <span class="s">\'USING CRON 0 2 * * * UTC\'</span>\n<span class="k">AS CALL</span> sp_load_stg_customers();']]
+              .map(t=>'<div class="tcard"><div class="th"><span class="tn">'+t[0]+'</span><span class="tt">'+t[1]+
+                '</span><span class="tg">'+t[2]+'</span></div><pre class="code">'+t[3]+'</pre></div>').join('')+'</div>'},
+            {t:'bad', x:'This is real, readable SQL, and it is still the pattern: no test runs before it ships, no dev or CI environment, and "fix the source" means editing the procedure body directly in production.'}]}
+         ]},
+        {t:'bad', x:'Three different shapes, one shared result: nobody currently at the company can say, with confidence, what breaks if this source changes shape tomorrow.'}
+      ]}
+     ]},
+    {t:'bad', x:'Same story on both sides of the gap: these tools were built for a fixed server, a fixed network and a licence per core. None of that assumption survives contact with a platform that scales up and down by the query.'},
+    {t:'lens',
+      bus:'This is the stack most clients already paid for once. The pitch is not rip-and-replace, it is removing the manual risk sitting inside what they already run.',
+      tech:'Ask what catches a broken upstream change before a stakeholder does. If the answer is "someone notices the numbers look wrong," that is the gap the rest of this chapter fills.',
+      partner:'This is the opening wedge: point at the stored procedure, the Informatica mapping, or the hand-rolled extraction script nobody wants to touch, and scope the migration as its own engagement.'}
+   ]},
   {tab:T('c0.s0.tab'), desc:T('c0.s0.desc'),
    blocks:[
     {t:'sim', id:'stackbuild'},
@@ -2134,7 +2231,24 @@ function buildGuide(){ return [
       ['It parses the SQL, not the file.','So a reformat, a renamed alias or a comment is not a change and rebuilds nothing.'],
       ['It asks whether the upstream data moved,','not only whether the code did. That is the part a manifest comparison cannot do at all.'],
       ['Freshness becomes a declaration.','A per-model tolerance states how stale that table is allowed to get, in the project, where it can be reviewed. Most estates carry the same requirement scattered across cron jobs whose reasons nobody remembers.']]},
-    {t:'warn', x:'<b>Staleness a person absorbs, an agent acts on.</b> Someone reading a dashboard notices that yesterday’s number looks off. An agent does not pause to ask whether the data is current. It acts, at machine speed, and a tolerance that was survivable for a dashboard is not survivable for the agent.'}
+    {t:'warn', x:'<b>Staleness a person absorbs, an agent acts on.</b> Someone reading a dashboard notices that yesterday’s number looks off. An agent does not pause to ask whether the data is current. It acts, at machine speed, and a tolerance that was survivable for a dashboard is not survivable for the agent.'},
+    {t:'wow', x:[
+      {tab:'Without dbt State, in dev', title:'Reproducing a prod failure means rebuilding the whole lane',
+       sub:'A test fails in production. Dev is empty, so there is nothing to query there yet. dbt build --select +fct_orders rebuilds every upstream model from scratch before the failing row even exists to look at.',
+       blocks:[
+        {t:'bul', k:'x', x:[
+          ['--defer only gets you halfway,','it skips building the models you did not select, but fct_orders itself is still selected, so it still rebuilds, from nothing, because dev has nothing underneath it to build on top of.'],
+          ['Five edits while chasing the bug, five full rebuilds,','each one a wait before the next guess can even be tested.']]}
+       ]},
+      {tab:'With dbt State, in dev', title:'Same command, no extra flags, prod comes to her',
+       sub:'dbt State checks the same freshness and logic signal it uses in prod. Everything upstream that has not changed is cloned into dev instead of skipped or rebuilt, so the failing row is there on the first run.',
+       blocks:[
+        {t:'code', x:'<span class="c">-- same selector, no --defer, no --state, no manifest juggling</span>\ndbt build --select +fct_orders'},
+        {t:'bul', k:'ok', x:[
+          ['Deferral happens on its own, and goes further than deferral,','an unchanged upstream node is cloned rather than referenced or skipped, so it is a real, queryable table in dev.'],
+          ['The red test shows up before anything she cares about has to rebuild,','because the clone carries prod\'s state with it instead of starting from an empty schema.']]}
+       ]}]},
+    {t:'ft', x:'<b>The dev loop is the same mechanism as the prod run.</b> One decision, rebuild only what semantically changed and whose data moved, pays off twice: fewer DATTs billed in production, and fewer full rebuilds between each guess while debugging in dev.'}
    ]},
   {tab:T('c6.s2.tab'), desc:T('c6.s2.desc'),
    blocks:[
@@ -4345,7 +4459,8 @@ setLangCSS();
 renderNav();
 setLens(store.g('lens','tech'));
 setTheme(store.g('theme','light'));
-setAud(store.g('aud','both'));
+const _audParam=new URLSearchParams(location.search).get('aud');
+setAud(['both','sf','dbx'].includes(_audParam) ? _audParam : store.g('aud','both'));
 applyChrome();
 const _p=store.g('pos',[0,0]);
 go(_p[0],_p[1],false);
