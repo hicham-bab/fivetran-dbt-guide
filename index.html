@@ -1366,10 +1366,10 @@ L.en={
 'c9.s1.tab':'What you send','c9.s1.desc':'Activation is a deliberate selection rather than a mirror. Pick the records, the field and the moment.',
 'c9.s2.tab':'Person or agent','c9.s2.desc':'The consumer at the end can be either, and the governed layer does not change. What changes is how fast a wrong decision spreads.',
 'c9.s3.tab':'How it gets built','c9.s3.desc':'Managed activation, a hand-rolled script, or pushing out from the warehouse, and the honest trade in each.',
-'c11.tab':'Core vs platform','c11.title':'dbt Core, the dbt platform, or dbt Projects on Snowflake',
-'c11.s0.tab':'The engines','c11.s0.desc':'Core v2, the Fusion binary and the dbt platform are three distributions over one shared Rust runtime. dbt Projects on Snowflake runs that same Core or Fusion inside Snowflake’s own compute — a hosting choice, not a fourth engine. Knowing which line is which is the whole conversation.',
-'c11.s1.tab':'What self-hosting means','c11.s1.desc':'The engine is free. For the control plane around it, dbt Core ships nothing at all, so it is the platform, dbt Projects on Snowflake if the estate is Snowflake-only, or software you select, integrate and staff yourself.',
-'c11.s2.tab':'What the platform adds','c11.s2.desc':'Capabilities that are platform-level rather than engine-level, including the four you cannot build from the open source at any price, and what Snowflake’s own hosted runtime covers of that list.',
+'c11.tab':'dbt vs platform','c11.title':'dbt, dbt OSS, the dbt platform, or dbt Projects on Snowflake',
+'c11.s0.tab':'The engines','c11.s0.desc':'dbt v1, dbt OSS and dbt (renamed from Fusion at dbt Summit 2026) are three distributions over one shared Rust-era runtime, and the dbt platform sits above all of them. dbt Projects on Snowflake runs that same dbt or dbt OSS inside Snowflake’s own compute, a hosting choice, not a fourth engine. Knowing which line is which is the whole conversation.',
+'c11.s1.tab':'What self-hosting means','c11.s1.desc':'The engine, dbt or dbt OSS, is free. For the control plane around it, neither ships anything at all, so it is the platform, dbt Projects on Snowflake if the estate is Snowflake-only, or software you select, integrate and staff yourself.',
+'c11.s2.tab':'Score the fit','c11.s2.desc':'The same question as a live tool: tick what the client needs, and score it across self-hosting it yourself, dbt Projects on Snowflake, and the dbt platform, including the four capabilities not buildable from the open source at any price.',
 'c11.s3.tab':'When Core is right','c11.s3.desc':'The honest counter-case, because for some teams self-hosting, including on Snowflake’s own hosted runtime, is the correct answer and saying so earns the rest of the conversation.',
 'c10.tab':'Value','c10.title':'Value and gates',
 'c10.s0.tab':'The six gates','c10.s0.desc':'A gate is evidence you can produce and put in front of a client, not an assertion that the work went well. Tick what you could evidence today.',
@@ -2264,7 +2264,7 @@ function buildGuide(){ return [
    blocks:[
     {t:'sim', id:'costattr'},
     {t:'grid', cols:2, x:[
-      ['Before the run','Fusion understands SQL across engine dialects, so a broken reference or a bad column surfaces while the model is being written rather than after a run somebody already paid for.'],
+      ['Before the run','dbt’s engine (renamed from Fusion in September 2026) understands SQL across engine dialects, so a broken reference or a bad column surfaces while the model is being written rather than after a run somebody already paid for.'],
       ['After the run','Spend attributed per model turns "the bill went up" into the specific change that caused it. That is the difference between a cost conversation and a cost argument.']]},
     {t:'lens',
       bus:'"Our warehouse bill doubled and nobody can tell me why" is the most common sentence in this whole guide. Per-model attribution is the answer, and it is an answer a finance reader can check.',
@@ -2363,7 +2363,7 @@ function buildGuide(){ return [
      rows:[
       ['A business question: what does this metric mean, what is revenue','<b>Semantic Layer tools, over MCP</b>','Governed metrics, dimensions, entities and saved queries, and the ability to query a metric rather than guess at a column.'],
       ['A model or lineage question: where does this come from, what breaks','<b>Discovery tools, over MCP</b>','Models, columns, descriptions, lineage, sources, tests and project health.'],
-      ['A code-aware question, inside a project, in an editor','<b>Fusion and language-server tools, over MCP</b>','Definition lookup, compiled SQL context, column-level lineage.'],
+      ['A code-aware question, inside a project, in an editor','<b>dbt and language-server tools, over MCP</b>','Definition lookup, compiled SQL context, column-level lineage.'],
       ['No MCP in play, or you need lower-level access','<b>The build artifacts directly</b>','The manifest, catalog, semantic manifest and run results. Valid and powerful, and a raw integration surface rather than an agent interface.']]},
     {t:'warn', x:'<b>Do not default a client onto the artifact-indexed route.</b> Normalising artifacts into a queryable metadata layer is directionally right and it is where this is going. It is also not the safe default unless the client already has it in place. Start at the supported path and step down only when there is a reason.'},
     {t:'h4', x:'Two traps'},
@@ -2483,37 +2483,37 @@ function buildGuide(){ return [
   {tab:T('c11.s0.tab'), desc:T('c11.s0.desc'),
    blocks:[
     {t:'sim', id:'engines'},
-    {t:'ft', x:'<b>What changed in June 2026.</b> dbt Core v2.0 shipped its first alpha on 1 June 2026, rebuilt on the same Rust foundations as Fusion, and a large amount of Fusion code was open-sourced into the <code>dbt-core</code> repository under Apache 2.0. The two-engine era is closing: Core and Fusion now share one runtime. If your notes still say Fusion is a separate ELv2 engine you should not plan around, they are out of date.'},
+    {t:'ft', x:'<b>What changed, in two steps.</b> dbt Core v2.0 shipped its first alpha on 1 June 2026, rebuilt on the same Rust foundations as Fusion, with a large amount of Fusion code open-sourced into the <code>dbt-core</code> repository under Apache 2.0. Then, at dbt Summit 2026 (Las Vegas, 15 to 18 September), the names themselves retired: dbt v2.0 went GA on 16 September, Fusion became simply <b>dbt</b>, and dbt Core v2 became <b>dbt OSS</b>. The old dbt Core v1.x line is now <b>dbt v1</b>, on maintenance. If your notes still say Fusion, dbt Core v2 or ELv2, they are out of date twice over.'},
     {t:'table', head:['Distribution','Licence','Cost','What it is'],
      rows:[
-      ['<b>dbt Core v1.12</b> (Python)','Apache 2.0','free','The Python engine. Still available on PyPI and GitHub, in beta, and <b>not receiving new features</b>.'],
-      ['<b>dbt Core v2.0</b> (Rust)','Apache 2.0','free','The open-source baseline, built on the same foundations as Fusion. First alpha 1 June 2026.'],
-      ['<b>Fusion binary</b>','more permissive than ELv2','<b>free locally and in production</b>','The enhanced precompiled binary of v2. Contains some proprietary optimisations, including a built-in high-performance SQL linter. Premium features unlock with a free login or a payment method.'],
-      ['<b>dbt platform</b>','subscription','paid','Premium capabilities layered on the shared runtime. The control plane, not the engine.']],
-     cap:'From the dbt Labs announcement of dbt Core v2, June 2026. dbt Labs explicitly states the Fusion binary can be used free forever, including to power products that compete with Fivetran + dbt Labs.'},
-    {t:'ft', x:'<b>Where it runs matters too.</b> Snowflake now hosts that same Core or Fusion distribution directly inside Snowsight as <b>dbt Projects on Snowflake</b>, generally available since 10 November 2025, currently on dbt Core 1.9.4 or 1.10.15, or a preview build of Fusion 2.0.0. It is a place to run the engine, priced as ordinary warehouse compute with no separate licence — not a new engine, and not the platform.'},
-    {t:'warn', x:'<b>Do not sell the engine.</b> This is the single most common mistake in this conversation. The best free dbt CLI is Fusion, and dbt Labs says so in writing. If your pitch is "the platform gives you a faster engine", a technical buyer who has read the blog will correct you, and you will lose the room. The engine is the shared floor. The platform is what sits above it.'},
+      ['<b>dbt v1</b> (Python)','Apache 2.0','free','The old dbt Core engine, package name still <code>dbt-core</code>. On PyPI and GitHub, in maintenance, and <b>not receiving new features</b>.'],
+      ['<b>dbt OSS</b> (Rust)','Apache 2.0','free','The 100% open-source distribution of the v2 engine. No SQL comprehension, linter or language-server support, and none of the platform’s seat-based features.'],
+      ['<b>dbt</b> <span class="cap">renamed from Fusion, Sept 2026</span>','dbt Product Licensing Agreement','<b>free locally and in production</b>','The default, recommended distribution. The same engine as dbt OSS plus free advanced local features, including SQL comprehension, a built-in linter and LSP support. Seat-based platform features unlock with a free login or a payment method.'],
+      ['<b>dbt platform</b>','subscription','paid','Premium capabilities layered on either distribution. The control plane, not the engine.']],
+     cap:'From dbt Labs’ dbt Summit 2026 renaming (16 September). dbt Labs explicitly states the dbt distribution can be used free forever, including to power products that compete with Fivetran + dbt Labs.'},
+    {t:'ft', x:'<b>Where it runs matters too.</b> Snowflake hosts that same engine directly inside Snowsight as <b>dbt Projects on Snowflake</b>, generally available since 10 November 2025. Snowflake’s own version list, still labelled with the old names, currently supports dbt v1 (dbt Core 1.11.11, active; 1.9.4 and 1.10.15, deprecated but still running) or dbt v2 (shown as “dbt Fusion 2.0.0-preview.175” and later builds, which Snowflake’s own docs confirm is GA despite the preview label). It is a place to run the engine, priced as ordinary warehouse compute with no separate licence, not a new engine, and not the platform.'},
+    {t:'warn', x:'<b>Do not sell the engine.</b> This is the single most common mistake in this conversation. The best free dbt CLI is dbt (formerly Fusion), and dbt Labs says so in writing. If your pitch is "the platform gives you a faster engine", a technical buyer who has read the blog will correct you, and you will lose the room. The engine is the shared floor. The platform is what sits above it.'},
     {t:'lens',
       bus:'The engine being free and open is a reason to trust the vendor, not an objection. It means the transformation logic is portable by construction, and the paid layer has to earn its money on operations rather than on lock-in.',
-      tech:'Check which distribution the client is on. Python v1.x is on a maintenance path with no new features, so the question is not whether to move to the Rust runtime but when, and whether they run it themselves.',
-      partner:'Recommend Fusion for local and production CLI use without hesitation, because it is free and it is the best experience. Your commercial conversation is about the control plane, and it is a stronger conversation for being separated from the engine.'}
+      tech:'Check which distribution the client is on. The Python v1.x line is on a maintenance path with no new features, so the question is not whether to move to the Rust-era v2 engine but when, which distribution (dbt or dbt OSS), and whether they run it themselves.',
+      partner:'Recommend dbt (formerly Fusion) for local and production CLI use without hesitation, because it is free and it is the best experience. Your commercial conversation is about the control plane, and it is a stronger conversation for being separated from the engine.'}
    ]},
   {tab:T('c11.s1.tab'), desc:T('c11.s1.desc'),
    blocks:[
     {t:'sim', id:'selfhost'},
     {t:'h', x:'The engine is the cheap part'},
-    {t:'p', x:'A team that installs Fusion has a first-class transformation engine, for free, forever. Nothing in this chapter argues otherwise. The point is narrower and sharper than "the platform is more convenient": for the whole control plane, <b>dbt Core ships nothing at all</b>. There is no scheduler in it, no alerting, no run-history store, no RBAC, no per-pull-request CI, and no hosted catalog that several teams can search. Those are not thin features you switch on. They are separate pieces of software that somebody has to choose, deploy, secure, upgrade and answer the phone for.'},
+    {t:'p', x:'A team that installs dbt (formerly Fusion), or dbt OSS, has a first-class transformation engine, for free, forever. Nothing in this chapter argues otherwise. The point is narrower and sharper than "the platform is more convenient": for the whole control plane, <b>neither distribution ships anything at all</b>. There is no scheduler in it, no alerting, no run-history store, no RBAC, no per-pull-request CI, and no hosted catalog that several teams can search. Those are not thin features you switch on. They are separate pieces of software that somebody has to choose, deploy, secure, upgrade and answer the phone for.'},
     {t:'bul', x:[
       ['This is the comparison people get wrong in the client’s favour.','They compare a licence fee against zero, when the honest comparison is a licence fee against selecting, integrating and staffing six or seven pieces of infrastructure.'],
       ['Each of those is somebody’s weekend at some point.','Not because the software is bad, but because the person who set it up moves teams and the runbook was in their head.'],
       ['The cost is not the build, it is the ownership.','Standing up Airflow plus dbt is a known quantity and a competent team does it in weeks. Running it for three years, through upgrades, staff changes and an audit, is the actual line item.'],
       ['Four capabilities are not buildable from the open source at all.','Not "hard", not "expensive": not available. The next tab names them precisely, and is careful about the ones that are available.']]},
-    {t:'ft', x:'<b>This is not theoretical.</b> An anonymized customer PoC (June 2026) scored the same transformation project three ways — legacy, Snowflake with self-hosted dbt Core, and Snowflake with the dbt platform — across 41 weighted criteria. The raw transformation engine scored close (87% vs 97%). The gap opened exactly where this chapter says it would: CI/CD (40% vs 97%), lineage and documentation (37% vs 92%), and operations and scheduling (49% vs 97%). Overall: 61% for self-hosted Core, 96% for the platform.'},
+    {t:'ft', x:'<b>This is not theoretical.</b> An anonymized customer PoC (June 2026) scored the same transformation project three ways — legacy, Snowflake with self-hosted dbt, and Snowflake with the dbt platform — across 41 weighted criteria. The raw transformation engine scored close (87% vs 97%). The gap opened exactly where this chapter says it would: CI/CD (40% vs 97%), lineage and documentation (37% vs 92%), and operations and scheduling (49% vs 97%). Overall: 61% for self-hosted, 96% for the platform. That was one client’s weighting; the scorer in the next tab runs the same logic live, on whatever the client in front of you actually needs.'},
     {t:'h', x:'A lighter version of self-hosting, if the estate is Snowflake-only'},
     {t:'p', x:'<b>dbt Projects on Snowflake</b>, generally available since 10 November 2025, sits between "roll your own" and the platform. Snowflake runs the dbt project inside its own compute and gives you native scheduling through Snowflake tasks, a DAG view with column-level lineage in Snowsight, and file-based development in Workspaces, for the cost of the warehouse and nothing else.'},
     {t:'bul', x:[
       ['It removes the DIY-infrastructure step, not the ceiling.','No dbt Mesh or cross-project refs, no Semantic Layer, one Snowflake account only, and CI/CD, failure alerting and deferral are still yours to script against Snowflake’s own primitives.'],
-      ['It runs Core or a preview of Fusion, not dbt Cloud.','dbt Cloud projects are explicitly unsupported, and the runtime is pinned to what Snowflake ships — dbt Core 1.9.4 or 1.10.15, Fusion 2.0.0-preview — so a client cannot pin an arbitrary dbt version the way they could self-hosting it themselves.'],
+      ['It runs dbt v1 or dbt v2, not the dbt platform’s own projects.','dbt platform projects are explicitly unsupported, and the runtime is pinned to what Snowflake ships — dbt Core 1.9.4 or 1.10.15 (both deprecated but supported), 1.11.11 (active), or “dbt Fusion 2.0.0-preview” and later, Snowflake’s own label for GA dbt v2 — so a client cannot pin an arbitrary dbt version the way they could self-hosting it themselves.'],
       ['A workspace belongs to one person.','Workspaces are created in a personal database and are not shared, which makes this a solo-developer or small-team surface rather than a collaborative one.']]},
     {t:'warn', x:'<b>Be careful with day estimates.</b> This guide does not put a number of engineer-days on self-hosting, because any number I gave you would be invented and a good architect would say so. What it does instead is count the components you would run and the things that page somebody, which is checkable against the client’s own estate.'}
    ]},
@@ -2521,52 +2521,38 @@ function buildGuide(){ return [
    blocks:[
     {t:'wow', x:[
       {tab:'What the engine gives you', title:'Free, open, and genuinely good',
-       sub:'This is the floor, identical whether you are on Core v2 or the Fusion binary, and it is a high floor.',
+       sub:'This is the floor, identical whether you are on dbt OSS or the dbt distribution (formerly Fusion), and it is a high floor.',
        blocks:[
         {t:'bul', k:'ok', x:[
-          ['Parse, compile and run, on the Rust runtime.','With the parse-time improvements on large projects that came with v2.'],
+          ['Parse, compile and run, on the Rust-era runtime.','With the parse-time improvements on large projects that came with v2.'],
           ['A tightly defined language spec.','Configuration typos are caught rather than silently ignored, which is a real class of bug removed.'],
           ['Tests, contracts, snapshots, exposures, the semantic manifest.','The modelling and governance primitives are in the open source.'],
           ['Parquet artifacts and a revamped local docs experience.','Artifacts are queryable directly with DuckDB, which is genuinely useful for your own tooling.'],
-          ['A built-in SQL linter, in the Fusion binary.','Free, and one of the proprietary optimisations that distribution carries.']]}
+          ['SQL comprehension, a built-in linter and LSP support, free in the dbt distribution.','Not in dbt OSS. The one free-local-feature gap between the two open engine distributions.']]}
        ]},
-      {tab:'What the platform adds', title:'The control plane dbt Core does not attempt, and four things you cannot build',
-       sub:'Three tiers. A high free floor in the engine, then a control plane dbt Core does not attempt at all, then four capabilities that are not in the open source at any price.',
+      {tab:'Score it live', title:'The control plane neither open distribution attempts, scored live',
+       sub:'Tick what this client needs. Three real choices for where the control plane lives: assemble it yourself, dbt Projects on Snowflake if the estate is Snowflake-only, or the dbt platform. Four rows are not buildable from the open source at any price, on any of the three.',
        blocks:[
-        {t:'table', head:['Capability','In dbt Core','dbt Projects on Snowflake','Self-hosted route','dbt platform'],
-         rows:[
-          ['Scheduling and orchestration','<b>Nothing</b>','Native Snowflake tasks, one warehouse-triggered queue','Airflow, Dagster, cron or Kubernetes that you deploy, upgrade and run','Included, with run history'],
-          ['CI with a schema per pull request','<b>Nothing</b>','<b>Not automatic</b>: Snowflake CLI plus your own CI scripting','Your CI system, plus scripts to create and drop the schema and report back','Included, fired by the git platform'],
-          ['Deferral to production artifacts','Flags exist','<b>Not documented</b>','You store, version and fetch the manifest yourself','Managed'],
-          ['Run history and log retention','<b>Nothing</b>','Basic: per-run logs and tracing, no live streaming output','A log store, a retention policy, and a way to search runs months later','Included and searchable'],
-          ['Failure alerting','<b>Nothing</b>','<b>Not built in</b>: wire your own Snowflake alert object','Your alerting stack, plus glue that knows what a dbt failure means','Included'],
-          ['Searchable catalog and lineage','Static docs per project','Column-level lineage in the Snowsight DAG (≤300 models), Snowflake-only','Host the docs yourself: no auth, no cross-team search, stale unless you rewire it','<b>dbt Catalog</b>'],
-          ['Environments, credentials, RBAC, SSO, audit','<b>Nothing</b>','Snowflake’s own account RBAC and SSO; workspaces are per-user, not shared','Your secret manager and identity provider, wired up and audited by you','Included'],
-          ['dbt MCP server for agents','Open source','<b>Not the dbt MCP</b>: Cortex Code, Snowflake’s own assistant','You can run it; it exposes local CLI and artifact tools','Managed, and reaches the governed metadata below'],
-          ['Cost attribution per model','<b>Nothing</b>','<b>Not possible</b>: warehouse-level compute cost only','<b>Not possible</b>','<b>Platform only</b>'],
-          ['<b>Data diff against production</b>','<b>Nothing</b>','<b>Not possible</b>','<b>Not possible</b>','<b>Platform only</b>'],
-          ['<b>Semantic Layer served over JDBC, APIs and MCP</b>','Define and compute locally, via MetricFlow (Apache 2.0 since Oct 2025)','<b>Not possible</b>','<b>Not possible</b>: the serving layer is not open','<b>Platform only</b>'],
-          ['<b>Cross-project refs with contracts and versions</b>','Contracts only','<b>Not possible</b>: one project, one Snowflake account','<b>Not possible</b>: cross-project resolution is not open','<b>Platform only</b>'],
-          ['dbt Wizard','<b>Nothing</b>','<b>Not possible</b>: Cortex Code is a separate, Snowflake-only assistant','<b>Not possible</b>','Platform']]},
+        {t:'sim', id:'fourway'},
         {t:'ok', x:'<b>The honest headline.</b> You can self-host a very good transformation engine for nothing, you can self-host the MCP server too, and if the estate is Snowflake-only, Snowflake will host the compute and basic scheduling for free. None of those three routes gets you a governed Semantic Layer served to consumers, a data diff against production, per-model cost attribution, or cross-project references with contracts. If the client’s roadmap has agents or more than one team on it, that is the line that decides this, and it decides it on capability rather than on price.'}
        ]}]},
     {t:'lens',
       bus:'Frame it as what the business gets that it currently cannot buy at any price internally: a number an agent can resolve, a change a reviewer can see the data impact of, and a bill attributable to the model that caused it.',
-      tech:'Ask which of the four platform-only rows the client needs in the next twelve months. If the answer is none, Core plus their existing orchestrator — or dbt Projects on Snowflake, if they are Snowflake-only — is a defensible architecture and you should say so.',
+      tech:'Ask which of the four platform-only rows the client needs in the next twelve months. If the answer is none, the open engine plus their existing orchestrator, or dbt Projects on Snowflake if they are Snowflake-only, is a defensible architecture and you should say so.',
       partner:'This is the most useful qualification conversation you can have early. It sorts a client into "wants a managed control plane" or "wants help running their own", and both are billable engagements with different shapes.'}
    ]},
   {tab:T('c11.s3.tab'), desc:T('c11.s3.desc'),
    blocks:[
-    {t:'h', x:'When self-hosted Core, or Snowflake’s own hosting, is the right answer'},
+    {t:'h', x:'When self-hosting the open engine, or Snowflake’s own hosting, is the right answer'},
     {t:'bul', x:[
       ['A mature platform team that already runs Airflow well.','If orchestration, secrets, CI and observability are already solved and staffed, the platform is buying a smaller delta and you should size it honestly.'],
       ['A small team, one project, few consumers.','The governance features earn their money at the point where several teams depend on each other. Before that they are optionality.'],
-      ['A Snowflake-only shop wanting the lightest possible on-ramp.','dbt Projects on Snowflake, GA since 10 November 2025, removes even the DIY-infrastructure step for a small team already on Core. It carries the same ceiling as self-hosting: no Mesh, no Semantic Layer, one Snowflake account, one warehouse-triggered task queue.'],
+      ['A Snowflake-only shop wanting the lightest possible on-ramp.','dbt Projects on Snowflake, GA since 10 November 2025, removes even the DIY-infrastructure step for a small team already on the open engine. It carries the same ceiling as self-hosting: no Mesh, no Semantic Layer, one Snowflake account, one warehouse-triggered task queue.'],
       ['A hard constraint on running software outside the perimeter.','Some regulated environments settle this before the value conversation starts. Note that this is the same class of question as the Fivetran residency one in chapter 2.'],
       ['Cost sensitivity with genuine engineering capacity to spend.','A team with time and no budget is a legitimate position. The platform trades money for their time; if they have more time than money, the trade is worse.']]},
-    {t:'bad', x:'<b>What is not a good reason.</b> "We want to avoid lock-in" does not argue for self-hosting, because the engine and the project are Apache 2.0 either way and the models are portable by construction. Lock-in lives in where the data sits and in how platform-specific the SQL was allowed to become, which is chapters 2 and 10, not this one.'},
+    {t:'bad', x:'<b>What is not a good reason.</b> "We want to avoid lock-in" does not argue for self-hosting. dbt OSS is Apache 2.0 either way you self-host, the dbt distribution carries its own free-forever licence, and in both cases the project files are portable by construction. Lock-in lives in where the data sits and in how platform-specific the SQL was allowed to become, which is chapters 2 and 10, not this one.'},
     {t:'ok', x:'<b>Say the counter-case out loud.</b> A partner who names the cases where the client does not need the platform is the partner the client believes when they say they do. This tab exists so you can have that sentence ready rather than improvising it under pressure.'},
-    {t:'gate', label:'How to close this conversation', x:'Name which platform-only capabilities the client needs inside twelve months, and which components they would otherwise run themselves or hand to Snowflake. If the first list is empty, recommend Fusion plus their existing orchestrator — or dbt Projects on Snowflake if they are Snowflake-only — and mean it.'}
+    {t:'gate', label:'How to close this conversation', x:'Name which platform-only capabilities the client needs inside twelve months, and which components they would otherwise run themselves or hand to Snowflake. If the first list is empty, recommend dbt (formerly Fusion) plus their existing orchestrator, or dbt Projects on Snowflake if they are Snowflake-only, and mean it.'}
    ]}
  ]},
 
@@ -2598,7 +2584,7 @@ function buildGuide(){ return [
     {t:'p', x:'An analytics engineer wants to check whether a model change does what they think. Today that means running it on the warehouse and burning credits to find out. With the data in open formats they point an in-process engine at the same tables on a laptop and find out for free. Same data, same governed tables, no cluster, no consumption. The same logic scales up: a workload that suits a different engine gets that engine, and a team that needs an ad-hoc query surface gets one without a licence conversation.'},
     {t:'sim', id:'bands'},
     {t:'grid', cols:2, x:[
-      ['What was measured','Five dbt projects across pharma and retail, migrated Snowflake to Databricks and Databricks to Snowflake: both directions at every band, nineteen models in total. One Fivetran-managed lake held the raw layer throughout and was never rewritten; only the transformation project moved. Fusion drove every run. Source tables of 750 rows and one derived fact of 6,000: enough to prove pattern coverage and merge behaviour, and nothing at all about tuning at production scale.'],
+      ['What was measured','Five dbt projects across pharma and retail, migrated Snowflake to Databricks and Databricks to Snowflake: both directions at every band, nineteen models in total. One Fivetran-managed lake held the raw layer throughout and was never rewritten; only the transformation project moved. dbt (formerly Fusion) drove every run. Source tables of 750 rows and one derived fact of 6,000: enough to prove pattern coverage and merge behaviour, and nothing at all about tuning at production scale.'],
       ['Where the measurement disagreed with the read','A model was broken on purpose, one aggregate rounded to a different place, and the run succeeded, the whole test suite passed, and the row count matched. Only a value-level comparison against the engine being left caught it. A green run, a green test suite and a matching row count are three layers of agreement that can all be wrong at once.']]},
     {t:'warn', x:'<b>Incremental behaviour can change with the runtime, not just the engine.</b> The same project can run incrementally on one runtime and silently fall back to full table materialisation on another. If the modelled layers are incremental-heavy, establish that first: it moves a client between bands on its own, and it is invisible until the bill arrives.'},
     {t:'ok', x:'<b>Portability is insurance, and insurance is not the argument.</b> A client running one engine, with no second platform in view and no renewal in front of them, gets far more from the right engine per job and a free one to develop against than from a move they may never make.'},
@@ -2681,7 +2667,7 @@ SIMS.stackbuild=function(el){
     const box=(cls,label,who)=>'<div class="pbox '+cls+'">'+label+(who?'<span class="who">'+who+'</span>':'')+'</div>';
     const arr='<span class="parrow">&#9656;</span>';
     let html=box(i>=1?'ftb':'','Move',i>=1?'Fivetran':'')+arr;
-    html+= i>=4 ? box('dbtb','Transformation','dbt platform, on the Fusion engine')+arr : box('gap','?')+arr;
+    html+= i>=4 ? box('dbtb','Transformation','dbt platform, on dbt (formerly Fusion)')+arr : box('gap','?')+arr;
     html+= box('','BI, analytics, AI');
     if(i>=7) html+=arr+box('ftb','Activation','Fivetran');
     $('#sbPipe',wrap).innerHTML=html;
@@ -4133,22 +4119,22 @@ SIMS.actagent=function(el){
 /* ---------- 32 · the engines, one shared runtime ---------- */
 SIMS.engines=function(el){
   const L=[
-    {k:'v1',  n:'dbt Core v1.12',   sub:'Python engine',              lic:'Apache 2.0', cost:'free',
-     note:'Still on PyPI and GitHub, in beta, and not receiving new features. A maintenance path, not a destination.', cls:'mid'},
-    {k:'v2',  n:'dbt Core v2.0',    sub:'Rust runtime, open source',  lic:'Apache 2.0', cost:'free',
-     note:'First alpha 1 June 2026, built on the same foundations as Fusion. A large amount of Fusion code was open-sourced into dbt-core.', cls:'good'},
-    {k:'fus', n:'Fusion binary',    sub:'enhanced distribution of v2',lic:'more permissive than ELv2', cost:'free, local and production',
-     note:'The best free dbt CLI. Precompiled, with some proprietary optimisations including a built-in SQL linter. Premium features unlock with a free login or a payment method.', cls:'good'},
+    {k:'v1',  n:'dbt v1',   sub:'Python engine, package dbt-core',  lic:'Apache 2.0', cost:'free',
+     note:'The old dbt Core line, renamed in September 2026. Still on PyPI and GitHub, in maintenance, and not receiving new features. A path, not a destination.', cls:'mid'},
+    {k:'v2',  n:'dbt OSS',    sub:'Rust-era engine, 100% open source',  lic:'Apache 2.0', cost:'free',
+     note:'Renamed from dbt Core v2 at dbt Summit 2026. First alpha 1 June 2026 as dbt Core v2.0, GA 16 September 2026 as dbt v2.0. No SQL comprehension, linter or LSP, and no seat-based platform features.', cls:'good'},
+    {k:'fus', n:'dbt',    sub:'renamed from Fusion, Sept 2026',lic:'dbt Product Licensing Agreement', cost:'free, local and production',
+     note:'The best free dbt CLI, and the default recommendation. Same engine as dbt OSS, plus free SQL comprehension, a built-in linter and LSP support. Premium platform features unlock with a free login or a payment method.', cls:'good'},
     {k:'plat',n:'dbt platform',     sub:'the control plane',          lic:'subscription', cost:'paid',
-     note:'Premium capabilities layered on the shared runtime. Orchestration, CI, catalog, Semantic Layer serving, cost attribution, MCP for agents.', cls:'ft'}
+     note:'Premium capabilities layered on either open distribution. Orchestration, CI, catalog, Semantic Layer serving, cost attribution, MCP for agents.', cls:'ft'}
   ];
   let at='fus';
   const c=simShell(el,'Interactive','Four distributions, one shared runtime');
   c.head.appendChild(mkSeg(L.map(x=>[x.k,x.n]),v=>{at=v;draw()}));
   const stack=E('div','blk'), out=E('div','blk');
-  c.body.appendChild(E('p','lead blk','Since June 2026 the engine is one Rust runtime with several distributions over it. Select a line to see what it is, what it costs and where it sits.'));
+  c.body.appendChild(E('p','lead blk','Since dbt Summit 2026 the engine is one Rust-era runtime with several distributions over it, renamed from Fusion and dbt Core v2. Select a line to see what it is, what it costs and where it sits.'));
   c.body.appendChild(stack); c.body.appendChild(out);
-  c.foot('The two-engine era is closing. dbt Core and Fusion are now built on a shared foundation, which is why the commercial conversation moved off the engine and onto the control plane.');
+  c.foot('The two-engine era is closing. dbt OSS and dbt are now built on a shared foundation, which is why the commercial conversation moved off the engine and onto the control plane.');
   $$('button',c.head.querySelector('.seg')).forEach(b=>b.classList.toggle('on',b.dataset.v===at));
   function draw(){
     stack.innerHTML='<div class="tcards">'+L.map(x=>{
@@ -4164,11 +4150,11 @@ SIMS.engines=function(el){
     out.innerHTML='<div class="callout c-'+(d.cls==='ft'?'ft':d.cls==='mid'?'warn':'ok')+'">'+
       '<span class="ci">i</span><div><b>'+d.n+'</b><br>'+d.note+'</div></div>'+
       (at==='fus'?'<div class="callout c-warn" style="margin-top:10px"><span class="ci">!</span><div>'+
-        'This is the one people get wrong. Fusion is free to use locally and in production, forever, and dbt Labs '+
+        'This is the one people get wrong. dbt (formerly Fusion) is free to use locally and in production, forever, and dbt Labs '+
         'says so in writing. Do not present the platform as the way to get a faster engine.</div></div>':'')+
       (at==='v1'?'<div class="callout c-warn" style="margin-top:10px"><span class="ci">!</span><div>'+
-        'If a client is here, the question is not whether to move to the Rust runtime but when. Path: upgrade to '+
-        'v1.12 or the Latest track, run <code>dbt parse --use-v2-parser</code>, then move to v2.</div></div>':'');
+        'If a client is here, the question is not whether to move to the Rust-era runtime but when. Path: upgrade to '+
+        'the Latest v1 track, run <code>dbt parse --use-v2-parser</code>, then move to v2.</div></div>':'');
   }
   draw();
 };
@@ -4249,12 +4235,109 @@ SIMS.selfhost=function(el){
         '. That is the real comparison, and it is a bigger one than the licence fee.</div></div>';
     } else {
       verdict='<div class="callout c-ok" style="margin-top:12px"><span class="ci">✓</span><div>'+
-        '<b>This is an engine-only need.</b> Recommend Fusion, take no money for a control plane they do not want, and keep the credibility for the conversation where it matters.</div></div>';
+        '<b>This is an engine-only need.</b> Recommend dbt (formerly Fusion), take no money for a control plane they do not want, and keep the credibility for the conversation where it matters.</div></div>';
     }
     if(asm.length>=5) verdict+='<div class="callout c-bad" style="margin-top:10px"><span class="ci">!</span><div>'+
       'At '+asm.length+' assembled components this has stopped being a tooling decision. It is a platform team with a '+
       'roadmap, a rota and a bus factor, and the person who wired it together will not be here in three years.</div></div>';
     out.innerHTML+=verdict;
+  }
+  paint();
+};
+
+/* ---------- 24b · the fit, scored across three real choices ---------- */
+SIMS.fourway=function(el){
+  const ROWS=[
+    {n:'Scheduling and orchestration',
+     a:['partial','Airflow, Dagster, cron or Kubernetes that you deploy, upgrade and run'],
+     s:['yes','Native Snowflake tasks, one warehouse-triggered queue'],
+     p:['yes','Included, with run history']},
+    {n:'CI with a schema per pull request',
+     a:['partial','Your CI system, plus scripts to create and drop the schema and report back'],
+     s:['partial','Not automatic: Snowflake CLI plus your own CI scripting'],
+     p:['yes','Included, fired by the git platform']},
+    {n:'Deferral to production artifacts',
+     a:['partial','You store, version and fetch the manifest yourself'],
+     s:['no','Not documented'],
+     p:['yes','Managed']},
+    {n:'Run history and log retention',
+     a:['partial','A log store, a retention policy, and a way to search runs months later'],
+     s:['partial','Basic: per-run logs and tracing, no live streaming output'],
+     p:['yes','Included and searchable']},
+    {n:'Failure alerting',
+     a:['partial','Your alerting stack, plus glue that knows what a dbt failure means'],
+     s:['no','Not built in: wire your own Snowflake alert object'],
+     p:['yes','Included']},
+    {n:'Searchable catalog and lineage',
+     a:['partial','Host the docs yourself: no auth, no cross-team search, stale unless you rewire it'],
+     s:['partial','Column-level lineage in the Snowsight DAG (≤300 models), Snowflake-only'],
+     p:['yes','dbt Catalog']},
+    {n:'Environments, credentials, RBAC, SSO, audit',
+     a:['partial','Your secret manager and identity provider, wired up and audited by you'],
+     s:['partial','Snowflake’s own account RBAC and SSO; workspaces are per-user, not shared'],
+     p:['yes','Included']},
+    {n:'MCP server an agent can query',
+     a:['yes','Open source, you can run it; exposes local CLI and artifact tools'],
+     s:['no','Not the dbt MCP: Cortex Code, Snowflake’s own assistant'],
+     p:['yes','Managed, and reaches the governed metadata below']},
+    {n:'Cost attribution per model', only:1,
+     a:['no',''], s:['no','Warehouse-level compute cost only'], p:['yes','Platform only']},
+    {n:'Data diff against production', only:1,
+     a:['no',''], s:['no',''], p:['yes','Platform only']},
+    {n:'Semantic Layer served over JDBC, APIs and MCP', only:1,
+     a:['no','The serving layer is not open'], s:['no',''], p:['yes','Platform only']},
+    {n:'Cross-project refs with contracts and versions (dbt Mesh)', only:1,
+     a:['no','Cross-project resolution is not open'], s:['no','One project, one Snowflake account'], p:['yes','Platform only']},
+    {n:'dbt Wizard', only:1,
+     a:['no',''], s:['no','Cortex Code is a separate, Snowflake-only assistant'], p:['yes','']}
+  ];
+  const VAL={yes:1,partial:.5,no:0};
+  const PILL={yes:'pv-ok',partial:'pv-diy',no:'pv-no'};
+  const LBL={yes:'native',partial:'you build it',no:'not possible'};
+  const need=new Set(ROWS.map((r,i)=>i));
+  const c=simShell(el,'Live scorer','Self-host it, hand it to Snowflake, or buy the platform');
+  c.head.appendChild(mkBtn('Everything','',()=>{ROWS.forEach((r,i)=>need.add(i));paint()}));
+  c.head.appendChild(mkBtn('Platform-only rows','',()=>{need.clear();ROWS.forEach((r,i)=>{if(r.only)need.add(i)});paint()}));
+  c.head.appendChild(mkBtn('Clear','',()=>{need.clear();paint()}));
+  const grid=E('div','blk'), out=E('div','blk');
+  c.body.appendChild(E('p','lead blk','Thirteen capabilities dbt Core ships none of. Tick what this specific client needs, and watch the score move across the three real choices for where the control plane lives: assembling it yourself, dbt Projects on Snowflake if the estate is Snowflake-only, and the dbt platform.'));
+  c.body.appendChild(grid); c.body.appendChild(out);
+  c.foot('Four rows are marked platform only: not buildable from the open source, self-hosted or on Snowflake, at any price.');
+  ROWS.forEach((r,i)=>{
+    const row=E('div','opt'); row.dataset.i=i;
+    row.innerHTML='<span class="bx">✓</span><span style="flex:1"><b>'+r.n+'</b>'+(r.only?' <span class="chip db">platform only</span>':'')+
+      '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px">'+
+      ['a','s','p'].map(k=>{
+        const[state,note]=r[k];
+        const tag={a:'Self-hosted',s:'dbt Projects on Snowflake',p:'dbt platform'}[k];
+        return '<span class="pillv '+PILL[state]+'" title="'+(note||'').replace(/"/g,'&quot;')+'">'+tag+': '+LBL[state]+'</span>';
+      }).join('')+'</div></span>';
+    row.addEventListener('click',()=>{need.has(i)?need.delete(i):need.add(i);paint()});
+    grid.appendChild(row);
+  });
+  function score(key){
+    const sel=ROWS.filter((r,i)=>need.has(i));
+    if(!sel.length) return 0;
+    return Math.round(100*sel.reduce((s,r)=>s+VAL[r[key][0]],0)/sel.length);
+  }
+  function paint(){
+    $$('.opt',grid).forEach(b=>b.classList.toggle('on',need.has(+b.dataset.i)));
+    const a=score('a'), s=score('s'), p=score('p');
+    const sel=ROWS.filter((r,i)=>need.has(i));
+    const onlyTicked=sel.filter(r=>r.only);
+    out.innerHTML='<div class="grid g3">'+
+      '<div class="stat"><b style="color:var(--amb)">'+(sel.length?a+'%':'—')+'</b><span>self-hosted, assembling it yourself</span></div>'+
+      '<div class="stat"><b style="color:var(--grn)">'+(sel.length?s+'%':'—')+'</b><span>dbt Projects on Snowflake</span></div>'+
+      '<div class="stat"><b style="color:var(--dbd)">'+(sel.length?p+'%':'—')+'</b><span>the dbt platform</span></div></div>';
+    if(onlyTicked.length){
+      out.innerHTML+='<div class="callout c-db" style="margin-top:12px"><span class="ci">i</span><div>'+
+        '<b>'+onlyTicked.length+' ticked '+(onlyTicked.length>1?'capabilities are':'capability is')+' not buildable at any price, on any of the three.</b> '+
+        onlyTicked.map(r=>r.n).join('; ')+'. If any of these is on the twelve-month roadmap, the platform is the only route to it, regardless of how the rest scores.</div></div>';
+    }
+    if(!onlyTicked.length && sel.length && s>=a && s>0){
+      out.innerHTML+='<div class="callout c-ok" style="margin-top:10px"><span class="ci">✓</span><div>'+
+        '<b>Nothing here is platform-only, and Snowflake covers it as well as self-hosting would.</b> If the estate is Snowflake-only, dbt Projects on Snowflake is a defensible, lower-effort architecture here.</div></div>';
+    }
   }
   paint();
 };
@@ -4437,10 +4520,10 @@ SIMS.products=function(el){
     ['db','dbt Semantic Layer','Metrics defined once on top of the models, so every consumer that asks for a number resolves the same definition.'],
     ['db','dbt State','Rebuilds only what actually changed. It reads the SQL semantically rather than diffing files, and it also checks whether the upstream data moved.'],
     ['db','dbt Lake Compute · private beta','A hosted, serverless DuckDB engine that reads and writes Iceberg tables directly in the client’s own MDLS storage, selected model by model inside the same project and the same DAG as the warehouse. No data copy, no project migration; for workloads that do not need a distributed warehouse.'],
-    ['db','dbt Core v2','The open-source Rust baseline under Apache 2.0, sharing its foundations with Fusion. First alpha June 2026; the Python v1.x line is on maintenance.'],
+    ['db','dbt OSS','The 100% open-source Rust-era baseline, Apache 2.0, renamed from dbt Core v2 at dbt Summit 2026. First alpha June 2026 as dbt Core v2.0; dbt v1 (the old dbt Core) is on maintenance.'],
     ['db','dbt Mesh','Governed model sharing across projects: public models with contracts and versions, so an upstream change does not silently break a downstream team.'],
     ['db','dbt MCP server','The interface an agent uses to reach models, metrics, lineage and freshness through the same governance a person gets.'],
-    ['db','Fusion','The enhanced free distribution of the Rust engine. Understands SQL across dialects, so errors surface before a query reaches the warehouse, and carries a built-in SQL linter. Free locally and in production.'],
+    ['db','dbt','The default distribution of the Rust-era engine, renamed from Fusion at dbt Summit 2026 (September). Understands SQL across dialects, so errors surface before a query reaches the warehouse, and carries a built-in SQL linter and LSP support. Free locally and in production.'],
     ['db','dbt Wizard · preview','An agent grounded in the compiled project (lineage, state and metrics) for investigating, changing and validating dbt work.'],
     ['open','Apache Iceberg','A metadata layer over Parquet that makes a directory of files behave like a table. Always created by the managed lake.'],
     ['open','Delta Lake','The other metadata layer, created over the same Parquet when you enable it. Databricks reads this one.'],
