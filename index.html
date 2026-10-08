@@ -60,6 +60,22 @@ ul{margin:0;padding-left:1.1em}li{margin:.28em 0}
 .tnb .own{display:inline-block;width:5px;height:5px;border-radius:2px;margin-right:5px;vertical-align:1px}
 .tnb[data-own=ft] .own{background:var(--ft)}.tnb[data-own=db] .own{background:var(--db)}
 .tnb[data-own=both] .own{background:linear-gradient(120deg,var(--ft),var(--db))}
+.tnb .cn{display:inline-grid;place-items:center;width:16px;height:16px;border-radius:50%;margin-right:6px;font-style:normal;font-size:10.4px;font-weight:800;background:rgba(255,255,255,.14);color:inherit;vertical-align:1px}
+.tnb.on .cn{background:#0B1524;color:#fff}
+.tnb.cat{padding:8px 12px}
+.chapnav{display:none;position:relative;flex-direction:column;align-items:center;gap:10px;margin:14px auto 0;padding:14px 18px 14px;max-width:100%;box-sizing:border-box;
+  background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.16);border-radius:16px}
+.cn-notch{position:absolute;top:-8px;width:14px;height:14px;background:#142030;border-left:1px solid rgba(255,255,255,.16);border-top:1px solid rgba(255,255,255,.16);transform:rotate(45deg);border-radius:3px 0 0 0}
+.cat-desc{text-align:center;font-size:12.6px;color:rgba(255,255,255,.7);line-height:1.45;max-width:720px}
+.cn-row{display:flex;gap:8px;align-items:center;justify-content:center;flex-wrap:wrap}
+.cn-lab{font-size:11.6px;font-weight:650;color:rgba(255,255,255,.55);letter-spacing:.02em;margin-right:4px}
+.cn-lab b{color:rgba(255,255,255,.9)}
+.cnb{display:inline-flex;align-items:center;gap:8px;padding:7px 15px 7px 8px;border-radius:12px;font-size:13px;font-weight:680;color:rgba(255,255,255,.78);background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.16);transition:.15s}
+.cnb:hover{color:#fff;border-color:rgba(255,255,255,.45)}
+.cnb .cnn{font-style:normal;font-size:10.8px;font-weight:800;padding:3px 7px;border-radius:7px;background:rgba(255,255,255,.14);color:rgba(255,255,255,.85);letter-spacing:.02em}
+.cnb.on{background:#fff;color:#0B1524;border-color:#fff}
+.cnb.on .cnn{background:#0B1524;color:#fff}
+@media(max-width:640px){.chapnav{padding:12px}}
 .hero-bar{display:flex;gap:12px;align-items:center;justify-content:center;flex-wrap:wrap;padding:14px 0 18px}
 .hero-sub{font-size:12.4px;color:rgba(255,255,255,.5)}
 
@@ -506,12 +522,8 @@ html[data-aud=sf] [data-hideaud~=sf],html[data-aud=dbx] [data-hideaud~=dbx]{disp
     <h1>The <span class="ft">Fivetran</span> + <span class="db">dbt</span> Interactive Guide</h1>
     <p class="tl" id="tagline"></p>
     <nav class="topnav" id="topnav"></nav>
+    <nav class="chapnav" id="chapnav"></nav>
     <div class="hero-bar">
-      <div class="seg wt" id="audSeg" title="Presenting in front of one platform's own team? Hide the other platform's native-tool comparisons.">
-        <button data-aud="both">Both platforms</button>
-        <button data-aud="sf">In front of Snowflake</button>
-        <button data-aud="dbx">In front of Databricks</button>
-      </div>
       <span class="hero-sub" id="chapCount"></span>
       <button class="iconbtn" id="themeBtn" title="Light or dark"
         style="background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.2);color:#fff">◐</button>
@@ -1348,7 +1360,7 @@ L.en={
 'c0.tab':'The stack','c0.title':'Where Fivetran and dbt sit',
 'c0.before.tab':'Before','c0.before.desc':'The gap in the middle is rarely empty. Two common shapes, and the failure mode both share.',
 'c0.s0.tab':'Build the stack','c0.s0.desc':'A data platform with raw data in one end and consumers at the other, and two gaps in the middle. Build it up one layer at a time.',
-'c0.s1.tab':'The ten chapters','c0.s1.desc':'What each chapter proves, and what you can run in front of a client when you get there.',
+'c0.s1.tab':'The four categories','c0.s1.desc':'From source to consumption in four categories: what each chapter proves, and what you can run in front of a client when you get there.',
 'c0.s2.tab':'What changed at Summit','c0.s2.desc':'dbt Summit 2026 in four level-ups, each one mapped to the chapter that proves it.',
 'c1.tab':'Move','c1.title':'Move',
 'c1.s0.tab':'Source coverage','c1.s0.desc':'The core systems are covered by everyone. The argument is about the long tail, which is where scope gets cut.',
@@ -1403,9 +1415,9 @@ L.en={
 'c10.s4.tab':'Objections','c10.s4.desc':'Ten sentences you will hear in the room, and the answer that holds.',
 'c10.s5.tab':'Product reference','c10.s5.desc':'Everything named in this guide, in one place, with what it actually does.',
 /* UI chrome */
-'ui.tagline':'Without it and with it, side by side against the native services, and every claim runnable as a simulation. Ten chapters from a source system to an agent that acts.',
+'ui.tagline':'Without it and with it, side by side against the native services, and every claim runnable as a simulation. Four categories from a source system to an agent that acts.',
 'ui.bus':'Business','ui.tech':'Technical','ui.partner':'Partner',
-'ui.chapters':'chapters','ui.presskeys':'press 1 to 11',
+'ui.chapters':'sections','ui.presskeys':'press 1 to 7',
 'ui.prev':'Previous','ui.next':'Next','ui.done':'Done','ui.step':'Step','ui.of':'of',
 'ui.whyc':'Why it matters commercially','ui.verify':'What to verify','ui.practice':'For your practice',
 'ui.gate':'The gate that closes this stage','ui.happening':'What is happening',
@@ -1634,21 +1646,46 @@ const mkSeg=(items,fn,cls)=>{
 let CH=0, SUB=0;
 function renderNav(){
   const nav=$('#topnav'); nav.innerHTML='';
-  GUIDE.forEach((c,i)=>{
-    const b=E('button','tnb'+(i===CH?' on':''),'<span class="own"></span>'+c.tab);
-    b.dataset.own=c.own||'both';
-    b.addEventListener('click',()=>go(i,0));
+  const gi=groupOf(CH);
+  GROUPS.forEach((g,i)=>{
+    const b=E('button','tnb'+(g.n?' cat':'')+(i===gi?' on':''),'<span class="own"></span>'+(g.n?'<i class="cn">'+g.n+'</i>':'')+g.label);
+    b.dataset.own=g.own;
+    b.addEventListener('click',()=>go(g.ch[0],0,true));
     nav.appendChild(b);
   });
-  $('#chapCount').textContent = GUIDE.length+' '+T('ui.chapters')+' · '+T('ui.presskeys');
+  const cn=$('#chapnav'); cn.innerHTML='';
+  const g=GROUPS[gi];
+  cn.style.display=g.ch.length>1?'flex':'none';
+  if(g.ch.length>1){
+    cn.appendChild(E('span','cn-notch'));
+    if(g.desc) cn.appendChild(E('div','cat-desc',g.desc));
+    const row=E('div','cn-row');
+    row.appendChild(E('span','cn-lab','Inside this category: <b>'+g.ch.length+' chapters</b>'));
+    g.ch.forEach((ci,k)=>{
+      const b=E('button','cnb'+(ci===CH?' on':''),'<i class="cnn">'+(g.n?g.n+'.':'')+(k+1)+'</i>'+GUIDE[ci].tab);
+      b.addEventListener('click',()=>go(ci,0,true));
+      row.appendChild(b);
+    });
+    cn.appendChild(row);
+    placeNotch();
+  }
+  $('#chapCount').textContent = GROUPS.length+' '+T('ui.chapters')+' · '+T('ui.presskeys');
 }
+function placeNotch(){
+  const cn=$('#chapnav'), on=$('#topnav .tnb.on'), nav=$('#topnav'), nt=$('.cn-notch',cn);
+  if(!on||!nt||cn.style.display==='none') return;
+  cn.style.width=nav.offsetWidth+'px';
+  const r=on.getBoundingClientRect(), c=cn.getBoundingClientRect();
+  nt.style.left=Math.round(r.left+r.width/2-c.left-7)+'px';
+}
+addEventListener('resize',placeNotch);
 function go(ci,si,scroll){
   RUN++;
   CH=Math.max(0,Math.min(GUIDE.length-1,ci));
   const ch=GUIDE[CH];
   SUB=Math.max(0,Math.min(ch.subs.length-1,si||0));
-  store.s('pos',[CH,SUB]);
-  $$('#topnav .tnb').forEach((b,i)=>b.classList.toggle('on',i===CH));
+  store.s('pos2',[CH,SUB]);
+  renderNav();
   $('#chTitle').textContent=ch.title;
 
   const sn=$('#subnav'); sn.innerHTML='';
@@ -1702,7 +1739,7 @@ addEventListener('keydown',e=>{
   if(k==='t'){setTheme(document.documentElement.dataset.theme==='dark'?'light':'dark');return}
   if(k==='arrowright'){e.preventDefault();$('#nextBtn').click()}
   if(k==='arrowleft'){e.preventDefault();$('#prevBtn').click()}
-  if(k>='1'&&k<='9'){const i=+k-1; if(i<GUIDE.length)go(i,0,true)}
+  if(k>='1'&&k<='9'){const i=+k-1; if(i<GROUPS.length)go(GROUPS[i].ch[0],0,true)}
 });
 
 /* ==================================================================
@@ -1823,18 +1860,19 @@ function buildGuide(){ return [
    ]},
   {tab:T('c0.s1.tab'), desc:T('c0.s1.desc'),
    blocks:[
-    {t:'table', head:['Chapter','What it proves','Runnable'],
+    {t:'table', head:['Category','Chapter','What it proves','Runnable'],
      rows:[
-      ['<b>Move</b> <span class="chip ft">Fivetran</span>','Every source lands, including the ones not in any catalog','Source coverage race · schema drift · SDK build'],
-      ['<b>Manage</b> <span class="chip ft">Fivetran</span>','One write, read by every engine, in storage the client owns','Cross-layer parity · who pays for the merge'],
-      ['<b>Models</b> <span class="chip db">dbt</span>','SQL becomes a tested, portable artifact instead of a script','Compile and materialize · layer walk'],
-      ['<b>Tests</b> <span class="chip db">dbt</span>','Bad data stops at the layer it appeared in','Build with a failing test'],
-      ['<b>Workflow</b> <span class="chip db">dbt</span>','A change reaches production through a gate a person can read','Branch to prod · CI with data diff'],
-      ['<b>Orchestration</b> <span class="chip db">dbt</span>','Run order is derived, not maintained; runs cost what changed','Dependency order · dbt State · cost attribution'],
-      ['<b>Governance</b> <span class="chip db">dbt</span>','A definition changes in one place and every consumer follows','Contract break · Semantic Layer query'],
-      ['<b>AI and agents</b> <span class="chip db">dbt</span>','An agent resolves meaning before it answers','Governed vs ungoverned · engine parity · context layer · Wizard · Explore and Charts'],
-      ['<b>Activation</b> <span class="chip ft">Fivetran</span>','The decision reaches the system the business runs on','Write-back and undo'],
-      ['<b>Value and gates</b>','Every claim above closes with evidence, not assertion','Gate scorecard · migration bands']]},
+      ['<b>1 Move and land</b> <span class="chip ft">Fivetran</span>','Move','Every source lands, including the ones not in any catalog','Source coverage race · schema drift · SDK build'],
+      ['','Manage','One write, read by every engine, in storage the client owns','Cross-layer parity · who pays for the merge · attach engines'],
+      ['<b>2 Build and trust</b> <span class="chip db">dbt</span>','Models','SQL becomes a tested, portable artifact instead of a script','Compile and materialize · layer walk'],
+      ['','Tests','Bad data stops at the layer it appeared in','Build with a failing test'],
+      ['','Workflow','A change reaches production through a gate a person can read','Branch to prod · CI with data diff'],
+      ['','Orchestration','Run order is derived, not maintained; runs cost what changed','Dependency order · dbt State · cost attribution'],
+      ['<b>3 Govern and give context</b> <span class="chip db">dbt</span>','Governance','A definition changes in one place and every consumer follows','Contract break · Semantic Layer query'],
+      ['','Context for AI','An agent resolves meaning before it answers','Governed vs ungoverned · how an agent reads it · context layer'],
+      ['<b>4 Consume and act</b> <span class="chip db">dbt</span> <span class="chip ft">Fivetran</span>','Wizard and Charts','People and agents build, ask and chart on governed models','dbt Wizard · Explore Mode · dbt Charts'],
+      ['','Activation','The decision reaches the system the business runs on','Write-back and undo'],
+      ['<b>Decide and close</b>','Self-hosted vs platform · Value','Every claim above closes with evidence, not assertion','Benchmark · scorer · gate scorecard · migration bands']]},
     {t:'ft', x:'<b>Three lenses.</b> The switch in the header rewrites the commentary throughout: business framing, technical verification, or what a services practice does with it. The architecture does not change; only what gets said about it.'}
    ]},
   {tab:T('c0.s2.tab'), desc:T('c0.s2.desc'),
@@ -1842,10 +1880,10 @@ function buildGuide(){ return [
     {t:'p', x:'The framing for the whole announcement is <b>Level Up</b>: the analytics engineers who built reliable pipelines on Fivetran and dbt are the ones best placed to become the <b>context engineers</b> of the AI era. Four level-ups, one stack, and the guide already proves each of them.'},
     {t:'table', head:['Level-up','What shipped','Status at Summit','Where it is proven'],
      rows:[
-      ['<b>1. The engine</b><br><span class="cap">Faster, cheaper, more flexible transformation</span>','dbt v2 (the unified engine) · dbt State · Fivetran Managed Data Lake Service · dbt Lake Compute','GA · GA · GA · private beta','<b>Orchestration and cost</b> (dbt State) · <b>Manage and storage</b> · <b>dbt, dbt OSS, the dbt platform</b>'],
-      ['<b>2. For AI</b><br><span class="cap">Context is business understanding, not more data points</span>','Semantic Layer · dbt MCP server · Agents schema · AI native integrations · Fivetran Context Layer','GA · GA · GA · GA · private beta','<b>Governance and semantics</b> · <b>AI and agents</b> (how an agent reads it, context layer)'],
-      ['<b>3. With AI</b><br><span class="cap">AI reshapes data work and how the business gets answers</span>','dbt Wizard in the dbt platform · dbt Wizard CLI · dbt Wizard Desktop App · Explore Mode · dbt Charts','public preview · public beta · private beta · preview · public beta','<b>AI and agents</b> (dbt Wizard, ask and chart)'],
-      ['<b>4. The stack</b><br><span class="cap">Open tables, open standards, flexible compute</span>','Iceberg and open table formats · open compute · one write that every engine reads','The direction of travel, and the premise of the whole guide','<b>Manage and storage</b> · <b>AI and agents</b> (any engine, any agent)']]},
+      ['<b>1. The engine</b><br><span class="cap">Faster, cheaper, more flexible transformation</span>','dbt v2 (the unified engine) · dbt State · Fivetran Managed Data Lake Service · dbt Lake Compute','GA · GA · GA · private beta','<b>Orchestration</b> (dbt State) · <b>Manage</b> · <b>Self-hosted vs platform</b>'],
+      ['<b>2. For AI</b><br><span class="cap">Context is business understanding, not more data points</span>','Semantic Layer · dbt MCP server · Agents schema · AI native integrations · Fivetran Context Layer','GA · GA · GA · GA · private beta','<b>Governance</b> · <b>Context for AI</b> (how an agent reads it, context layer)'],
+      ['<b>3. With AI</b><br><span class="cap">AI reshapes data work and how the business gets answers</span>','dbt Wizard in the dbt platform · dbt Wizard CLI · dbt Wizard Desktop App · Explore Mode · dbt Charts','public preview · public beta · private beta · preview · public beta','<b>Wizard and Charts</b> (dbt Wizard, Explore Mode, dbt Charts)'],
+      ['<b>4. The stack</b><br><span class="cap">Open tables, open standards, flexible compute</span>','Iceberg and open table formats · open compute · one write that every engine reads','The direction of travel, and the premise of the whole guide','<b>Manage</b> (any engine, any agent)']]},
     {t:'ft', x:'<b>The story in one line.</b> Fivetran builds and unifies context out of the sources a client already runs; dbt turns it into a governed, ready-to-use layer for AI. Open data infrastructure is what keeps that portable, accessible and governable across tools, teams and environments.'},
     {t:'warn', x:'<b>Statuses move.</b> These are the release phases announced at dbt Summit 2026 (16 September). Preview and beta products are the direction, not something to quote as available to every client. Check the current phase before you say it out loud.'}
    ]}
@@ -1931,6 +1969,7 @@ function buildGuide(){ return [
  subs:[
   {tab:T('c2.s0.tab'), desc:T('c2.s0.desc'),
    blocks:[
+    {t:'ft', x:'<b>This is the Fivetran Managed Data Lake Service (MDLS).</b> A managed data lake as the destination: the files stay in the client’s own cloud storage, and Fivetran maintains the table formats and registers them in a catalog (the Fivetran-Managed Apache Polaris catalog). It is the seam between Move and everything downstream, and the reason more than one engine can read one write.'},
     {t:'sim', id:'parity'},
     {t:'wow', x:[
       {tab:'Without an open lake', title:'A copy per engine, and a pipeline per copy',
@@ -2374,7 +2413,7 @@ function buildGuide(){ return [
           ['The definition is version-controlled and reviewed.','Changing revenue is a pull request, not a Slack message.'],
           ['Available over MCP, APIs and JDBC,','so a notebook, a BI tool and an agent all resolve the same thing.']]}
        ]}]},
-    {t:'ft', x:'<b>The value is determinism.</b> An important definition is correct every single time, whoever asks and however they ask. That is also why the Semantic Layer is a critical input to the context layer: see AI and agents, Context layer.'},
+    {t:'ft', x:'<b>The value is determinism.</b> An important definition is correct every single time, whoever asks and however they ask. That is also why the Semantic Layer is a critical input to the context layer: see Context for AI, Context layer.'},
     {t:'gate', x:'Every governed metric has a definition, a test, and lineage back to its source, and an agent resolves the definition before it queries. Coverage is countable from the compiled project.'}
    ]}
  ]},
@@ -2741,7 +2780,26 @@ function buildGuide(){ return [
    blocks:[{t:'sim', id:'products'}]}
  ]}
 ]; }
-let GUIDE=buildGuide();
+/* Re-cut into four categories, source to consumption. Content is moved, not copied:
+   the AI chapter is split along its natural seam, and the engine-parity tab joins storage. */
+function recut(A){
+  const ai=A[8], manage=A[2];
+  manage.subs=manage.subs.concat([ai.subs[3]]);
+  manage.tab='Manage and storage (MDLS)';
+  const ctx={tab:'Context for AI', own:'db', title:'Context for AI agents', subs:[ai.subs[0],ai.subs[1],ai.subs[2]]};
+  const wiz={tab:'Wizard and Charts', own:'db', title:'Build, ask and chart with AI', subs:[ai.subs[4],ai.subs[5]]};
+  return [A[0],A[1],manage,A[3],A[4],A[5],A[6],A[7],ctx,wiz,A[9],A[10],A[11]];
+}
+let GUIDE=recut(buildGuide());
+const GROUPS=[
+  {label:'The stack',                  ch:[0],         own:'both'},
+  {label:'Move and land',              ch:[1,2],       own:'ft',   n:1, desc:'Fivetran moves every source into an open lake the client owns: the connectors, then the Managed Data Lake Service (MDLS) that stores and registers the data.'},
+  {label:'Build and trust',            ch:[3,4,5,6],   own:'db',   n:2, desc:'dbt turns landed data into tested, versioned, orchestrated models that reach production through a gate.'},
+  {label:'Govern and give context',    ch:[7,8],       own:'db',   n:3, desc:'Contracts, catalog and the Semantic Layer, then the context an agent reads before it answers.'},
+  {label:'Consume and act',            ch:[9,10],      own:'both', n:4, desc:'People and agents ask, build and chart with dbt Wizard, Explore Mode and dbt Charts; Activation writes decisions back.'},
+  {label:'Self-hosted vs platform',    ch:[11],        own:'db'},
+  {label:'Value',                      ch:[12],        own:'both'}];
+const groupOf=ci=>Math.max(0,GROUPS.findIndex(g=>g.ch.includes(ci)));
 
 /* ==================================================================
    SIMULATORS · part 1
@@ -4762,10 +4820,9 @@ setLangCSS();
 renderNav();
 setLens(store.g('lens','tech'));
 setTheme(store.g('theme','light'));
-const _audParam=new URLSearchParams(location.search).get('aud');
-setAud(['both','sf','dbx'].includes(_audParam) ? _audParam : store.g('aud','both'));
+setAud('both'); /* the per-platform filter was removed: always show both platforms, ignoring any saved or ?aud= value */
 applyChrome();
-const _p=store.g('pos',[0,0]);
+const _p=store.g('pos2',[0,0]);
 go(_p[0],_p[1],false);
 initJaPreview();
 </script>
